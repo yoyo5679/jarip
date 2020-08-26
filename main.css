@@ -72,12 +72,14 @@ main{
 .mainphoto{
 width: 150px;
 height: 150px;
-pading: 30px;
+padding: 0px;
+margin: 0px;
 
 }
 
 td{
-    padding: 20px;
+    padding: 5px;
+    margin: 10px;
  
 }
 section{
