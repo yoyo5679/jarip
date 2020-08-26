@@ -1,0 +1,127 @@
+.myhome{
+    color:white;
+    text-align: center;
+    font-weight: bold;
+    font-size: 30px;
+   line-height: 2;
+    color: rgb(52, 92, 110);
+    background-color: whitesmoke;
+    margin: 10px;
+}
+
+header{
+    background: powderblue;
+    opacity: 0.8;
+    margin:10px;
+    padding: 1px;
+
+}
+
+.name{
+    font-size: 13px;
+}
+
+.name1{
+    font-size: 20px;
+    color: blue;
+}
+
+.book{
+
+    padding: 30px;
+}
+header nav{
+    margin:0px;
+
+    padding: 0px;
+    background-color: black ;
+    opacity: 0.8;
+}
+
+header nav ul {
+    display: flex;
+}
+.myimg{  
+
+}
+header nav ul li {
+    list-style: none;
+    margin-right:30px;
+    margin-left: 10px;
+    margin-top: 10PX;
+    margin-bottom: 10PX;
+    padding-top: 50px;
+    font-size: 27px;
+}
+.pagename{
+    text-align: center;
+    font-weight: bold;
+    font-size: 50px;
+}
+.mainpage{
+    text-align: center;
+    font-weight: bold;
+    font-size: 30px;
+    background-color: burlywood;
+    margin-left: 520px;
+    margin-right: 520px;
+}
+main{
+    display: flex;
+}
+.mainphoto{
+width: 280px;
+height: 280px;
+
+}
+
+td{
+    padding: 20px;
+ 
+}
+section{
+    width: 70%;
+    
+    margin: 10px;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+article{
+    background: rgb(253, 242, 190);
+    margin-bottom: 10px;
+    padding:10px;
+ 
+}
+
+article h2{
+
+}
+
+article p{ 
+
+    font-size: 20px;
+}
+
+aside{
+    width: 30%;
+    background-color: tomato;
+    margin: 10px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+footer{
+    background: rgb(212, 170, 162);
+    margin: 10px;
+    padding: 10px;
+}
+
+footer address {
+
+}
+
+footer address a{
+    text-align: center;
+    display: block;
+}
