@@ -36,10 +36,9 @@ header{
 }
 header nav{
     margin:0px;
-
+text-align: center;
     padding: 0px;
-    background-color: black ;
-    opacity: 0.8;
+    
 }
 
 header nav ul {
