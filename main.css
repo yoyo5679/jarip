@@ -1,18 +1,23 @@
+body{
+    background-color: #F2F1F6;
+}
+
 .myhome{
     color:white;
     text-align: center;
     font-weight: bold;
     font-size: 30px;
+    font-family: 'Nanum Pen Script', cursive;
    line-height: 2;
-    color: rgb(52, 92, 110);
-    background-color: whitesmoke;
+color: black;
+background-color: white;
     margin: 10px;
+   
 }
 .maincenter{
     margin:0 auto;
 }
 header{
-    background: powderblue;
     opacity: 0.8;
     margin:10px;
     padding: 1px;
@@ -38,7 +43,8 @@ header nav{
     margin:0px;
 text-align: center;
     padding: 0px;
-    
+
+    opacity: 0.8;
 }
 
 header nav ul {
@@ -73,8 +79,8 @@ main{
     display: flex;
 }
 .mainphoto{
-width: 100px;
-height: 100px;
+width: 150px;
+height: 150px;
 padding: 0px;
 margin: 0px;
 
@@ -123,6 +129,7 @@ aside{
 footer{
     margin: 10px;
     padding: 10px;
+    margin:0 auto;
 }
 
 footer address {
