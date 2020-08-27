@@ -10,8 +10,9 @@ body{
     font-family: 'Nanum Pen Script', cursive;
    line-height: 2;
 color: black;
-background-color: white;
+
     margin: 10px;
+    margin-bottom: 0px;
    
 }
 .maincenter{
@@ -19,8 +20,8 @@ background-color: white;
 }
 header{
     opacity: 0.8;
-    margin:10px;
-    padding: 1px;
+    margin:0px;
+    padding: 0px;
 
 }
 
