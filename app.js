@@ -252,17 +252,12 @@ document.addEventListener("DOMContentLoaded", () => {
     statTotal.textContent = policies.length;
     
     const countCategory = (cat) => policies.filter(p => p.category === cat).length;
-    const countRecruiting = policies.filter(p => p.status === "모집중").length;
     
     statEconomic.textContent = countCategory("economic");
     statHousing.textContent = countCategory("housing");
     statEducation.textContent = countCategory("education");
     if (statJob) statJob.textContent = countCategory("job");
     if (statLife) statLife.textContent = countCategory("life");
-    
-    // 모집중 통계 업데이트
-    const statRecruiting = document.getElementById("statRecruiting");
-    if (statRecruiting) statRecruiting.textContent = countRecruiting;
   }
 
   // 모집 상태 배지 HTML 생성 헬퍼
