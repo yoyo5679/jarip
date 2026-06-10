@@ -1,0 +1,17 @@
+# Node.js
+node_modules/
+.node/
+
+# Local Environment Settings
+.env
+
+# Temporary & Scratch Files
+scratch/
+*.log
+*_matches.json
+prev_matches.json
+data_restored.js
+
+# OS-specific
+.DS_Store
+Thumbs.db

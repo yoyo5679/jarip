@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>자립해봄 - 자립준비청년 지원 정보 공유 대시보드</title>
+  <!-- FontAwesome Icon CDN (임시 바로가기 화살표용) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css?v=20260609_15">
+</head>
+<body>
+
+
+  <div class="app-container">
+    
+    <!-- 좌측 사이드바 -->
+    <aside class="sidebar">
+      <div class="logo-section">
+        <h1><span class="logo-emoji">🌸</span> 자립해봄</h1>
+        <p>자립 정보 공유 대시보드</p>
+      </div>
+
+      <!-- AI 자립상담 챗봇 특화 섹션 -->
+      <div class="nav-section">
+        <h3 class="section-title">🤖 AI 자립지원 챗봇</h3>
+        <div class="quick-links">
+          <a href="https://notebooklm.google.com/notebook/52b7a619-a506-4c80-8532-f66d4dddd98d" target="_blank" class="link-card special-chatbot-card" id="link-chatbot">
+            <div class="chatbot-card-body">
+              <span class="chatbot-title">자립해봄 AI 챗봇 💬</span>
+              <span class="chatbot-badge">추천 ⚡</span>
+            </div>
+            <p class="chatbot-desc">구글 NotebookLM 기반 AI가 맞춤형 자립 정보를 친절하게 실시간 상담해 드려요! (구글 로그인 필요)</p>
+          </a>
+        </div>
+      </div>
+
+      <!-- 주요 유관 사이트 퀵링크 -->
+      <div class="nav-section">
+        <h3 class="section-title">🔗 주요 지원 사이트</h3>
+        <div class="quick-links">
+          <a href="https://jaripon.ncrc.or.kr" target="_blank" class="link-card" id="link-jaripon">
+            <span>아동권리보장원 자립정보ON</span>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+          <a href="https://youth.seoul.go.kr/infoData/sprtInfo/list.do?key=2309130006" target="_blank" class="link-card" id="link-youth-seoul">
+            <span>서울 청년몽땅정보통</span>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+          <a href="https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancList.do?mi=1026" target="_blank" class="link-card" id="link-lh">
+            <span>LH 청약플러스</span>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+          <a href="https://www.i-sh.co.kr/app/index.do" target="_blank" class="link-card" id="link-sh">
+            <span>서울주택도시개발공사 (SH)</span>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- 서울시 아동그룹홈 자립준비청년 지원 기관 -->
+      <div class="nav-section">
+        <h3 class="section-title">🏠 서울시 아동그룹홈 자립준비청년 지원 기관</h3>
+        <div class="quick-links">
+          <a href="https://seoulcenter.org/index.php?" target="_blank" class="link-card" id="link-seoulcenter">
+            <span>서울시 아동공동생활가정지원센터</span>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- 전국 17개 시도 전담기관 리스트 -->
+      <div class="nav-section" style="flex: 1; display: flex; flex-direction: column; min-height: 250px;">
+        <h3 class="section-title">🏢 시·도 자립지원전담기관</h3>
+        <div id="centersList" class="centers-list" style="flex: 1;">
+          <!-- JS에서 동적 로드됨 -->
+        </div>
+      </div>
+    </aside>
+
+    <!-- 메인 컨텐츠 영역 -->
+    <main class="main-content">
+      
+      <!-- 상단 헤더 & 컨트롤바 -->
+      <div class="header-section">
+        <div class="search-filter-bar">
+          <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="searchInput" placeholder="지원사업명, 지원주체, 키워드를 검색하세요...">
+          </div>
+          <select id="regionFilter" class="select-filter">
+            <!-- JS에서 동적 로드됨 -->
+            <option value="all">📍 전체 지역</option>
+          </select>
+          <select id="sourceFilter" class="select-filter">
+            <!-- JS에서 동적 로드됨 -->
+            <option value="all">🔍 전체 출처</option>
+          </select>
+        </div>
+        
+        <div class="header-actions">
+
+
+          <button id="themeToggle" class="theme-toggle" title="화면 테마 변경">🌙</button>
+          <button id="openModalBtn" class="btn-primary">
+            <span>새 지원사업 등록</span> ➕
+          </button>
+        </div>
+      </div>
+
+      <!-- 요약 통계 판판 -->
+      <div class="stats-container">
+        <div class="stat-card">
+          <span class="label">총 보유 정책</span>
+          <span id="statTotal" class="value">0</span>
+        </div>
+        <div class="stat-card" style="border-left: 4px solid var(--cat-economic);">
+          <span class="label">금융·경제 정책</span>
+          <span id="statEconomic" class="value">0</span>
+        </div>
+        <div class="stat-card" style="border-left: 4px solid var(--cat-housing);">
+          <span class="label">주거 지원 정책</span>
+          <span id="statHousing" class="value">0</span>
+        </div>
+        <div class="stat-card" style="border-left: 4px solid var(--cat-education);">
+          <span class="label">교육·장학 정책</span>
+          <span id="statEducation" class="value">0</span>
+        </div>
+        <div class="stat-card" style="border-left: 4px solid #ef4444;">
+          <span class="label">현재 모집중 🔴</span>
+          <span id="statRecruiting" class="value">0</span>
+        </div>
+      </div>
+
+      <!-- 카테고리 탭 -->
+      <div class="category-tabs">
+        <button class="tab-btn active" data-category="all">전체보기</button>
+        <button class="tab-btn" data-category="economic">💰 금융·경제</button>
+        <button class="tab-btn" data-category="housing">🏠 주거지원</button>
+        <button class="tab-btn" data-category="education">🎓 교육·장학</button>
+        <button class="tab-btn" data-category="job">💼 취업·진로</button>
+        <button class="tab-btn" data-category="life">🍀 생활·의료</button>
+      </div>
+
+      <!-- 기관 구분 및 정렬 필터 -->
+      <div class="type-filter-container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span class="filter-label">🏢 기관 구분:</span>
+          <div class="type-tabs">
+            <button class="type-btn active" data-type="all">전체</button>
+            <button class="type-btn" data-type="공공·지자체">🏛️ 공공·지자체</button>
+            <button class="type-btn" data-type="NGO·복지재단">🤝 NGO·복지재단</button>
+            <button class="type-btn" data-type="기업·사회공헌">🏢 기업·사회공헌</button>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <span class="filter-label">정렬:</span>
+          <select id="sortFilter" style="padding: 0.5rem; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--color-text-main); font-size: 0.9rem; outline: none; cursor: pointer;">
+            <option value="newest">최신순 (ID 역순)</option>
+            <option value="closing_soon">마감 임박순</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 정책 카드 목록 -->
+      <div id="cardsGrid" class="cards-grid">
+        <!-- JS에서 동적 로드됨 -->
+      </div>
+      
+    </main>
+    
+  </div>
+
+  <!-- 정책 등록/수정 모달창 -->
+  <div id="policyModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">➕ 새 지원 사업 등록</h3>
+        <button id="modalClose" class="modal-close" type="button"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      
+      <form id="policyForm">
+        <input type="hidden" id="policyId">
+        <div class="form-grid">
+          
+          <div class="form-group full-width">
+            <label for="policyTitle">지원사업명 *</label>
+            <input type="text" id="policyTitle" required placeholder="예: LH 자립준비청년 매입임대주택 우선공급">
+          </div>
+          
+          <div class="form-group">
+            <label for="policyCategory">지원 분류 *</label>
+            <select id="policyCategory" required>
+              <option value="economic">💰 금융·경제</option>
+              <option value="housing">🏠 주거지원</option>
+              <option value="education">🎓 교육·장학</option>
+              <option value="job">💼 취업·진로</option>
+              <option value="life">🍀 생활·의료</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="policyType">기관 구분 *</label>
+            <select id="policyType" required>
+              <option value="공공·지자체">🏛️ 공공·지자체</option>
+              <option value="NGO·복지재단">🤝 NGO·복지재단</option>
+              <option value="기업·사회공헌">🏢 기업·사회공헌</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="policyRegion">지원 지역 *</label>
+            <select id="policyRegion" required>
+              <option value="전국">전국</option>
+              <option value="서울">서울</option>
+              <option value="경기">경기</option>
+              <option value="부산">부산</option>
+              <option value="인천">인천</option>
+              <option value="대구">대구</option>
+              <option value="광주">광주</option>
+              <option value="대전">대전</option>
+              <option value="울산">울산</option>
+              <option value="세종">세종</option>
+              <option value="강원">강원</option>
+              <option value="충북">충북</option>
+              <option value="충남">충남</option>
+              <option value="전북">전북</option>
+              <option value="전남">전남</option>
+              <option value="경북">경북</option>
+              <option value="경남">경남</option>
+              <option value="제주">제주</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="policyProvider">지원 주체 *</label>
+            <input type="text" id="policyProvider" required placeholder="예: LH 한국토지주택공사">
+          </div>
+          
+          <div class="form-group">
+            <label for="policyDate">신청 기간 *</label>
+            <input type="text" id="policyDate" required placeholder="예: 상시 신청 또는 2026.06.30까지">
+          </div>
+          
+          <div class="form-group full-width">
+            <label for="policyTarget">지원 대상 조건 *</label>
+            <input type="text" id="policyTarget" required placeholder="예: 아동시설 보호종료 5년 이내 무주택 청년">
+          </div>
+          
+          <div class="form-group full-width">
+            <label for="policyContent">상세 지원 내용 *</label>
+            <textarea id="policyContent" rows="3" required placeholder="상세한 혜택 내용 및 지원 방식을 입력하세요."></textarea>
+          </div>
+          
+          <div class="form-group full-width">
+            <label for="policyTip">전담요원 꿀팁 (추천 메모)</label>
+            <textarea id="policyTip" rows="2" placeholder="청년들에게 조언해주고 싶은 신청 팁, 주의사항 등을 입력하세요."></textarea>
+          </div>
+          
+          <div class="form-group full-width">
+            <label for="policyLink">상세정보 웹사이트 주소 (링크) *</label>
+            <input type="url" id="policyLink" required placeholder="https://example.com">
+          </div>
+          
+        </div>
+        
+        <div class="form-actions">
+          <button id="btnDelete" class="btn-delete" type="button" style="display: none;">삭제하기</button>
+          <button id="btnCancel" class="btn-secondary" type="button" onclick="document.getElementById('modalClose').click()">취소</button>
+          <button id="btnSubmit" class="btn-submit" type="submit">등록하기</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 토스트 알림 표시 컨테이너 -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- 자립해봄 어플리케이션 스크립트 로드 -->
+  <script src="data.js?v=20260608_14"></script>
+  <script src="app.js?v=20260608_14"></script>
+</body>
+</html>
