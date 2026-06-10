@@ -75,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function loadPolicies() {
     const saved = localStorage.getItem("jarip_policies");
     const savedVersion = localStorage.getItem("jarip_data_version");
-    const currentVersion = "v2026.06.10_v34"; // 새 상세 내용 업데이트로 버전 상향
+    const currentVersion = "v2026.06.10_v35"; // 새 상세 내용 업데이트로 버전 상향
     
     let rawPolicies = [];
     if (saved && savedVersion === currentVersion) {
@@ -185,27 +185,33 @@ document.addEventListener("DOMContentLoaded", () => {
   function loadTheme() {
     const savedTheme = localStorage.getItem("theme");
     const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const mobileBtn = document.getElementById("themeToggleMobile");
     
     if (savedTheme === "dark" || (!savedTheme && systemPrefersDark)) {
       document.documentElement.setAttribute("data-theme", "dark");
-      themeToggleBtn.innerHTML = '☀️'; // 라이트 모드로 전환 아이콘
+      themeToggleBtn.innerHTML = '☀️';
+      if (mobileBtn) mobileBtn.innerHTML = '☀️';
     } else {
       document.documentElement.setAttribute("data-theme", "light");
-      themeToggleBtn.innerHTML = '🌙'; // 다크 모드로 전환 아이콘
+      themeToggleBtn.innerHTML = '🌙';
+      if (mobileBtn) mobileBtn.innerHTML = '🌙';
     }
   }
 
   function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute("data-theme");
+    const mobileBtn = document.getElementById("themeToggleMobile");
     if (currentTheme === "dark") {
       document.documentElement.setAttribute("data-theme", "light");
       localStorage.setItem("theme", "light");
       themeToggleBtn.innerHTML = '🌙';
+      if (mobileBtn) mobileBtn.innerHTML = '🌙';
       showToast("☀️ 라이트 모드로 전환되었습니다.");
     } else {
       document.documentElement.setAttribute("data-theme", "dark");
       localStorage.setItem("theme", "dark");
       themeToggleBtn.innerHTML = '☀️';
+      if (mobileBtn) mobileBtn.innerHTML = '☀️';
       showToast("🌙 다크 모드로 전환되었습니다.");
     }
   }
@@ -563,8 +569,12 @@ ${p.link}
 
   // 14. 이벤트 리스너 설정
   function setupEventListeners() {
-    // 테마 토글
+    // 테마 토글 (데스크톱 + 모바일 헤더 버튼 모두 연결)
     themeToggleBtn.addEventListener("click", toggleTheme);
+    const themeToggleMobile = document.getElementById("themeToggleMobile");
+    if (themeToggleMobile) {
+      themeToggleMobile.addEventListener("click", toggleTheme);
+    }
 
     // 검색 입력
     searchInput.addEventListener("input", (e) => {
@@ -675,6 +685,18 @@ ${p.link}
       rebuildCombinedPolicies();
       closeModal();
     });
+
+    // 위로가기 버튼 스크롤 토글
+    const scrollTopBtn = document.getElementById("scrollTopBtn");
+    if (scrollTopBtn) {
+      window.addEventListener("scroll", () => {
+        if (window.scrollY > 300) {
+          scrollTopBtn.classList.add("visible");
+        } else {
+          scrollTopBtn.classList.remove("visible");
+        }
+      });
+    }
 
     // 삭제 버튼 클릭
     btnDelete.addEventListener("click", () => {
