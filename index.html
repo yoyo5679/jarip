@@ -6,7 +6,7 @@
   <title>자립해봄 - 자립준비청년 지원 정보 공유 대시보드</title>
   <!-- FontAwesome Icon CDN (임시 바로가기 화살표용) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="styles.css?v=20260610_13">
+  <link rel="stylesheet" href="styles.css?v=20260610_16">
 </head>
 <body>
 
@@ -77,6 +77,21 @@
       </div>
     </aside>
 
+    <!-- 모바일 전용: 상단 헤더바 -->
+    <header class="mobile-top-header">
+      <div class="mobile-logo">
+        <span class="mobile-logo-emoji">🌸</span>
+        <span class="mobile-logo-text">자립해봄</span>
+      </div>
+      <!-- 중앙: AI 챗봇 버튼 -->
+      <a href="https://notebooklm.google.com/notebook/52b7a619-a506-4c80-8532-f66d4dddd98d"
+         target="_blank" class="mobile-chatbot-btn" id="mobileChatbotBtn">
+        <span class="mobile-chatbot-icon">🤖</span>
+        <span class="mobile-chatbot-label">AI 자립상담</span>
+      </a>
+      <button id="themeToggleMobile" class="theme-toggle" title="화면 테마 변경">🌙</button>
+    </header>
+
     <!-- 메인 컨텐츠 영역 -->
     <main class="main-content">
       
@@ -112,7 +127,7 @@
           </div>
         </div>
         
-        <div class="header-actions">
+        <div class="header-actions desktop-only">
           <button id="themeToggle" class="theme-toggle" title="화면 테마 변경">🌙</button>
         </div>
       </div>
@@ -156,9 +171,9 @@
       </div>
 
       <!-- 기관 구분 및 정렬 필터 -->
-      <div class="type-filter-container" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
-          <span class="filter-label">🏢 기관 구분:</span>
+      <div class="type-filter-container">
+        <div class="filter-group">
+          <span class="filter-label">🏢 기관:</span>
           <div class="type-tabs">
             <button class="type-btn active" data-type="all">전체</button>
             <button class="type-btn" data-type="공공·지자체">🏛️ 공공·지자체</button>
@@ -166,11 +181,10 @@
             <button class="type-btn" data-type="기업·사회공헌">🏢 기업·사회공헌</button>
           </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 0.5rem;">
-          <span class="filter-label">정렬:</span>
-          <select id="sortFilter" style="padding: 0.5rem; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--color-text-main); font-size: 0.9rem; outline: none; cursor: pointer;">
-            <option value="newest">최신순 (ID 역순)</option>
-            <option value="closing_soon">마감 임박순</option>
+        <div class="sort-section">
+          <select id="sortFilter" class="sort-select">
+            <option value="newest">최신순</option>
+            <option value="closing_soon">마감임박순</option>
           </select>
         </div>
       </div>
@@ -293,106 +307,103 @@
   <script src="data.js?v=20260608_14"></script>
   <script src="app.js?v=20260610_13"></script>
 
-  <!-- 모바일 전용: 하단 탭 내비게이션 바 -->
+  <!-- 모바일 전용: 하단 탭 내비게이션 바 (3수 구성) -->
   <nav class="mobile-bottom-nav">
-    <a href="https://notebooklm.google.com/notebook/52b7a619-a506-4c80-8532-f66d4dddd98d" target="_blank" class="mobile-nav-item">
-      <span class="mobile-nav-icon">🤖</span>
-      <span>AI 챗봇</span>
-    </a>
-    <button class="mobile-nav-item" id="mobileNavSites" onclick="openMobileDrawer()">
+    <button class="mobile-nav-item" onclick="openLinksModal('sites')">
       <span class="mobile-nav-icon">🔗</span>
-      <span>주요 지원 사이트</span>
+      <span>주요지원사이트</span>
+    </button>
+    <button class="mobile-nav-item" onclick="openLinksModal('grouphome')">
+      <span class="mobile-nav-icon">🏠</span>
+      <span>아동그룹홈</span>
+    </button>
+    <button class="mobile-nav-item" onclick="openLinksModal('centers')">
+      <span class="mobile-nav-icon">🏢</span>
+      <span>시도전담기관</span>
     </button>
   </nav>
 
-  <!-- 모바일 전용: 드로어 오버레이 -->
-  <div class="mobile-drawer-overlay" id="mobileDrawerOverlay" onclick="closeMobileDrawer()"></div>
+  <!-- 위로가기 버튼 -->
+  <button id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" class="scroll-top-btn" title="위로가기">
+    ↑
+  </button>
 
-  <!-- 모바일 전용: 드로어 패널 -->
-  <div class="mobile-drawer" id="mobileDrawer">
-    <div class="mobile-drawer-handle"></div>
-
-    <!-- 내부 탭 헤더 -->
-    <div class="drawer-tabs">
-      <button class="drawer-tab-btn active" data-tab="sites" onclick="switchDrawerTab('sites')">🔗 주요 지원 사이트</button>
-      <button class="drawer-tab-btn" data-tab="grouphome" onclick="switchDrawerTab('grouphome')">🏠 아동그룹홈</button>
-      <button class="drawer-tab-btn" data-tab="centers" onclick="switchDrawerTab('centers')">🏢 시도전담기관</button>
-    </div>
-
-    <!-- 주요 지원 사이트 탭 -->
-    <div id="drawerSites" class="drawer-tab-content">
-      <div class="quick-links" style="margin-top:1rem">
-        <a href="https://jaripon.ncrc.or.kr" target="_blank" class="link-card">
-          <span>아동권리보장원 자립정보ON</span>
-          <i class="fa-solid fa-arrow-up-right-from-square"></i>
-        </a>
-        <a href="https://youth.seoul.go.kr/infoData/sprtInfo/list.do?key=2309130006" target="_blank" class="link-card">
-          <span>서울 청년몽땅정보통</span>
-          <i class="fa-solid fa-arrow-up-right-from-square"></i>
-        </a>
-        <a href="https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancList.do?mi=1026" target="_blank" class="link-card">
-          <span>LH 청약플러스</span>
-          <i class="fa-solid fa-arrow-up-right-from-square"></i>
-        </a>
-        <a href="https://www.i-sh.co.kr/app/index.do" target="_blank" class="link-card">
-          <span>서울주택도시개발공사 (SH)</span>
-          <i class="fa-solid fa-arrow-up-right-from-square"></i>
-        </a>
+  <!-- 모바일 링크 모달 -->
+  <div id="linksModal" class="links-modal-overlay" onclick="closeLinksModal(event)">
+    <div class="links-modal-box">
+      <div class="links-modal-header">
+        <span id="linksModalTitle" class="links-modal-title"></span>
+        <button class="links-modal-close" onclick="closeLinksModal()"><i class="fa-solid fa-xmark"></i></button>
       </div>
-    </div>
-
-    <!-- 서울시 아동그룹홈 탭 -->
-    <div id="drawerGrouphome" class="drawer-tab-content" style="display:none">
-      <div class="quick-links" style="margin-top:1rem">
-        <a href="https://seoulcenter.org/index.php?" target="_blank" class="link-card">
-          <span>서울시 아동공동생활가정지원센터</span>
-          <i class="fa-solid fa-arrow-up-right-from-square"></i>
-        </a>
-      </div>
-    </div>
-
-    <!-- 시도전담기관 탭 -->
-    <div id="drawerCenters" class="drawer-tab-content" style="display:none">
-      <div id="mobileCentersList" class="centers-list" style="max-height:50vh; margin-top:1rem"></div>
+      <div id="linksModalBody" class="links-modal-body"></div>
     </div>
   </div>
 
   <script>
-    let mobileDrawerOpen = false;
-
-    function openMobileDrawer() {
-      if (mobileDrawerOpen) {
-        closeMobileDrawer();
-        return;
+    // 링크 모달 데이터 정의
+    const MODAL_LINKS = {
+      sites: {
+        title: '🔗 주요 지원 사이트',
+        links: [
+          { label: '아동권리보장원 자립정보ON', url: 'https://jaripon.ncrc.or.kr' },
+          { label: '서울 청년몽땅정보통', url: 'https://youth.seoul.go.kr/infoData/sprtInfo/list.do?key=2309130006' },
+          { label: 'LH 청약플러스', url: 'https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancList.do?mi=1026' },
+          { label: '서울주택도시개발공사 (SH)', url: 'https://www.i-sh.co.kr/app/index.do' },
+        ]
+      },
+      grouphome: {
+        title: '🏠 서울시 아동그룹홈',
+        links: [
+          { label: '서울시 아동공동생활가정지원센터', url: 'https://seoulcenter.org/index.php?' },
+        ]
+      },
+      centers: {
+        title: '🏢 시·도 자립지원전담기관',
+        links: [] // app.js에서 동적 주입
       }
-      mobileDrawerOpen = true;
-      switchDrawerTab('sites');
-      document.getElementById('mobileDrawerOverlay').classList.add('open');
-      document.getElementById('mobileDrawer').classList.add('open');
-    }
+    };
 
-    function closeMobileDrawer() {
-      mobileDrawerOpen = false;
-      document.getElementById('mobileDrawerOverlay').classList.remove('open');
-      document.getElementById('mobileDrawer').classList.remove('open');
-    }
+    function openLinksModal(type) {
+      const data = MODAL_LINKS[type];
+      if (!data) return;
 
-    function switchDrawerTab(tab) {
-      // 탭 버튼 활성화
-      document.querySelectorAll('.drawer-tab-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.tab === tab);
-      });
-      // 콘텐츠 전환
-      document.getElementById('drawerSites').style.display = tab === 'sites' ? 'block' : 'none';
-      document.getElementById('drawerGrouphome').style.display = tab === 'grouphome' ? 'block' : 'none';
-      document.getElementById('drawerCenters').style.display = tab === 'centers' ? 'block' : 'none';
+      document.getElementById('linksModalTitle').textContent = data.title;
+      const body = document.getElementById('linksModalBody');
+      body.innerHTML = '';
 
-      // 시도전담기관 목록 동적 복사
-      if (tab === 'centers') {
+      if (type === 'centers') {
+        // 시도 전담기관: 사이드바 HTML 복사
         const source = document.getElementById('centersList');
-        const target = document.getElementById('mobileCentersList');
-        if (source && target && target.innerHTML === '') target.innerHTML = source.innerHTML;
+        if (source) {
+          const clone = source.cloneNode(true);
+          clone.id = 'modalCentersList';
+          clone.style.maxHeight = '60vh';
+          clone.style.overflowY = 'auto';
+          body.appendChild(clone);
+        }
+      } else {
+        const list = document.createElement('div');
+        list.className = 'quick-links';
+        data.links.forEach(item => {
+          const a = document.createElement('a');
+          a.href = item.url;
+          a.target = '_blank';
+          a.className = 'link-card';
+          a.rel = 'noopener noreferrer';
+          a.innerHTML = `<span>${item.label}</span><i class="fa-solid fa-arrow-up-right-from-square"></i>`;
+          list.appendChild(a);
+        });
+        body.appendChild(list);
       }
+
+      document.getElementById('linksModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLinksModal(e) {
+      if (e && e.target !== document.getElementById('linksModal')) return;
+      document.getElementById('linksModal').classList.remove('open');
+      document.body.style.overflow = '';
     }
   </script>
 </body>

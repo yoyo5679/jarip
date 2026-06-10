@@ -840,6 +840,21 @@ window.initialPolicies = [
     "status": "상시모집",
     "source": "서울시아동공동생활가정지원센터",
     "id": 632
+  },
+  {
+    "title": "[자립정보ON] 자립준비청년 HPV 예방접종 가다실9 지원사업",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "사단법인 야나",
+    "region": "서울",
+    "target": "자립준비청년 대상",
+    "content": "사단법인 야나에서 우리 자립준비청년들을 위해 준비한 [자립준비청년 HPV 예방접종 가다실9 지원사업] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 우측 하단의 '원문 바로가기' 링크를 꾹~ 눌러서 꼼꼼히 확인해봐요! 😉",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=1904&menuPos=1",
+    "date": "2026-06-10 ~ 2026-06-24",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 633
   }
 ];
 
