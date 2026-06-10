@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "routes": [
+    { "src": "/styles.css", "dest": "/styles.css" },
+    { "src": "/app.js", "dest": "/app.js" },
+    { "src": "/data.js", "dest": "/data.js" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}
