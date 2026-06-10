@@ -15,3 +15,7 @@ data_restored.js
 # OS-specific
 .DS_Store
 Thumbs.db
+
+# Excel data files
+*.xlsx
+
