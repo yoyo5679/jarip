@@ -924,45 +924,195 @@ body {
 
 /* 반응형 모바일 최적화 */
 @media (max-width: 1024px) {
-  body {
-    flex-direction: column;
-  }
-  
   .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-    border-right: none;
-    border-bottom: 1px solid var(--border-color);
-    padding: 1.5rem;
+    display: none;
   }
-  
-  .centers-list {
-    max-height: 200px;
-  }
-  
+
   .main-content {
     height: auto;
+    padding: 1rem;
+    padding-bottom: 80px; /* 하단 탭바 공간 확보 */
+  }
+
+  /* 모바일 상단 헤더 */
+  .header-section {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .search-filter-bar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .search-filter-bar .search-input-wrapper {
+    flex: 1 1 100%;
+  }
+
+  .select-filter {
+    flex: 1;
+    font-size: 0.8rem;
+    padding: 0.6rem 0.75rem;
+  }
+
+  .header-garden {
+    display: none;
+  }
+
+  .header-actions {
+    align-self: flex-end;
+  }
+
+  /* 통계 카드 2열 그리드 */
+  .stats-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+  }
+
+  .stat-card {
+    padding: 0.85rem 1rem;
+  }
+
+  .stat-card .value {
+    font-size: 1.4rem;
+  }
+
+  .stat-card .label {
+    font-size: 0.72rem;
+  }
+
+  /* 카테고리 탭 가로 스크롤 */
+  .category-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .category-tabs::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex-shrink: 0;
+    font-size: 0.82rem;
+    padding: 0.5rem 1rem;
+  }
+
+  /* 기관 구분 필터 가로 스크롤 */
+  .type-filter-container {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    box-sizing: border-box;
+  }
+  .type-filter-container::-webkit-scrollbar { display: none; }
+
+  .type-tabs {
+    flex-wrap: nowrap;
+  }
+
+  .type-btn {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+  }
+
+  /* 정책 카드 1열 */
+  .cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* 하단 탭 내비게이션 바 */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background-color: var(--bg-sidebar);
+    border-top: 1px solid var(--border-color);
+    z-index: 200;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+  }
+
+  .mobile-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    text-decoration: none;
+    color: var(--color-text-muted);
+    font-size: 0.65rem;
+    font-weight: 600;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+
+  .mobile-nav-item:active,
+  .mobile-nav-item.active {
+    color: var(--color-primary);
+  }
+
+  .mobile-nav-icon {
+    font-size: 1.4rem;
+    line-height: 1;
+  }
+
+  /* 모바일 사이드바 드로워 */
+  .mobile-drawer-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 300;
+    backdrop-filter: blur(2px);
+  }
+
+  .mobile-drawer-overlay.open {
+    display: block;
+  }
+
+  .mobile-drawer {
+    position: fixed;
+    bottom: 64px;
+    left: 0;
+    right: 0;
+    max-height: 70vh;
+    overflow-y: auto;
+    background-color: var(--bg-sidebar);
+    border-top: 1px solid var(--border-color);
+    border-radius: 24px 24px 0 0;
+    z-index: 400;
     padding: 1.5rem;
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .mobile-drawer.open {
+    transform: translateY(0);
+  }
+
+  .mobile-drawer-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--border-color);
+    border-radius: 2px;
+    margin: 0 auto 1.5rem;
   }
 }
 
-@media (max-width: 768px) {
-  .header-section {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .search-filter-bar {
-    flex-direction: column;
-  }
-  
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .form-group.full-width {
-    grid-column: span 1;
+/* 데스크톱에서 모바일 전용 요소 숨기기 */
+@media (min-width: 1025px) {
+  .mobile-bottom-nav,
+  .mobile-drawer-overlay,
+  .mobile-drawer {
+    display: none !important;
   }
 }
 

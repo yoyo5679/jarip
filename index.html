@@ -291,6 +291,117 @@
 
   <!-- 자립해봄 어플리케이션 스크립트 로드 -->
   <script src="data.js?v=20260608_14"></script>
-  <script src="app.js?v=20260608_14"></script>
+  <script src="app.js?v=20260610_13"></script>
+
+  <!-- 모바일 전용: 하단 탭 내비게이션 바 -->
+  <nav class="mobile-bottom-nav">
+    <button class="mobile-nav-item" id="mobileNavLinks" onclick="openMobileDrawer('links')">
+      <span class="mobile-nav-icon">🔗</span>
+      <span>바로가기</span>
+    </button>
+    <button class="mobile-nav-item" id="mobileNavCenters" onclick="openMobileDrawer('centers')">
+      <span class="mobile-nav-icon">🏢</span>
+      <span>전담기관</span>
+    </button>
+    <a href="https://notebooklm.google.com/notebook/52b7a619-a506-4c80-8532-f66d4dddd98d" target="_blank" class="mobile-nav-item">
+      <span class="mobile-nav-icon">🤖</span>
+      <span>AI챗봇</span>
+    </a>
+    <button class="mobile-nav-item" id="mobileNavTheme" onclick="document.getElementById('themeToggle').click()">
+      <span class="mobile-nav-icon">🌙</span>
+      <span>테마</span>
+    </button>
+  </nav>
+
+  <!-- 모바일 전용: 드로어 오버레이 -->
+  <div class="mobile-drawer-overlay" id="mobileDrawerOverlay" onclick="closeMobileDrawer()"></div>
+
+  <!-- 모바일 전용: 드로어 패널 -->
+  <div class="mobile-drawer" id="mobileDrawer">
+    <div class="mobile-drawer-handle"></div>
+
+    <!-- 바로가기 탭 콘텐츠 -->
+    <div id="drawerLinks" class="drawer-content">
+      <div class="nav-section">
+        <h3 class="section-title">🤖 AI 자립지원 챗봇</h3>
+        <div class="quick-links">
+          <a href="https://notebooklm.google.com/notebook/52b7a619-a506-4c80-8532-f66d4dddd98d" target="_blank" class="link-card special-chatbot-card">
+            <div class="chatbot-card-body">
+              <span class="chatbot-title">자립해봄 AI 챗봇 💬</span>
+              <span class="chatbot-badge">추천 ⚡</span>
+            </div>
+            <p class="chatbot-desc">구글 NotebookLM 기반 AI가 맞춤형 자립 정보를 실시간 상담해 드려요!</p>
+          </a>
+        </div>
+      </div>
+      <div class="nav-section" style="margin-top:1.5rem">
+        <h3 class="section-title">🔗 주요 지원 사이트</h3>
+        <div class="quick-links">
+          <a href="https://jaripon.ncrc.or.kr" target="_blank" class="link-card">
+            <span>아동권리보장원 자립정보ON</span>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+          <a href="https://youth.seoul.go.kr/infoData/sprtInfo/list.do?key=2309130006" target="_blank" class="link-card">
+            <span>서울 청년몽땅정보통</span>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+          <a href="https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancList.do?mi=1026" target="_blank" class="link-card">
+            <span>LH 청약플러스</span>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+          <a href="https://www.i-sh.co.kr/app/index.do" target="_blank" class="link-card">
+            <span>서울주택도시개발공사 (SH)</span>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+          <a href="https://seoulcenter.org/index.php?" target="_blank" class="link-card">
+            <span>서울시 아동공동생활가정지원센터</span>
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 전담기관 탭 콘텐츠 -->
+    <div id="drawerCenters" class="drawer-content" style="display:none">
+      <div class="nav-section">
+        <h3 class="section-title">🏢 시·도 자립지원전담기관</h3>
+        <div id="mobileCentersList" class="centers-list" style="max-height: 55vh;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 모바일 드로어 제어
+    let currentDrawer = null;
+    function openMobileDrawer(type) {
+      const overlay = document.getElementById('mobileDrawerOverlay');
+      const drawer = document.getElementById('mobileDrawer');
+      const drawerLinks = document.getElementById('drawerLinks');
+      const drawerCenters = document.getElementById('drawerCenters');
+      
+      if (currentDrawer === type) {
+        closeMobileDrawer();
+        return;
+      }
+      currentDrawer = type;
+      drawerLinks.style.display = type === 'links' ? 'block' : 'none';
+      drawerCenters.style.display = type === 'centers' ? 'block' : 'none';
+
+      // 전담기관 목록 복사 (동적으로 채워진 것 가져오기)
+      if (type === 'centers') {
+        const source = document.getElementById('centersList');
+        const target = document.getElementById('mobileCentersList');
+        if (source && target) target.innerHTML = source.innerHTML;
+      }
+
+      overlay.classList.add('open');
+      drawer.classList.add('open');
+    }
+    function closeMobileDrawer() {
+      document.getElementById('mobileDrawerOverlay').classList.remove('open');
+      document.getElementById('mobileDrawer').classList.remove('open');
+      currentDrawer = null;
+    }
+  </script>
 </body>
 </html>
