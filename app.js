@@ -617,7 +617,9 @@ ${p.link}
     });
 
     // 모달 제어
-    openModalBtn.addEventListener("click", () => openModal(null));
+    if (openModalBtn) {
+      openModalBtn.addEventListener("click", () => openModal(null));
+    }
     modalCloseBtn.addEventListener("click", closeModal);
 
 
