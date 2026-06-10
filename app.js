@@ -45,6 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const statEconomic = document.getElementById("statEconomic");
   const statHousing = document.getElementById("statHousing");
   const statEducation = document.getElementById("statEducation");
+  const statJob = document.getElementById("statJob");
+  const statLife = document.getElementById("statLife");
 
   // 토스트 컨테이너
   const toastContainer = document.getElementById("toastContainer");
@@ -255,6 +257,8 @@ document.addEventListener("DOMContentLoaded", () => {
     statEconomic.textContent = countCategory("economic");
     statHousing.textContent = countCategory("housing");
     statEducation.textContent = countCategory("education");
+    if (statJob) statJob.textContent = countCategory("job");
+    if (statLife) statLife.textContent = countCategory("life");
     
     // 모집중 통계 업데이트
     const statRecruiting = document.getElementById("statRecruiting");
