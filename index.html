@@ -118,7 +118,7 @@
       </div>
 
       <!-- 요약 통계 판판 -->
-      <div class="stats-container">
+      <div class="stats-container" id="statsContainer">
         <div class="stat-card">
           <span class="label">지원사업</span>
           <span id="statTotal" class="value">0</span>
@@ -295,21 +295,13 @@
 
   <!-- 모바일 전용: 하단 탭 내비게이션 바 -->
   <nav class="mobile-bottom-nav">
-    <button class="mobile-nav-item" id="mobileNavLinks" onclick="openMobileDrawer('links')">
-      <span class="mobile-nav-icon">🔗</span>
-      <span>바로가기</span>
-    </button>
-    <button class="mobile-nav-item" id="mobileNavCenters" onclick="openMobileDrawer('centers')">
-      <span class="mobile-nav-icon">🏢</span>
-      <span>전담기관</span>
-    </button>
     <a href="https://notebooklm.google.com/notebook/52b7a619-a506-4c80-8532-f66d4dddd98d" target="_blank" class="mobile-nav-item">
       <span class="mobile-nav-icon">🤖</span>
-      <span>AI챗봇</span>
+      <span>AI 챗봇</span>
     </a>
-    <button class="mobile-nav-item" id="mobileNavTheme" onclick="document.getElementById('themeToggle').click()">
-      <span class="mobile-nav-icon">🌙</span>
-      <span>테마</span>
+    <button class="mobile-nav-item" id="mobileNavSites" onclick="openMobileDrawer()">
+      <span class="mobile-nav-icon">🔗</span>
+      <span>주요 지원 사이트</span>
     </button>
   </nav>
 
@@ -320,87 +312,87 @@
   <div class="mobile-drawer" id="mobileDrawer">
     <div class="mobile-drawer-handle"></div>
 
-    <!-- 바로가기 탭 콘텐츠 -->
-    <div id="drawerLinks" class="drawer-content">
-      <div class="nav-section">
-        <h3 class="section-title">🤖 AI 자립지원 챗봇</h3>
-        <div class="quick-links">
-          <a href="https://notebooklm.google.com/notebook/52b7a619-a506-4c80-8532-f66d4dddd98d" target="_blank" class="link-card special-chatbot-card">
-            <div class="chatbot-card-body">
-              <span class="chatbot-title">자립해봄 AI 챗봇 💬</span>
-              <span class="chatbot-badge">추천 ⚡</span>
-            </div>
-            <p class="chatbot-desc">구글 NotebookLM 기반 AI가 맞춤형 자립 정보를 실시간 상담해 드려요!</p>
-          </a>
-        </div>
-      </div>
-      <div class="nav-section" style="margin-top:1.5rem">
-        <h3 class="section-title">🔗 주요 지원 사이트</h3>
-        <div class="quick-links">
-          <a href="https://jaripon.ncrc.or.kr" target="_blank" class="link-card">
-            <span>아동권리보장원 자립정보ON</span>
-            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-          </a>
-          <a href="https://youth.seoul.go.kr/infoData/sprtInfo/list.do?key=2309130006" target="_blank" class="link-card">
-            <span>서울 청년몽땅정보통</span>
-            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-          </a>
-          <a href="https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancList.do?mi=1026" target="_blank" class="link-card">
-            <span>LH 청약플러스</span>
-            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-          </a>
-          <a href="https://www.i-sh.co.kr/app/index.do" target="_blank" class="link-card">
-            <span>서울주택도시개발공사 (SH)</span>
-            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-          </a>
-          <a href="https://seoulcenter.org/index.php?" target="_blank" class="link-card">
-            <span>서울시 아동공동생활가정지원센터</span>
-            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-          </a>
-        </div>
+    <!-- 내부 탭 헤더 -->
+    <div class="drawer-tabs">
+      <button class="drawer-tab-btn active" data-tab="sites" onclick="switchDrawerTab('sites')">🔗 주요 지원 사이트</button>
+      <button class="drawer-tab-btn" data-tab="grouphome" onclick="switchDrawerTab('grouphome')">🏠 아동그룹홈</button>
+      <button class="drawer-tab-btn" data-tab="centers" onclick="switchDrawerTab('centers')">🏢 시도전담기관</button>
+    </div>
+
+    <!-- 주요 지원 사이트 탭 -->
+    <div id="drawerSites" class="drawer-tab-content">
+      <div class="quick-links" style="margin-top:1rem">
+        <a href="https://jaripon.ncrc.or.kr" target="_blank" class="link-card">
+          <span>아동권리보장원 자립정보ON</span>
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        </a>
+        <a href="https://youth.seoul.go.kr/infoData/sprtInfo/list.do?key=2309130006" target="_blank" class="link-card">
+          <span>서울 청년몽땅정보통</span>
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        </a>
+        <a href="https://apply.lh.or.kr/lhapply/apply/wt/wrtanc/selectWrtancList.do?mi=1026" target="_blank" class="link-card">
+          <span>LH 청약플러스</span>
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        </a>
+        <a href="https://www.i-sh.co.kr/app/index.do" target="_blank" class="link-card">
+          <span>서울주택도시개발공사 (SH)</span>
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        </a>
       </div>
     </div>
 
-    <!-- 전담기관 탭 콘텐츠 -->
-    <div id="drawerCenters" class="drawer-content" style="display:none">
-      <div class="nav-section">
-        <h3 class="section-title">🏢 시·도 자립지원전담기관</h3>
-        <div id="mobileCentersList" class="centers-list" style="max-height: 55vh;"></div>
+    <!-- 서울시 아동그룹홈 탭 -->
+    <div id="drawerGrouphome" class="drawer-tab-content" style="display:none">
+      <div class="quick-links" style="margin-top:1rem">
+        <a href="https://seoulcenter.org/index.php?" target="_blank" class="link-card">
+          <span>서울시 아동공동생활가정지원센터</span>
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        </a>
       </div>
+    </div>
+
+    <!-- 시도전담기관 탭 -->
+    <div id="drawerCenters" class="drawer-tab-content" style="display:none">
+      <div id="mobileCentersList" class="centers-list" style="max-height:50vh; margin-top:1rem"></div>
     </div>
   </div>
 
   <script>
-    // 모바일 드로어 제어
-    let currentDrawer = null;
-    function openMobileDrawer(type) {
-      const overlay = document.getElementById('mobileDrawerOverlay');
-      const drawer = document.getElementById('mobileDrawer');
-      const drawerLinks = document.getElementById('drawerLinks');
-      const drawerCenters = document.getElementById('drawerCenters');
-      
-      if (currentDrawer === type) {
+    let mobileDrawerOpen = false;
+
+    function openMobileDrawer() {
+      if (mobileDrawerOpen) {
         closeMobileDrawer();
         return;
       }
-      currentDrawer = type;
-      drawerLinks.style.display = type === 'links' ? 'block' : 'none';
-      drawerCenters.style.display = type === 'centers' ? 'block' : 'none';
-
-      // 전담기관 목록 복사 (동적으로 채워진 것 가져오기)
-      if (type === 'centers') {
-        const source = document.getElementById('centersList');
-        const target = document.getElementById('mobileCentersList');
-        if (source && target) target.innerHTML = source.innerHTML;
-      }
-
-      overlay.classList.add('open');
-      drawer.classList.add('open');
+      mobileDrawerOpen = true;
+      switchDrawerTab('sites');
+      document.getElementById('mobileDrawerOverlay').classList.add('open');
+      document.getElementById('mobileDrawer').classList.add('open');
     }
+
     function closeMobileDrawer() {
+      mobileDrawerOpen = false;
       document.getElementById('mobileDrawerOverlay').classList.remove('open');
       document.getElementById('mobileDrawer').classList.remove('open');
-      currentDrawer = null;
+    }
+
+    function switchDrawerTab(tab) {
+      // 탭 버튼 활성화
+      document.querySelectorAll('.drawer-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+      });
+      // 콘텐츠 전환
+      document.getElementById('drawerSites').style.display = tab === 'sites' ? 'block' : 'none';
+      document.getElementById('drawerGrouphome').style.display = tab === 'grouphome' ? 'block' : 'none';
+      document.getElementById('drawerCenters').style.display = tab === 'centers' ? 'block' : 'none';
+
+      // 시도전담기관 목록 동적 복사
+      if (tab === 'centers') {
+        const source = document.getElementById('centersList');
+        const target = document.getElementById('mobileCentersList');
+        if (source && target && target.innerHTML === '') target.innerHTML = source.innerHTML;
+      }
     }
   </script>
 </body>
