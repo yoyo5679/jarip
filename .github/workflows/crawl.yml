@@ -1,9 +1,7 @@
 name: Auto Crawl and Update
 
 on:
-  schedule:
-    - cron: '0 0,3,5,7 * * *' # KST 09:00, 12:00, 14:00, 16:00 (UTC 00:00, 03:00, 05:00, 07:00)
-  workflow_dispatch: # Allows manual trigger from GitHub UI
+  workflow_dispatch: # 수동 실행만 허용
 
 jobs:
   crawl-and-deploy:
