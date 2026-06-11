@@ -344,14 +344,96 @@ async function crawlJaripon() {
 }
 
 
-// 4. 수집 데이터를 data.js에 업데이트하는 메인 함수
+// 4. 서울광역청년센터 크롤링 (자립준비청년 키워드 포함 글만)
+async function crawlSmyc() {
+  console.log('--- 서울광역청년센터(SMYC) 크롤링 시작 ---');
+  const BASE = 'https://www.smyc.kr';
+  const KEYWORD_ENC = '%EC%9E%90%EB%A6%BD%EC%A4%80%EB%B9%84%EC%B2%AD%EB%85%84'; // 자립준비청년
+  const Q = 'YToxOntzOjEyOiJrZXl3b3JkX3R5cGUiO3M6MzoiYWxsIjt9';
+  const CLOSED_BADGES = new Set(['종료', '마감', '모집완료']);
+  const newPolicies = [];
+
+  try {
+    // 키워드 검색 결과를 최대 5페이지까지 수집 (같은 페이지 반복 시 조기 종료)
+    let prevPageKey = '';
+    for (let page = 1; page <= 5; page++) {
+      const url = `${BASE}/program/?q=${Q}&keyword=${KEYWORD_ENC}&t=board&page=${page}`;
+      const res = await axiosInstance.get(url);
+      if (res.status !== 200) break;
+
+      const $ = cheerio.load(res.data);
+      const cards = $('a.post_link_wrap');
+      if (cards.length === 0) break;
+
+      // 이전 페이지와 동일한 카드 목록이면 페이지네이션 끝
+      const pageKey = cards.map((i, el) => $(el).attr('href')).get().join(',');
+      if (pageKey === prevPageKey) break;
+      prevPageKey = pageKey;
+
+      cards.each((i, el) => {
+        const a = $(el);
+        const href = a.attr('href') || '';
+        const idxMatch = href.match(/idx=(\d+)/);
+        if (!idxMatch) return;
+
+        const cardEl = a.closest('.card');
+        const fullText = cardEl.text().replace(/\s+/g, ' ').trim();
+
+        // 제목·상태·날짜 추출: "공지 [상태] [제목] 0 0 [날짜] 조회 [숫자]"
+        const m = fullText.match(/^공지\s+(\S+)\s+(.+?)\s+\d+\s+\d+\s+(\d{4}-\d{2}-\d{2}|[\d]+[시간일분]+전)\s+조회\s+\d+/);
+        if (!m) return;
+
+        const badge = m[1].trim();   // 모집, 종료, 소개 …
+        const title = m[2].trim();
+        const rawDate = m[3];
+
+        // 종료/마감/모집완료 제외
+        if (CLOSED_BADGES.has(badge)) return;
+
+        const shouldSkip = BLACKLIST.some(word => title.includes(word));
+        if (shouldSkip) return;
+
+        // 날짜 정리: "2026-05-22" → "~2026.05.22", "23시간전" → "상시 모집"
+        const dateText = /^\d{4}-\d{2}-\d{2}$/.test(rawDate)
+          ? `~ ${rawDate.replace(/-/g, '.')}`
+          : '상시 모집';
+
+        const link = `${BASE}/program/?q=${Q}&bmode=view&idx=${idxMatch[1]}&t=board`;
+
+        newPolicies.push({
+          title: `[서울광역청년센터] ${title}`,
+          category: detectCategory(title),
+          type: '공공·지자체',
+          provider: '서울광역청년센터',
+          region: '서울',
+          target: '자립준비청년 (서울 거주 청년 우선)',
+          content: `서울광역청년센터에서 우리 자립준비청년들을 위해 준비한 [${title}] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 우측 하단의 '원문 바로가기' 링크를 꾹~ 눌러서 꼼꼼히 확인해봐요! 😉`,
+          tip: '신청 전 공식 페이지에서 대상 자격·제출 서류를 반드시 확인하세요.',
+          link,
+          date: dateText,
+          status: badge === '모집' ? '모집중' : '상시',
+          source: '서울광역청년센터'
+        });
+      });
+    }
+
+    console.log(`서울광역청년센터 자립준비청년 공고 ${newPolicies.length}건 수집 완료`);
+    return newPolicies;
+  } catch (error) {
+    console.error('서울광역청년센터 크롤링 오류:', error.message);
+    return [];
+  }
+}
+
+// 5. 수집 데이터를 data.js에 업데이트하는 메인 함수
 async function main() {
   try {
-    // 세 사이트 데이터 수집
+    // 네 사이트 데이터 수집
     const ggData = await crawlGyeonggi();
     const seoulData = await crawlSeoul();
     const jariponData = await crawlJaripon();
-    const scraped = [...ggData, ...seoulData, ...jariponData];
+    const smycData = await crawlSmyc();
+    const scraped = [...ggData, ...seoulData, ...jariponData, ...smycData];
 
     if (scraped.length === 0) {
       console.log('수집된 신규 정책이 없습니다.');
