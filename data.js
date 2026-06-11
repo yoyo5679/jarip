@@ -930,6 +930,36 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "자립정보ON",
     "id": 638
+  },
+  {
+    "title": "[자립정보ON] 리턴 투 워크-마인드카페와 함께하는 한걸음 챌린지_1기",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "서울현대교육재단",
+    "region": "전국",
+    "target": "자립준비청년 대상",
+    "content": "서울현대교육재단에서 우리 자립준비청년들을 위해 준비한 [리턴 투 워크-마인드카페와 함께하는 한걸음 챌린지_1기] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 우측 하단의 '원문 바로가기' 링크를 꾹~ 눌러서 꼼꼼히 확인해봐요! 😉",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=1907&menuPos=1",
+    "date": "2026-05-20 ~ 2026-06-24",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 639
+  },
+  {
+    "title": "[서울광역청년센터] 2026 CJ제일제당 나눔냉장고 캠페인 참여 안내(6월)",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "서울광역청년센터",
+    "region": "서울",
+    "target": "자립준비청년 (서울 거주 청년 우선)",
+    "content": "서울광역청년센터에서 우리 자립준비청년들을 위해 준비한 [2026 CJ제일제당 나눔냉장고 캠페인 참여 안내(6월)] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 우측 하단의 '원문 바로가기' 링크를 꾹~ 눌러서 꼼꼼히 확인해봐요! 😉",
+    "tip": "신청 전 공식 페이지에서 대상 자격·제출 서류를 반드시 확인하세요.",
+    "link": "https://www.smyc.kr/program/?q=YToxOntzOjEyOiJrZXl3b3JkX3R5cGUiO3M6MzoiYWxsIjt9&bmode=view&idx=171748189&t=board",
+    "date": "상시 모집",
+    "status": "모집중",
+    "source": "서울광역청년센터",
+    "id": 640
   }
 ];
 
