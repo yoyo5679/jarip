@@ -77,6 +77,12 @@ document.addEventListener("DOMContentLoaded", () => {
                  border-radius:6px;font-weight:700;cursor:pointer;font-size:0.8rem;">
           + 새 지원사업 등록
         </button>
+        <button id="deployBtn"
+          style="background:rgba(255,255,255,0.15);color:#fff;
+                 border:1px solid rgba(255,255,255,0.45);padding:0.3rem 0.9rem;
+                 border-radius:6px;cursor:pointer;font-size:0.8rem;">
+          📤 전체 기기에 배포
+        </button>
         <button id="adminLogoutBtn"
           style="background:rgba(255,255,255,0.15);color:#fff;
                  border:1px solid rgba(255,255,255,0.45);padding:0.3rem 0.9rem;
@@ -93,12 +99,90 @@ document.addEventListener("DOMContentLoaded", () => {
     // 새 지원사업 등록 버튼
     document.getElementById('openModalBtn').addEventListener('click', () => openModal(null));
 
+    // 전체 기기 배포 버튼
+    document.getElementById('deployBtn').addEventListener('click', async () => {
+      const token = prompt('GitHub Personal Access Token을 입력하세요:\n(Contents: Read & Write 권한 필요)');
+      if (!token) return;
+      const btn = document.getElementById('deployBtn');
+      btn.disabled = true;
+      btn.textContent = '⏳ 배포 중...';
+      try {
+        await deployToGitHub(token.trim());
+        showToast('✅ 배포 완료! 1~2분 후 모든 기기에 반영됩니다.');
+      } catch (e) {
+        showToast('❌ 배포 실패: ' + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '📤 전체 기기에 배포';
+      }
+    });
+
     // 로그아웃 버튼
     document.getElementById('adminLogoutBtn').addEventListener('click', () => {
       sessionStorage.removeItem('jarip_admin');
       showToast('👋 관리자 로그아웃 되었습니다.');
       setTimeout(() => location.reload(), 800);
     });
+  }
+
+  // GitHub API로 data.js를 직접 업데이트하여 전체 기기에 배포
+  async function deployToGitHub(token) {
+    const REPO = 'yoyo5679/jarip';
+    const FILE = 'data.js';
+    const API = `https://api.github.com/repos/${REPO}/contents/${FILE}`;
+
+    // 1. 현재 data.js SHA + 내용 가져오기
+    const getResp = await fetch(API, {
+      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' }
+    });
+    if (!getResp.ok) {
+      const e = await getResp.json().catch(() => ({}));
+      if (getResp.status === 401 || getResp.status === 403) throw new Error('토큰이 유효하지 않습니다.');
+      throw new Error(e.message || `HTTP ${getResp.status}`);
+    }
+    const fileInfo = await getResp.json();
+    const sha = fileInfo.sha;
+
+    // 2. 현재 내용에서 regionalCenters 섹션 추출
+    const currentContent = decodeURIComponent(escape(atob(fileInfo.content.replace(/\n/g, ''))));
+    const rcIdx = currentContent.indexOf('\nwindow.regionalCenters');
+    if (rcIdx < 0) throw new Error('data.js 형식이 예상과 다릅니다.');
+    const regionalCentersPart = currentContent.slice(rcIdx + 1); // \n 제외
+
+    // 3. 버전 번호 올리기
+    const curVer = window.initialDataVersion || 'v2026.06.10_v0';
+    const verMatch = curVer.match(/^(v\d{4}\.\d{2}\.\d{2}_v)(\d+)$/);
+    const today = new Date();
+    const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
+    const newVerNum = verMatch ? parseInt(verMatch[2]) + 1 : 1;
+    const newVersion = `v${dateStr}_v${newVerNum}`;
+
+    // 4. 새 data.js 내용 조합
+    const newContent =
+      `// 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관)\n` +
+      `// 마지막 업데이트: ${today.toISOString().slice(0,10)}\n` +
+      `window.initialDataVersion = "${newVersion}";\n` +
+      `window.initialPolicies = ${JSON.stringify(localPolicies, null, 2)};\n\n` +
+      regionalCentersPart;
+
+    // 5. Base64 인코딩 (한글 포함)
+    const encoded = btoa(unescape(encodeURIComponent(newContent)));
+
+    // 6. GitHub API로 파일 업데이트 (main 브랜치)
+    const putResp = await fetch(API, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: `Admin: 정책 수정 배포 (${newVersion})`,
+        content: encoded,
+        sha,
+        branch: 'main'
+      })
+    });
+    if (!putResp.ok) {
+      const e = await putResp.json().catch(() => ({}));
+      throw new Error(e.message || `HTTP ${putResp.status}`);
+    }
   }
 
   function rebuildCombinedPolicies() {
@@ -126,7 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function loadPolicies() {
     const saved = localStorage.getItem("jarip_policies");
     const savedVersion = localStorage.getItem("jarip_data_version");
-    const currentVersion = "v2026.06.10_v38"; // 새 상세 내용 업데이트로 버전 상향
+    const currentVersion = window.initialDataVersion || "v2026.06.10_v38";
     
     let rawPolicies = [];
     if (saved && savedVersion === currentVersion) {
