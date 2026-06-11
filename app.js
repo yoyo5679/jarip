@@ -77,12 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
                  border-radius:6px;font-weight:700;cursor:pointer;font-size:0.8rem;">
           + 새 지원사업 등록
         </button>
-        <button id="deployBtn"
-          style="background:rgba(255,255,255,0.15);color:#fff;
-                 border:1px solid rgba(255,255,255,0.45);padding:0.3rem 0.9rem;
-                 border-radius:6px;cursor:pointer;font-size:0.8rem;">
-          📤 전체 기기에 배포
-        </button>
         <button id="adminLogoutBtn"
           style="background:rgba(255,255,255,0.15);color:#fff;
                  border:1px solid rgba(255,255,255,0.45);padding:0.3rem 0.9rem;
@@ -99,109 +93,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // 새 지원사업 등록 버튼
     document.getElementById('openModalBtn').addEventListener('click', () => openModal(null));
 
-    // 전체 기기 배포 버튼
-    document.getElementById('deployBtn').addEventListener('click', async () => {
-      const token = prompt('GitHub Personal Access Token을 입력하세요:\n(Contents: Read & Write 권한 필요)');
-      if (!token) return;
-      const btn = document.getElementById('deployBtn');
-      btn.disabled = true;
-      btn.textContent = '⏳ 배포 중...';
-      try {
-        await deployToGitHub(token.trim());
-        showToast('✅ 배포 완료! 1~2분 후 모든 기기에 반영됩니다.');
-      } catch (e) {
-        showToast('❌ 배포 실패: ' + e.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = '📤 전체 기기에 배포';
-      }
-    });
-
     // 로그아웃 버튼
     document.getElementById('adminLogoutBtn').addEventListener('click', () => {
       sessionStorage.removeItem('jarip_admin');
       showToast('👋 관리자 로그아웃 되었습니다.');
       setTimeout(() => location.reload(), 800);
     });
-  }
-
-  // GitHub API로 단일 파일 업데이트 헬퍼
-  async function ghPut(token, filePath, newContent, commitMsg) {
-    const API = `https://api.github.com/repos/yoyo5679/jarip/contents/${filePath}`;
-    const headers = { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' };
-
-    const getResp = await fetch(API, { headers });
-    if (!getResp.ok) {
-      const e = await getResp.json().catch(() => ({}));
-      if (getResp.status === 401 || getResp.status === 403) throw new Error('토큰이 유효하지 않습니다.');
-      throw new Error(e.message || `HTTP ${getResp.status}`);
-    }
-    const { sha } = await getResp.json();
-    const encoded = btoa(unescape(encodeURIComponent(newContent)));
-
-    const putResp = await fetch(API, {
-      method: 'PUT',
-      headers,
-      body: JSON.stringify({ message: commitMsg, content: encoded, sha, branch: 'main' })
-    });
-    if (!putResp.ok) {
-      const e = await putResp.json().catch(() => ({}));
-      throw new Error(e.message || `HTTP ${putResp.status}`);
-    }
-  }
-
-  // GitHub API로 data.js + index.html을 업데이트하여 전체 기기에 배포
-  async function deployToGitHub(token) {
-    const headers = { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' };
-
-    // ── data.js 가져오기 ──
-    const dataResp = await fetch('https://api.github.com/repos/yoyo5679/jarip/contents/data.js', { headers });
-    if (!dataResp.ok) {
-      const e = await dataResp.json().catch(() => ({}));
-      if (dataResp.status === 401 || dataResp.status === 403) throw new Error('토큰이 유효하지 않습니다.');
-      throw new Error(e.message || `HTTP ${dataResp.status}`);
-    }
-    const dataFile = await dataResp.json();
-    const currentDataContent = decodeURIComponent(escape(atob(dataFile.content.replace(/\n/g, ''))));
-
-    // regionalCenters 섹션 추출
-    const rcIdx = currentDataContent.indexOf('\nwindow.regionalCenters');
-    if (rcIdx < 0) throw new Error('data.js 형식이 예상과 다릅니다.');
-    const regionalCentersPart = currentDataContent.slice(rcIdx + 1);
-
-    // 버전 번호 올리기
-    const curVer = window.initialDataVersion || 'v2026.06.10_v0';
-    const verMatch = curVer.match(/^(v\d{4}\.\d{2}\.\d{2}_v)(\d+)$/);
-    const today = new Date();
-    const dateStr = `${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
-    const newVerNum = verMatch ? parseInt(verMatch[2]) + 1 : 1;
-    const newVersion = `v${dateStr}_v${newVerNum}`;
-    // index.html 캐시 버스터용 타임스탬프
-    const cacheTag = `${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}_${newVerNum}`;
-
-    // 새 data.js 조합
-    const newDataContent =
-      `// 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관)\n` +
-      `// 마지막 업데이트: ${today.toISOString().slice(0, 10)}\n` +
-      `window.initialDataVersion = "${newVersion}";\n` +
-      `window.initialPolicies = ${JSON.stringify(localPolicies, null, 2)};\n\n` +
-      regionalCentersPart;
-
-    // ── index.html 가져오기 ──
-    const htmlResp = await fetch('https://api.github.com/repos/yoyo5679/jarip/contents/index.html', { headers });
-    if (!htmlResp.ok) throw new Error('index.html 조회 실패');
-    const htmlFile = await htmlResp.json();
-    const currentHtml = decodeURIComponent(escape(atob(htmlFile.content.replace(/\n/g, ''))));
-
-    // data.js 캐시 버스터 교체
-    const newHtml = currentHtml.replace(
-      /src="data\.js\?v=[^"]+"/,
-      `src="data.js?v=${cacheTag}"`
-    );
-
-    // ── 두 파일 순차 업데이트 ──
-    await ghPut(token, 'data.js', newDataContent, `Admin: 정책 수정 배포 (${newVersion})`);
-    await ghPut(token, 'index.html', newHtml, `Admin: data.js 캐시 버스터 갱신 (${cacheTag})`);
   }
 
   function rebuildCombinedPolicies() {
