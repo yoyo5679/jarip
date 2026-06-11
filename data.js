@@ -915,6 +915,21 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "자립정보ON",
     "id": 637
+  },
+  {
+    "title": "[자립정보ON] 2026 LH전세 문제해결",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "인천광역시자립지원전담기관",
+    "region": "인천",
+    "target": "자립준비청년 대상",
+    "content": "인천광역시자립지원전담기관에서 우리 자립준비청년들을 위해 준비한 [2026 LH전세 문제해결] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 우측 하단의 '원문 바로가기' 링크를 꾹~ 눌러서 꼼꼼히 확인해봐요! 😉",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=1906&menuPos=1",
+    "date": "2026-06-10 ~ 2026-06-21",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 638
   }
 ];
 
