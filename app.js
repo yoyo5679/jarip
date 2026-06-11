@@ -790,15 +790,3 @@ ${p.link}
   // 실행 시작!
   init();
 });
-return '#';
-    try {
-      const u = new URL(url);
-      return (u.protocol === 'http:' || u.protocol === 'https:') ? url : '#';
-    } catch {
-      return '#';
-    }
-  }
-
-  // 실행 시작!
-  init();
-});
