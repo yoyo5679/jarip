@@ -44,11 +44,13 @@ async function rewriteWithGemini(policy) {
       generationConfig: { maxOutputTokens: 300, temperature: 0.8 }
     }, { headers: { 'Content-Type': 'application/json' } });
 
-    const text = resp.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const candidate = resp.data?.candidates?.[0];
+    const finishReason = candidate?.finishReason;
+    const text = candidate?.content?.parts?.[0]?.text;
     if (text) {
       return text.trim();
     }
-    console.warn('  [Gemini] 응답 파싱 실패 - 기본 content 사용');
+    console.warn(`  [Gemini] 응답 파싱 실패 (finishReason: ${finishReason || 'unknown'}) - 기본 content 사용`);
     return policy.content;
   } catch (err) {
     console.warn('  [Gemini] API 오류 - 기본 content 사용:', err.message);
@@ -365,8 +367,11 @@ async function crawlSmyc() {
       const cards = $('a.post_link_wrap');
       if (cards.length === 0) break;
 
-      // 이전 페이지와 동일한 카드 목록이면 페이지네이션 끝
-      const pageKey = cards.map((i, el) => $(el).attr('href')).get().join(',');
+      // idx 기준으로 중복 페이지 감지 (q 파라미터가 페이지마다 달라지는 imweb 특성 대응)
+      const pageKey = cards.map((i, el) => {
+        const m = ($(el).attr('href') || '').match(/idx=(\d+)/);
+        return m ? m[1] : '';
+      }).get().join(',');
       if (pageKey === prevPageKey) break;
       prevPageKey = pageKey;
 
