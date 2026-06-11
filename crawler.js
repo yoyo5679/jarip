@@ -38,11 +38,21 @@ async function rewriteWithGemini(policy) {
 - 기간: ${policy.date}`;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
     const resp = await axiosInstance.post(url, {
       contents: [{ parts: [{ text: prompt }] }],
       generationConfig: { maxOutputTokens: 300, temperature: 0.8 }
     }, { headers: { 'Content-Type': 'application/json' } });
+
+    // 할당량 초과 (429) 또는 기타 오류 응답
+    if (resp.status === 429) {
+      console.warn('  [Gemini] 일일 할당량 초과 - 기본 content 사용 (내일 자동 리셋)');
+      return policy.content;
+    }
+    if (resp.status !== 200) {
+      console.warn(`  [Gemini] HTTP ${resp.status} 오류 - 기본 content 사용`);
+      return policy.content;
+    }
 
     const candidate = resp.data?.candidates?.[0];
     const finishReason = candidate?.finishReason;
