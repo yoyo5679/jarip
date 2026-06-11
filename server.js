@@ -13,7 +13,7 @@ app.use(express.json());
 
 // 허용된 정적 파일만 명시적으로 서빙 (소스 코드 노출 방지)
 // server.js, crawler.js, package.json 등은 접근 불가
-const ALLOWED_STATIC_FILES = new Set(['index.html', 'app.js', 'data.js', 'styles.css']);
+const ALLOWED_STATIC_FILES = new Set(['index.html', 'admin.html', 'app.js', 'data.js', 'styles.css']);
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));

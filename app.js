@@ -457,19 +457,26 @@ document.addEventListener("DOMContentLoaded", () => {
           <a href="${safeUrl(p.link)}" target="_blank" rel="noopener noreferrer" class="btn-card link">
             <span>원문 바로가기</span> 🔗
           </a>
-          <button class="btn-card share" data-id="${p.id}">
-            <span>공유 정보 복사</span> 💬
-          </button>
+          ${isAdmin ? `<button class="btn-card share" data-id="${p.id}"><span>공유 정보 복사</span> 💬</button>` : ''}
           ${isAdmin ? `<button class="btn-card edit" data-id="${p.id}" title="정책 수정/삭제">⚙️</button>` : ''}
         </div>
       `;
-      
+
+      // 일반 방문자: 카드 클릭 시 상세 모달
+      if (!isAdmin) {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', (e) => {
+          if (!e.target.closest('a')) openDetailModal(p.id);
+        });
+      }
+
       cardsGrid.appendChild(card);
     });
 
     // 이벤트 리스너 재바인딩
     document.querySelectorAll(".btn-card.share").forEach(btn => {
       btn.addEventListener("click", (e) => {
+        e.stopPropagation();
         const rawId = e.currentTarget.getAttribute("data-id");
         const id = /^\d+$/.test(rawId) ? parseInt(rawId) : rawId;
         sharePolicy(id);
@@ -478,11 +485,56 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.querySelectorAll(".btn-card.edit").forEach(btn => {
       btn.addEventListener("click", (e) => {
+        e.stopPropagation();
         const rawId = e.currentTarget.getAttribute("data-id");
         const id = /^\d+$/.test(rawId) ? parseInt(rawId) : rawId;
         openModal(id);
       });
     });
+  }
+
+  // 10-1. 읽기 전용 상세 모달
+  function openDetailModal(id) {
+    const p = policies.find(x => String(x.id) === String(id));
+    if (!p) return;
+
+    let modal = document.getElementById('detailModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'detailModal';
+      modal.style.cssText = 'position:fixed;inset:0;z-index:8000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);padding:1rem;';
+      modal.innerHTML = `
+        <div id="detailModalBox" style="background:var(--color-surface);border-radius:18px;max-width:580px;width:100%;max-height:88vh;overflow-y:auto;padding:2rem;position:relative;box-shadow:0 8px 40px rgba(0,0,0,0.18);">
+          <button id="detailModalClose" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--color-text-muted);">✕</button>
+          <div id="detailModalContent"></div>
+        </div>`;
+      document.body.appendChild(modal);
+      document.getElementById('detailModalClose').addEventListener('click', () => { modal.style.display = 'none'; });
+      modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+    }
+
+    const content = document.getElementById('detailModalContent');
+    content.innerHTML = `
+      <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.75rem;flex-wrap:wrap;">
+        <span class="badge ${p.category}">${getCategoryLabel(p.category)}</span>
+        ${getStatusBadge(p.status)}
+        <span class="card-region">${escapeHTML(p.region)}</span>
+      </div>
+      <h3 style="margin:0 0 1.25rem;font-size:1.15rem;line-height:1.5;color:var(--color-text);">${escapeHTML(p.title)}</h3>
+      <div class="card-metadata" style="margin-bottom:1rem;">
+        <div class="meta-row"><span class="label">기관구분</span><span class="value font-semibold type-${getTypeClass(p.type)}">${escapeHTML(p.type || '공공·지자체')}</span></div>
+        <div class="meta-row"><span class="label">지원주체</span><span class="value">${escapeHTML(p.provider)}</span></div>
+        <div class="meta-row"><span class="label">지원대상</span><span class="value">${escapeHTML(p.target)}</span></div>
+        <div class="meta-row"><span class="label">신청기간</span><span class="value" style="font-weight:600;color:var(--color-primary);">${escapeHTML(p.date)}</span></div>
+        ${p.source ? `<div class="meta-row"><span class="label">출처</span><span class="value" style="font-size:0.78rem;color:var(--color-text-light);">${escapeHTML(p.source)}</span></div>` : ''}
+      </div>
+      <p style="font-size:0.88rem;line-height:1.7;color:var(--color-text-muted);margin-bottom:1rem;">${escapeHTML(p.content)}</p>
+      ${p.tip ? `<div class="card-tip" style="margin-bottom:1.25rem;">💡 <b>전담요원 꿀팁:</b> ${escapeHTML(p.tip)}</div>` : ''}
+      <a href="${safeUrl(p.link)}" target="_blank" rel="noopener noreferrer" class="btn-card link" style="display:inline-flex;">
+        <span>원문 바로가기</span> 🔗
+      </a>
+    `;
+    modal.style.display = 'flex';
   }
 
   // 10. 사이드바 17개 시도 전담기관 렌더링
