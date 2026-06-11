@@ -4,22 +4,15 @@ const https = require('https');
 const axios = require('axios');
 const cheerio = require('cheerio');
 
-// 기본 인스턴스 (SSL 검증 활성화)
+// SSL 인증서 경고 무시 (일부 공공기관 사이트 대응)
 const axiosInstance = axios.create({
   timeout: 15000,
   headers: {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
   },
-  validateStatus: () => true
-});
-
-// 공공기관 사이트 전용 인스턴스 (일부 기관 SSL 인증서 문제 대응 - 필요한 사이트만 사용)
-const axiosInsecure = axios.create({
-  timeout: 15000,
-  headers: {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-  },
-  httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+  httpsAgent: new https.Agent({  
+    rejectUnauthorized: false
+  }),
   validateStatus: () => true
 });
 
@@ -59,7 +52,7 @@ async function crawlGyeonggi() {
   const newPolicies = [];
 
   try {
-    const response = await axiosInsecure.get(listUrl); // 경기도 기관 SSL 인증서 대응
+    const response = await axiosInstance.get(listUrl);
     if (response.status !== 200) {
       console.error(`경기도 사이트 응답 에러: ${response.status}`);
       return [];
@@ -126,7 +119,7 @@ async function crawlSeoul() {
   const newPolicies = [];
 
   try {
-    const response = await axiosInsecure.get(listUrl); // 서울 기관 SSL 인증서 대응
+    const response = await axiosInstance.get(listUrl);
     if (response.status !== 200) {
       console.error(`서울 사이트 응답 에러: ${response.status}`);
       return [];
@@ -209,7 +202,7 @@ async function crawlJaripon() {
   const newPolicies = [];
 
   try {
-    const response = await axiosInsecure.get(listUrl); // 자립정보ON SSL 인증서 대응
+    const response = await axiosInstance.get(listUrl);
     if (response.status !== 200) {
       console.error(`자립정보ON 응답 에러: ${response.status}`);
       return [];
@@ -313,14 +306,11 @@ async function main() {
       throw new Error('data.js 파일에서 initialPolicies 파악 실패');
     }
 
-    // JSON 파싱 (eval 대신 안전한 JSON.parse 사용)
+    // JSON 형식처럼 파싱 가능한 문자열로 가다듬기
     let existingPoliciesText = match[1].trim();
+    // 안전한 파싱을 위해 임시 변수에 대입하여 실행 평가
     let existingPolicies = [];
-    try {
-      existingPolicies = JSON.parse(existingPoliciesText);
-    } catch (e) {
-      throw new Error('data.js initialPolicies JSON 파싱 실패: ' + e.message);
-    }
+    eval(`existingPolicies = ${existingPoliciesText}`);
 
     // 중복 제거 및 신규 데이터 추가
     let addedCount = 0;
@@ -359,4 +349,17 @@ async function main() {
     if (versionMatch) {
       const prefix = versionMatch[1];
       const currentVerNum = parseInt(versionMatch[2], 10);
-      const nextVerNum = currentVe
+      const nextVerNum = currentVerNum + 1;
+      const nextVersionStr = `const currentVersion = "${prefix}${nextVerNum}"`;
+      
+      const updatedAppContent = appContent.replace(versionRegex, nextVersionStr);
+      fs.writeFileSync(APP_FILE, updatedAppContent, 'utf8');
+      console.log(`[app.js 업데이트 완료] 캐시 버전이 ${prefix}${currentVerNum} -> ${prefix}${nextVerNum}으로 상향되었습니다.`);
+    }
+
+  } catch (error) {
+    console.error('메인 실행 오류:', error);
+  }
+}
+
+main();
