@@ -77,12 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
                  border-radius:6px;font-weight:700;cursor:pointer;font-size:0.8rem;">
           + 새 지원사업 등록
         </button>
-        <button id="crawlBtn"
-          style="background:rgba(255,255,255,0.15);color:#fff;
-                 border:1px solid rgba(255,255,255,0.45);padding:0.3rem 0.9rem;
-                 border-radius:6px;cursor:pointer;font-size:0.8rem;">
-          🔄 최신 데이터 수집
-        </button>
         <button id="adminLogoutBtn"
           style="background:rgba(255,255,255,0.15);color:#fff;
                  border:1px solid rgba(255,255,255,0.45);padding:0.3rem 0.9rem;
@@ -100,37 +94,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('openModalBtn').addEventListener('click', () => openModal(null));
 
     // 로그아웃 버튼
-    document.getElementById('crawlBtn').addEventListener('click', async () => {
-      const token = prompt('GitHub Personal Access Token을 입력하세요:\n(Actions: Read & Write 권한 필요)');
-      if (!token) return;
-      const btn = document.getElementById('crawlBtn');
-      btn.disabled = true;
-      btn.textContent = '⏳ 요청 중...';
-      try {
-        const res = await fetch('https://api.github.com/repos/yoyo5679/jarip/actions/workflows/crawl.yml/dispatches', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + token.trim(), 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ref: 'main' })
-        });
-        if (res.status === 204) {
-          showToast('✅ 크롤링이 시작됐어요! 약 1~2분 후 데이터가 업데이트됩니다.');
-        } else {
-          const err = await res.json().catch(() => ({}));
-          if (res.status === 401 || res.status === 403) {
-            localStorage.removeItem('jarip_gh_token');
-            showToast('❌ 토큰이 유효하지 않습니다. 다시 시도해주세요.');
-          } else {
-            showToast('❌ 오류: ' + (err.message || res.status));
-          }
-        }
-      } catch(e) {
-        showToast('❌ 네트워크 오류: ' + e.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = '🔄 최신 데이터 수집';
-      }
-    });
-
     document.getElementById('adminLogoutBtn').addEventListener('click', () => {
       sessionStorage.removeItem('jarip_admin');
       showToast('👋 관리자 로그아웃 되었습니다.');
