@@ -101,12 +101,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 로그아웃 버튼
     document.getElementById('crawlBtn').addEventListener('click', async () => {
-      let token = localStorage.getItem('jarip_gh_token');
-      if (!token) {
-        token = prompt('GitHub Personal Access Token을 입력하세요:\n(Actions: Read & Write 권한 필요)');
-        if (!token) return;
-        localStorage.setItem('jarip_gh_token', token.trim());
-      }
+      const token = prompt('GitHub Personal Access Token을 입력하세요:\n(Actions: Read & Write 권한 필요)');
+      if (!token) return;
       const btn = document.getElementById('crawlBtn');
       btn.disabled = true;
       btn.textContent = '⏳ 요청 중...';
