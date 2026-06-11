@@ -808,4 +808,37 @@ ${p.link}
       if (editingPolicyId === null) return;
 
       if (confirm("정말로 이 지원 정보를 대시보드에서 삭제하시겠습니까?")) {
-        localPolicies = localPoli
+        localPolicies = localPolicies.filter(p => p.id !== editingPolicyId);
+        savePolicies();
+        rebuildCombinedPolicies();
+        closeModal();
+        showToast("🗑️ 지원 정보가 삭제되었습니다.");
+      }
+    });
+  }
+
+  // 15. HTML 이스케이프 유틸리티 (XSS 방지)
+  function escapeHTML(str) {
+    if (!str) return '';
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  // 16. URL 안전성 검사 (javascript: 등 악성 URL 차단)
+  function safeUrl(url) {
+    if (!url) return '#';
+    try {
+      const u = new URL(url);
+      return (u.protocol === 'http:' || u.protocol === 'https:') ? url : '#';
+    } catch {
+      return '#';
+    }
+  }
+
+  // 실행 시작!
+  init();
+});
