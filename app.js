@@ -504,8 +504,8 @@ document.addEventListener("DOMContentLoaded", () => {
       modal.id = 'detailModal';
       modal.style.cssText = 'position:fixed;inset:0;z-index:8000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.45);padding:1rem;';
       modal.innerHTML = `
-        <div id="detailModalBox" style="background:var(--color-surface);border-radius:18px;max-width:580px;width:100%;max-height:88vh;overflow-y:auto;padding:2rem;position:relative;box-shadow:0 8px 40px rgba(0,0,0,0.18);">
-          <button id="detailModalClose" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--color-text-muted);">✕</button>
+        <div id="detailModalBox" style="background:var(--bg-modal);border-radius:18px;max-width:580px;width:100%;max-height:88vh;overflow-y:auto;padding:2rem;position:relative;box-shadow:0 8px 40px rgba(0,0,0,0.25);color:var(--color-text-main);">
+          <button id="detailModalClose" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--color-text-main);opacity:0.6;">✕</button>
           <div id="detailModalContent"></div>
         </div>`;
       document.body.appendChild(modal);
