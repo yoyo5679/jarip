@@ -496,28 +496,22 @@ async function main() {
     // 정렬 (ID 오름차순 또는 원하는 대로)
     existingPolicies.sort((a, b) => a.id - b.id);
 
-    // data.js 갱신
+    // data.js 버전 번호 올리기 (캐시 무효화)
+    const verRegex = /window\.initialDataVersion\s*=\s*["'](v\d{4}\.\d{2}\.\d{2}_v)(\d+)["']/m;
+    const verMatch = dataContent.match(verRegex);
+    let newVersionStr = '';
+    if (verMatch) {
+      const prefix = verMatch[1];
+      const nextNum = parseInt(verMatch[2], 10) + 1;
+      newVersionStr = `${prefix}${nextNum}`;
+      dataContent = dataContent.replace(verRegex, `window.initialDataVersion = "${newVersionStr}"`);
+    }
+
+    // data.js 갱신 (정책 배열 + 버전 동시 업데이트)
     const formattedPolicies = JSON.stringify(existingPolicies, null, 2);
-    // window.initialPolicies 부분을 새 배열로 대체
     const updatedContent = dataContent.replace(policiesRegex, `window.initialPolicies = ${formattedPolicies};\n\nwindow.regionalCenters`);
     fs.writeFileSync(DATA_FILE, updatedContent, 'utf8');
-    console.log(`[data.js 업데이트 완료] 신규 지원사업 ${addedCount}건이 추가되었습니다!`);
-
-    // 5. 캐시 무효화를 위해 app.js 버전 상향
-    let appContent = fs.readFileSync(APP_FILE, 'utf8');
-    const versionRegex = /const\s+currentVersion\s*=\s*["'](v\d{4}\.\d{2}\.\d{2}_v)(\d+)["']/m;
-    const versionMatch = appContent.match(versionRegex);
-
-    if (versionMatch) {
-      const prefix = versionMatch[1];
-      const currentVerNum = parseInt(versionMatch[2], 10);
-      const nextVerNum = currentVerNum + 1;
-      const nextVersionStr = `const currentVersion = "${prefix}${nextVerNum}"`;
-      
-      const updatedAppContent = appContent.replace(versionRegex, nextVersionStr);
-      fs.writeFileSync(APP_FILE, updatedAppContent, 'utf8');
-      console.log(`[app.js 업데이트 완료] 캐시 버전이 ${prefix}${currentVerNum} -> ${prefix}${nextVerNum}으로 상향되었습니다.`);
-    }
+    console.log(`[data.js 업데이트 완료] 신규 지원사업 ${addedCount}건 추가, 버전 → ${newVersionStr}`);
 
   } catch (error) {
     console.error('메인 실행 오류:', error);
