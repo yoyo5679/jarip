@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function loadPolicies() {
     const saved = localStorage.getItem("jarip_policies");
     const savedVersion = localStorage.getItem("jarip_data_version");
-    const currentVersion = "v2026.06.10_v37"; // 새 상세 내용 업데이트로 버전 상향
+    const currentVersion = "v2026.06.10_v38"; // 새 상세 내용 업데이트로 버전 상향
     
     let rawPolicies = [];
     if (saved && savedVersion === currentVersion) {
