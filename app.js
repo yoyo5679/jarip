@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // 관리자 세션 확인 (admin.html에서 로그인 시 sessionStorage에 저장됨)
+  const isAdmin = sessionStorage.getItem('jarip_admin') === '1';
+
   // 1. 상태 관리 변수
   let policies = [];
   let localPolicies = []; // 로컬 수집 정책 리스트
@@ -51,6 +54,53 @@ document.addEventListener("DOMContentLoaded", () => {
   // 토스트 컨테이너
   const toastContainer = document.getElementById("toastContainer");
 
+  // 관리자 UI 설정 (로그인 상태일 때만 상단 바 및 편집 버튼 활성화)
+  function setupAdminUI() {
+    if (!isAdmin) return;
+
+    // 관리자 상단 바 동적 생성
+    const bar = document.createElement('div');
+    bar.id = 'adminBar';
+    bar.style.cssText = [
+      'position:fixed', 'top:0', 'left:0', 'right:0', 'z-index:9999',
+      'background:#4f46e5', 'color:#fff',
+      'padding:0.45rem 1.25rem',
+      'display:flex', 'align-items:center', 'justify-content:space-between',
+      'font-size:0.82rem', 'font-weight:600',
+      'box-shadow:0 2px 8px rgba(0,0,0,0.2)'
+    ].join(';');
+    bar.innerHTML = `
+      <span>🔑 관리자 모드 활성화</span>
+      <div style="display:flex;gap:0.6rem;align-items:center;">
+        <button id="openModalBtn"
+          style="background:#fff;color:#4f46e5;border:none;padding:0.3rem 0.9rem;
+                 border-radius:6px;font-weight:700;cursor:pointer;font-size:0.8rem;">
+          + 새 지원사업 등록
+        </button>
+        <button id="adminLogoutBtn"
+          style="background:rgba(255,255,255,0.15);color:#fff;
+                 border:1px solid rgba(255,255,255,0.45);padding:0.3rem 0.9rem;
+                 border-radius:6px;cursor:pointer;font-size:0.8rem;">
+          로그아웃
+        </button>
+      </div>
+    `;
+    document.body.prepend(bar);
+
+    // 상단 바 높이만큼 본문 여백 추가
+    document.body.style.paddingTop = '36px';
+
+    // 새 지원사업 등록 버튼
+    document.getElementById('openModalBtn').addEventListener('click', () => openModal(null));
+
+    // 로그아웃 버튼
+    document.getElementById('adminLogoutBtn').addEventListener('click', () => {
+      sessionStorage.removeItem('jarip_admin');
+      showToast('👋 관리자 로그아웃 되었습니다.');
+      setTimeout(() => location.reload(), 800);
+    });
+  }
+
   function rebuildCombinedPolicies() {
     policies = [...localPolicies];
     populateRegionFilters();
@@ -61,6 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 3-1. 초기화 함수
   function init() {
+    setupAdminUI();
     loadPolicies();
     loadTheme();
     populateRegionFilters();
@@ -403,15 +454,13 @@ document.addEventListener("DOMContentLoaded", () => {
         <p class="card-desc">${escapeHTML(p.content)}</p>
         ${p.tip ? `<div class="card-tip">💡 <b>전담요원 꿀팁:</b> ${escapeHTML(p.tip)}</div>` : ''}
         <div class="card-actions">
-          <a href="${escapeHTML(p.link)}" target="_blank" class="btn-card link">
+          <a href="${safeUrl(p.link)}" target="_blank" rel="noopener noreferrer" class="btn-card link">
             <span>원문 바로가기</span> 🔗
           </a>
           <button class="btn-card share" data-id="${p.id}">
             <span>공유 정보 복사</span> 💬
           </button>
-          <button class="btn-card edit" data-id="${p.id}" title="정책 수정/삭제">
-            ⚙️
-          </button>
+          ${isAdmin ? `<button class="btn-card edit" data-id="${p.id}" title="정책 수정/삭제">⚙️</button>` : ''}
         </div>
       `;
       
@@ -457,7 +506,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div>📍 관할지: ${escapeHTML(c.address)}</div>
         </div>
         <div class="center-links">
-          <a href="${escapeHTML(c.website)}" target="_blank" class="btn-mini">홈페이지 🔗</a>
+          <a href="${safeUrl(c.website)}" target="_blank" rel="noopener noreferrer" class="btn-mini">홈페이지 🔗</a>
           <button class="btn-mini btn-copy-contact" data-phone="${c.phone}" data-name="${c.name}">연락처 복사 📋</button>
         </div>
       `;
@@ -667,17 +716,21 @@ ${p.link}
         return;
       }
 
+      // 링크 URL 유효성 검사 (http/https 만 허용)
+      if (safeUrl(newPolicy.link) === '#') {
+        alert("링크는 http:// 또는 https:// 로 시작하는 유효한 URL을 입력해주세요.");
+        return;
+      }
+
       if (editingPolicyId !== null) {
-        // 수정 모드 반영
         const idx = localPolicies.findIndex(p => p.id === editingPolicyId);
         if (idx !== -1) {
           localPolicies[idx] = { ...localPolicies[idx], ...newPolicy };
           showToast("✏️ 지원 사업 정보가 수정되었습니다.");
         }
       } else {
-        // 신규 등록 모드 반영
-        newPolicy.id = Date.now(); // 고유 ID 부여
-        localPolicies.unshift(newPolicy); // 최신 글이 처음에 오도록 삽입
+        newPolicy.id = Date.now();
+        localPolicies.unshift(newPolicy);
         showToast("✨ 새 지원 사업 정보가 등록되었습니다.");
       }
 
@@ -701,7 +754,7 @@ ${p.link}
     // 삭제 버튼 클릭
     btnDelete.addEventListener("click", () => {
       if (editingPolicyId === null) return;
-      
+
       if (confirm("정말로 이 지원 정보를 대시보드에서 삭제하시겠습니까?")) {
         localPolicies = localPolicies.filter(p => p.id !== editingPolicyId);
         savePolicies();
@@ -721,6 +774,17 @@ ${p.link}
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+  }
+
+  // 16. URL 안전성 검사 (javascript: 등 악성 URL 차단)
+  function safeUrl(url) {
+    if (!url) return '#';
+    try {
+      const u = new URL(url);
+      return (u.protocol === 'http:' || u.protocol === 'https:') ? url : '#';
+    } catch {
+      return '#';
+    }
   }
 
   // 실행 시작!

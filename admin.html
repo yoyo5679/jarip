@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>관리자 로그인 — 자립해봄</title>
+  <link rel="stylesheet" href="styles.css?v=20260610_16">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: var(--color-bg);
+      margin: 0;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+    .login-card {
+      background: var(--color-surface);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+      text-align: center;
+    }
+    .login-icon {
+      font-size: 3rem;
+      margin-bottom: 0.75rem;
+    }
+    .login-card h2 {
+      margin: 0 0 0.4rem;
+      font-size: 1.4rem;
+      color: var(--color-text);
+    }
+    .login-card .subtitle {
+      color: var(--color-text-muted);
+      font-size: 0.88rem;
+      margin-bottom: 2rem;
+    }
+    .login-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid var(--color-border);
+      border-radius: 10px;
+      font-size: 1rem;
+      background: var(--color-bg);
+      color: var(--color-text);
+      margin-bottom: 1rem;
+      box-sizing: border-box;
+      transition: border-color 0.2s;
+    }
+    .login-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+    .login-input.shake {
+      animation: shake 0.3s ease;
+      border-color: #ef4444;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+    .login-btn {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .login-btn:hover { opacity: 0.9; }
+    .login-btn:active { transform: scale(0.98); }
+    .login-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .error-msg {
+      color: #ef4444;
+      font-size: 0.84rem;
+      margin-top: 0.8rem;
+      min-height: 1.2em;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 1.75rem;
+      color: var(--color-text-muted);
+      font-size: 0.84rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--color-text); }
+    .attempts-warn {
+      font-size: 0.78rem;
+      color: var(--color-text-light);
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="login-icon">🔐</div>
+    <h2>관리자 로그인</h2>
+    <p class="subtitle">자립해봄 관리자만 접근 가능합니다.</p>
+
+    <form id="loginForm">
+      <input
+        type="password"
+        id="passwordInput"
+        class="login-input"
+        placeholder="비밀번호를 입력하세요"
+        autocomplete="current-password"
+        autofocus
+      >
+      <button type="submit" class="login-btn" id="loginBtn">로그인</button>
+    </form>
+
+    <div id="errorMsg" class="error-msg"></div>
+    <div id="attemptsWarn" class="attempts-warn"></div>
+
+    <a href="index.html" class="back-link">← 메인으로 돌아가기</a>
+  </div>
+
+  <script>
+    // ──────────────────────────────────────────────
+    // 비밀번호를 변경하려면:
+    //   1) 터미널에서: echo -n "새비밀번호" | sha256sum
+    //   2) 출력된 해시값으로 ADMIN_HASH를 교체하세요.
+    //
+    // 기본 비밀번호: jarip2026!
+    // ──────────────────────────────────────────────
+    const ADMIN_HASH = '7aacb8b3d45b59a9e4f50a7453fd3967ba86e6a728f51796d4a0c906c3d6b862';
+
+    // 이미 로그인된 경우 바로 이동
+    if (sessionStorage.getItem('jarip_admin') === '1') {
+      location.replace('index.html');
+    }
+
+    // 로그인 실패 횟수 관리 (새로고침 초기화)
+    let failCount = 0;
+    const MAX_FAIL = 5;
+    let lockUntil = 0;
+
+    async function sha256(message) {
+      const buf = new TextEncoder().encode(message);
+      const hash = await crypto.subtle.digest('SHA-256', buf);
+      return Array.from(new Uint8Array(hash))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('errorMsg');
+      el.textContent = msg;
+      const input = document.getElementById('passwordInput');
+      input.classList.add('shake');
+      setTimeout(() => input.classList.remove('shake'), 350);
+      input.value = '';
+      input.focus();
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const now = Date.now();
+      if (now < lockUntil) {
+        const secs = Math.ceil((lockUntil - now) / 1000);
+        showError(`⛔ ${secs}초 후 다시 시도하세요.`);
+        return;
+      }
+
+      const btn = document.getElementById('loginBtn');
+      btn.disabled = true;
+      btn.textContent = '확인 중...';
+
+      const pw = document.getElementById('passwordInput').value;
+      const hash = await sha256(pw);
+
+      btn.disabled = false;
+      btn.textContent = '로그인';
+
+      if (hash === ADMIN_HASH) {
+        sessionStorage.setItem('jarip_admin', '1');
+        location.replace('index.html');
+      } else {
+        failCount++;
+        const remaining = MAX_FAIL - failCount;
+
+        if (failCount >= MAX_FAIL) {
+          lockUntil = Date.now() + 30 * 1000; // 30초 잠금
+          failCount = 0;
+          showError('⛔ 비밀번호를 5회 이상 틀렸습니다. 30초 후 재시도하세요.');
+          document.getElementById('attemptsWarn').textContent = '';
+        } else {
+          showError('⚠️ 비밀번호가 올바르지 않습니다.');
+          if (remaining <= 2) {
+            document.getElementById('attemptsWarn').textContent = `남은 시도 횟수: ${remaining}회`;
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -6,11 +6,26 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+// CORS: 허용 출처를 환경 변수로 관리 (미설정 시 로컬 개발용 기본값)
+const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || 'http://localhost:3000';
+app.use(cors({ origin: ALLOWED_ORIGIN }));
 app.use(express.json());
 
-// 정적 파일 서빙 (현재 디렉터리의 index.html, app.js 등)
-app.use(express.static('.'));
+// 허용된 정적 파일만 명시적으로 서빙 (소스 코드 노출 방지)
+// server.js, crawler.js, package.json 등은 접근 불가
+const ALLOWED_STATIC_FILES = new Set(['index.html', 'app.js', 'data.js', 'styles.css']);
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.use((req, res, next) => {
+  const filename = path.basename(req.path);
+  if (ALLOWED_STATIC_FILES.has(filename)) {
+    return res.sendFile(path.join(__dirname, filename));
+  }
+  next();
+});
 
 // 3시간마다 백기라운드에서 크롤러(crawler.js) 실행 자동화
 function runCrawler() {
@@ -46,17 +61,4 @@ function checkTimeAndCrawl() {
 }
 
 // 30초마다 시간을 체크하여 지정된 시각 정각에 크롤링을 동작시킵니다.
-setInterval(checkTimeAndCrawl, 30 * 1000);
-
-// 서버가 시작되고 5초 뒤에 최초 1회 바로 실행하여 데이터를 최신화합니다.
-setTimeout(runCrawler, 5000);
-
-console.log(`[스케줄러 설정] 매일 09:00, 12:00, 14:00, 16:00 정각에 자동 크롤링이 진행됩니다. (최초 구동 5초 후 즉시 실행)`);
-
-// 서버 구동
-app.listen(PORT, () => {
-  console.log(`========================================================`);
-  console.log(` Youth Policy Proxy Server is running!`);
-  console.log(` Local URL: http://localhost:${PORT}`);
-  console.log(`========================================================`);
-});
+setInterval(checkTimeAndCrawl, 30 * 10
