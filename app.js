@@ -708,4 +708,97 @@ ${p.link}
         content: contentInput.value.trim(),
         tip: tipInput.value.trim(),
         link: linkInput.value.trim(),
-        date: dat
+        date: dateInput.value.trim()
+      };
+
+      if (!newPolicy.title || !newPolicy.provider || !newPolicy.content || !newPolicy.link) {
+        alert("필수 입력 필드를 모두 채워주세요.");
+        return;
+      }
+
+      // 링크 URL 유효성 검사 (http/https 만 허용)
+      if (safeUrl(newPolicy.link) === '#') {
+        alert("링크는 http:// 또는 https:// 로 시작하는 유효한 URL을 입력해주세요.");
+        return;
+      }
+
+      if (editingPolicyId !== null) {
+        const idx = localPolicies.findIndex(p => p.id === editingPolicyId);
+        if (idx !== -1) {
+          localPolicies[idx] = { ...localPolicies[idx], ...newPolicy };
+          showToast("✏️ 지원 사업 정보가 수정되었습니다.");
+        }
+      } else {
+        newPolicy.id = Date.now();
+        localPolicies.unshift(newPolicy);
+        showToast("✨ 새 지원 사업 정보가 등록되었습니다.");
+      }
+
+      savePolicies();
+      rebuildCombinedPolicies();
+      closeModal();
+    });
+
+    // 위로가기 버튼 스크롤 토글
+    const scrollTopBtn = document.getElementById("scrollTopBtn");
+    if (scrollTopBtn) {
+      window.addEventListener("scroll", () => {
+        if (window.scrollY > 300) {
+          scrollTopBtn.classList.add("visible");
+        } else {
+          scrollTopBtn.classList.remove("visible");
+        }
+      });
+    }
+
+    // 삭제 버튼 클릭
+    btnDelete.addEventListener("click", () => {
+      if (editingPolicyId === null) return;
+
+      if (confirm("정말로 이 지원 정보를 대시보드에서 삭제하시겠습니까?")) {
+        localPolicies = localPolicies.filter(p => p.id !== editingPolicyId);
+        savePolicies();
+        rebuildCombinedPolicies();
+        closeModal();
+        showToast("🗑️ 지원 정보가 삭제되었습니다.");
+      }
+    });
+  }
+
+  // 15. HTML 이스케이프 유틸리티 (XSS 방지)
+  function escapeHTML(str) {
+    if (!str) return '';
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  // 16. URL 안전성 검사 (javascript: 등 악성 URL 차단)
+  function safeUrl(url) {
+    if (!url) return '#';
+    try {
+      const u = new URL(url);
+      return (u.protocol === 'http:' || u.protocol === 'https:') ? url : '#';
+    } catch {
+      return '#';
+    }
+  }
+
+  // 실행 시작!
+  init();
+});
+return '#';
+    try {
+      const u = new URL(url);
+      return (u.protocol === 'http:' || u.protocol === 'https:') ? url : '#';
+    } catch {
+      return '#';
+    }
+  }
+
+  // 실행 시작!
+  init();
+});
