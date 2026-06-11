@@ -1,4 +1,60 @@
 const fs = require('fs');
+
+// .env 파일 직접 파싱 (dotenv 패키지 불필요)
+const envPath = require('path').join(__dirname, '.env');
+if (fs.existsSync(envPath)) {
+  fs.readFileSync(envPath, 'utf8').split('\n').forEach(line => {
+    const idx = line.indexOf('=');
+    if (idx > 0) {
+      const key = line.slice(0, idx).trim();
+      const val = line.slice(idx + 1).trim();
+      if (key) process.env[key] = val;
+    }
+  });
+}
+
+// Gemini API로 content 친근하게 재작성
+async function rewriteWithGemini(policy) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    console.warn('  [Gemini] API 키 없음 - 기본 content 사용');
+    return policy.content;
+  }
+  const prompt = `당신은 보호종료아동(자립준비청년)을 위한 복지 정보를 친근하게 전달하는 글쓰기 전문가입니다.
+아래 지원사업 정보를 바탕으로, 자립준비청년들이 쉽게 이해할 수 있도록 친근하고 따뜻한 말투로 2~4문장의 소개글을 작성해 주세요.
+
+규칙:
+- 이모지 2~3개 포함
+- "자립준비청년 친구들", "우리" 같은 친근한 표현 사용
+- 어렵거나 딱딱한 행정 용어 대신 쉬운 말 사용
+- 사업명, 기관명, 지역, 모집 기간 등 핵심 정보 포함
+- 마지막 문장은 "자세한 내용은 원문 링크를 꼭 확인해봐요! 😊" 로 마무리
+
+지원사업 정보:
+- 제목: ${policy.title}
+- 기관: ${policy.provider}
+- 지역: ${policy.region}
+- 대상: ${policy.target}
+- 기간: ${policy.date}`;
+
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const resp = await axiosInstance.post(url, {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { maxOutputTokens: 300, temperature: 0.8 }
+    }, { headers: { 'Content-Type': 'application/json' } });
+
+    const text = resp.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (text) {
+      return text.trim();
+    }
+    console.warn('  [Gemini] 응답 파싱 실패 - 기본 content 사용');
+    return policy.content;
+  } catch (err) {
+    console.warn('  [Gemini] API 오류 - 기본 content 사용:', err.message);
+    return policy.content;
+  }
+}
 const path = require('path');
 const https = require('https');
 const axios = require('axios');
@@ -327,6 +383,9 @@ async function main() {
       const isDuplicate = existingPolicies.some(p => p.title === newItem.title || p.link === newItem.link);
       if (!isDuplicate) {
         newItem.id = nextId++;
+        // Gemini로 content 친근하게 재작성
+        console.log(`  [Gemini] "${newItem.title.slice(0, 30)}..." content 재작성 중...`);
+        newItem.content = await rewriteWithGemini(newItem);
         existingPolicies.push(newItem);
         addedCount++;
       }
