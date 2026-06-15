@@ -1,6 +1,6 @@
 // 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관)
 // 마지막 크롤링 일시: 2026-06-09
-window.initialDataVersion = "v2026.06.10_v40";
+window.initialDataVersion = "v2026.06.10_v41";
 window.initialPolicies = [
   {
     "id": 101,
@@ -939,7 +939,7 @@ window.initialPolicies = [
     "provider": "서울현대교육재단",
     "region": "전국",
     "target": "자립준비청년 대상",
-    "content": "취업하려고 마음먹었는데 막상 뭐부터 시작해야 할지 모르겠지? 😟 서울현대교육재단과 마인드카페가 함께 자립준비청년 친구들의 취업 재도약을 응원하는 '한걸음 챌린지 1기'를 모집하고 있어! 💪 6월 24일까지 온라인으로 신청하면 되고, 결과는 6월 25일에 발표돼. 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "content": "취업 준비하다 보면 마음이 지치고",
     "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
     "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=1907&menuPos=1",
     "date": "2026-05-20 ~ 2026-06-24",
@@ -954,7 +954,7 @@ window.initialPolicies = [
     "provider": "서울광역청년센터",
     "region": "서울",
     "target": "자립준비청년 (서울 거주 청년 우선)",
-    "content": "서울광역청년센터에서 우리 자립준비청년들을 위해 준비한 [2026 CJ제일제당 나눔냉장고 캠페인 참여 안내(6월)] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 우측 하단의 '원문 바로가기' 링크를 꾹~ 눌러서 꼼꼼히 확인해봐요! 😉",
+    "content": "\"오늘은 뭐 먹지?\" 매일매일 식비",
     "tip": "신청 전 공식 페이지에서 대상 자격·제출 서류를 반드시 확인하세요.",
     "link": "https://www.smyc.kr/program/?q=YToxOntzOjEyOiJrZXl3b3JkX3R5cGUiO3M6MzoiYWxsIjt9&bmode=view&idx=171748189&t=board",
     "date": "상시 모집",
@@ -969,7 +969,7 @@ window.initialPolicies = [
     "provider": "경기도자립지원전담기관",
     "region": "경기",
     "target": "경기도 거주 보호아동 및 자립준비청년",
-    "content": "경기도자립지원전담기관에서 우리 자립준비청년들을 위해 준비한 [2026 경기도자립지원전담기관 세계문화유산탐방 자립트립 참여자 모집] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 우측 하단의 '원문 바로가기' 링크를 꾹~ 눌러서 꼼꼼히 확인해봐요! 😉",
+    "content": "늘 똑같은 일상, 가끔은",
     "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
     "link": "https://www.ggjarip.or.kr/community_01.html?actobj=notice&acttype=VIEWINFO&bbs_code=notice&bbs_key=79739387819379_6a2bcc0cb54bd",
     "date": "2026-06-12 ~ 모집 시까지",
@@ -984,7 +984,7 @@ window.initialPolicies = [
     "provider": "서울자립지원전담기관",
     "region": "서울",
     "target": "서울시 거주 보호아동 및 자립준비청년",
-    "content": "서울자립지원전담기관에서 우리 자립준비청년들을 위해 준비한 [[사단법인 야나] 자립준비청년 자궁경부암(HPV) 백신 가다실9 무료접종사업] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 우측 하단의 '원문 바로가기' 링크를 꾹~ 눌러서 꼼꼼히 확인해봐요! 😉",
+    "content": "건강은 미리미리 챙겨야",
     "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
     "link": "https://www.sjarip.or.kr/home/kor/support/cmmn/view.do?menuPos=10&idx2=528",
     "date": "2026-06-10 ~ 2026-06-24",
