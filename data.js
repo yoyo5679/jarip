@@ -1,6 +1,6 @@
 // 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관)
 // 마지막 크롤링 일시: 2026-06-09
-window.initialDataVersion = "v2026.06.10_v39";
+window.initialDataVersion = "v2026.06.10_v40";
 window.initialPolicies = [
   {
     "id": 101,
@@ -991,6 +991,21 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "서울자립지원전담기관",
     "id": 642
+  },
+  {
+    "title": "[서울자립지원전담기관] 2026년 「청년 자립 Cheer-up Ⅱ」",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "서울자립지원전담기관",
+    "region": "서울",
+    "target": "서울시 거주 보호아동 및 자립준비청년",
+    "content": "서울에 사는 자립준비청년",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
+    "link": "https://www.sjarip.or.kr/home/kor/support/cmmn/view.do?menuPos=10&idx2=527",
+    "date": "2026-06-15 ~ 2026-06-19",
+    "status": "모집중",
+    "source": "서울자립지원전담기관",
+    "id": 643
   }
 ];
 
