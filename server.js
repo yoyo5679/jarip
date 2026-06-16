@@ -10,10 +10,11 @@ const PORT = process.env.PORT || 3000;
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN || 'http://localhost:3000';
 app.use(cors({ origin: ALLOWED_ORIGIN }));
 app.use(express.json());
+app.use('/icons', express.static(path.join(__dirname, 'icons')));
 
 // 허용된 정적 파일만 명시적으로 서빙 (소스 코드 노출 방지)
 // server.js, crawler.js, package.json 등은 접근 불가
-const ALLOWED_STATIC_FILES = new Set(['index.html', 'admin.html', 'app.js', 'data.js', 'styles.css']);
+const ALLOWED_STATIC_FILES = new Set(['index.html', 'admin.html', 'app.js', 'data.js', 'styles.css', 'manifest.json', 'sw.js']);
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
@@ -62,3 +63,7 @@ function checkTimeAndCrawl() {
 
 // 30초마다 시간을 체크하여 지정된 시각 정각에 크롤링을 동작시킵니다.
 setInterval(checkTimeAndCrawl, 30 * 1000);
+
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
