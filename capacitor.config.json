@@ -1,0 +1,9 @@
+{
+  "appId": "com.youth.jariphaebom",
+  "appName": "자립해봄",
+  "webDir": "www",
+  "server": {
+    "url": "https://jarip.vercel.app",
+    "cleartext": true
+  }
+}
