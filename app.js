@@ -120,6 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderStats();
     renderRegionalCenters();
     setupEventListeners();
+    setupPullToRefresh();
   }
 
   // 4. 데이터 로드 및 저장
@@ -816,25 +817,138 @@ ${p.link}
       }
     });
 
-    // 🔑 관리자 페이지 진입용 숨겨진 로직 (로고 7번 연속 터치 시 admin.html 이동)
+    // 🔑 관리자 페이지 진입용 숨겨진 로직 (로고 7번 연속 터치 시 admin.html 이동, 1번 터치 시 새로고침)
     let logoClicks = 0;
     let clickTimeout;
+    let reloadTimeout;
     const handleLogoClick = () => {
       logoClicks++;
+      
+      // 기존에 예약된 새로고침이 있다면 취소 (연속 터치 시 바로 새로고침 되는 것 방지)
+      clearTimeout(reloadTimeout);
+      
       if (logoClicks >= 7) {
         logoClicks = 0;
         window.location.href = "admin.html";
+        return;
       }
+      
       clearTimeout(clickTimeout);
       clickTimeout = setTimeout(() => {
         logoClicks = 0;
-      }, 3000); // 3초간 입력이 없으면 초기화
+      }, 3000); // 3초간 추가 입력이 없으면 카운트 초기화
+
+      // 300ms 후 새로고침 실행 (7번 연속 클릭을 시도 중인 경우 차단됨)
+      reloadTimeout = setTimeout(() => {
+        logoClicks = 0;
+        window.location.reload();
+      }, 300);
     };
 
     const desktopLogo = document.querySelector(".logo-section");
     const mobileLogo = document.querySelector(".mobile-logo");
     if (desktopLogo) desktopLogo.addEventListener("click", handleLogoClick);
     if (mobileLogo) mobileLogo.addEventListener("click", handleLogoClick);
+  }
+
+  // 14-2. 아래로 당겨서 새로고침 (Pull to Refresh) 기능 구현
+  function setupPullToRefresh() {
+    // 이미 생성된 경우 중복 생성 방지
+    if (document.getElementById("pullToRefresh")) return;
+
+    const ptr = document.createElement("div");
+    ptr.id = "pullToRefresh";
+    ptr.className = "ptr-indicator";
+    ptr.innerHTML = `
+      <div class="ptr-content">
+        <span class="ptr-icon">🌸</span>
+        <span class="ptr-text">당겨서 새로고침</span>
+      </div>
+    `;
+    document.body.prepend(ptr);
+
+    let startY = 0;
+    let currentY = 0;
+    let isPulling = false;
+    const threshold = 70; // 새로고침을 트리거할 당김 거리 (px)
+    const maxPull = 120;   // 최대 당김 거리 제한 (px)
+
+    const getScrollTop = () => {
+      const mainContent = document.querySelector(".main-content");
+      const mainScroll = mainContent ? mainContent.scrollTop : 0;
+      return window.scrollY || document.documentElement.scrollTop || mainScroll;
+    };
+
+    window.addEventListener("touchstart", (e) => {
+      // 스크롤이 가장 상단에 위치해 있을 때만 Pull to Refresh 작동
+      if (getScrollTop() === 0) {
+        startY = e.touches[0].pageY;
+        isPulling = true;
+      }
+    }, { passive: true });
+
+    window.addEventListener("touchmove", (e) => {
+      if (!isPulling) return;
+      currentY = e.touches[0].pageY;
+      const diff = currentY - startY;
+
+      // 아래 방향으로 끌어내릴 때만 동작
+      if (diff > 0) {
+        // 저항감을 주기 위해 0.5 배율 적용
+        const pullDist = Math.min(diff * 0.5, maxPull);
+        
+        // 인디케이터 위치 이동 및 회전 효과
+        ptr.style.transform = `translateY(${pullDist}px)`;
+        const icon = ptr.querySelector(".ptr-icon");
+        if (icon) {
+          icon.style.transform = `rotate(${pullDist * 3}deg)`;
+        }
+
+        const text = ptr.querySelector(".ptr-text");
+        if (text) {
+          if (pullDist >= threshold) {
+            text.textContent = "놓아서 새로고침";
+          } else {
+            text.textContent = "당겨서 새로고침";
+          }
+        }
+
+        // 당겨지는 동안 기본 바운스 스크롤 현상 방지
+        if (diff > 10 && e.cancelable) {
+          e.preventDefault();
+        }
+      } else {
+        isPulling = false;
+        ptr.style.transform = '';
+      }
+    }, { passive: false });
+
+    window.addEventListener("touchend", () => {
+      if (!isPulling) return;
+      isPulling = false;
+
+      const diff = currentY - startY;
+      const pullDist = diff * 0.5;
+
+      if (pullDist >= threshold) {
+        // 새로고침 임계값 충족 시 로딩 상태 전환 후 페이지 reload
+        ptr.classList.add("ptr-loading");
+        const text = ptr.querySelector(".ptr-text");
+        if (text) text.textContent = "새로고침 중...";
+        
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      } else {
+        // 임계값 미충족 시 다시 상단으로 부드럽게 복귀
+        ptr.style.transform = 'translateY(0)';
+        const icon = ptr.querySelector(".ptr-icon");
+        if (icon) icon.style.transform = '';
+      }
+
+      startY = 0;
+      currentY = 0;
+    });
   }
 
   // 15. HTML 이스케이프 유틸리티 (XSS 방지)
