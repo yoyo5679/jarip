@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const filesToCopy = ['index.html', 'styles.css', 'app.js', 'data.js'];
+const filesToCopy = ['index.html', 'styles.css', 'app.js', 'data.js', 'manifest.json', 'sw.js'];
 const destDir = path.join(__dirname, 'www');
 
 console.log('Building web assets for Capacitor...');
@@ -24,5 +24,21 @@ filesToCopy.forEach(file => {
     console.warn(`Warning: File not found: ${file}`);
   }
 });
+
+// Copy icons directory if it exists
+const iconsSrcDir = path.join(__dirname, 'icons');
+const iconsDestDir = path.join(destDir, 'icons');
+
+if (fs.existsSync(iconsSrcDir)) {
+  fs.mkdirSync(iconsDestDir, { recursive: true });
+  fs.readdirSync(iconsSrcDir).forEach(file => {
+    const srcPath = path.join(iconsSrcDir, file);
+    const destPath = path.join(iconsDestDir, file);
+    fs.copyFileSync(srcPath, destPath);
+    console.log(`Copied: icons/${file} -> www/icons/${file}`);
+  });
+} else {
+  console.warn('Warning: icons directory not found.');
+}
 
 console.log('Web asset build completed successfully!');
