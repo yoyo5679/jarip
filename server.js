@@ -61,4 +61,4 @@ function checkTimeAndCrawl() {
 }
 
 // 30초마다 시간을 체크하여 지정된 시각 정각에 크롤링을 동작시킵니다.
-setInterval(checkTimeAndCrawl, 30 * 10
+setInterval(checkTimeAndCrawl, 30 * 1000);
