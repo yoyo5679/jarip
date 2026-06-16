@@ -20,3 +20,7 @@ Thumbs.db
 *.xlsx
 
 GEMINI.ENV
+
+# Capacitor build outputs
+www/
+

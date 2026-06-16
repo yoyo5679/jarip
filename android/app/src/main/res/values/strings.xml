@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">자립해봄</string>
+    <string name="title_activity_main">자립해봄</string>
+    <string name="package_name">com.youth.jariphaebom</string>
+    <string name="custom_url_scheme">com.youth.jariphaebom</string>
+</resources>

@@ -1,4 +1,4 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 
 // .env 파일 직접 파싱 (dotenv 패키지 불필요)
 const envPath = require('path').join(__dirname, '.env');
@@ -38,10 +38,10 @@ async function rewriteWithGemini(policy) {
 - 기간: ${policy.date}`;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
     const resp = await axiosInstance.post(url, {
       contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { maxOutputTokens: 300, temperature: 0.8 }
+      generationConfig: { maxOutputTokens: 1000, temperature: 0.8, thinkingConfig: { thinkingBudget: 0 } }
     }, { headers: { 'Content-Type': 'application/json' } });
 
     // 할당량 초과 (429) 또는 기타 오류 응답
@@ -56,9 +56,11 @@ async function rewriteWithGemini(policy) {
 
     const candidate = resp.data?.candidates?.[0];
     const finishReason = candidate?.finishReason;
-    const text = candidate?.content?.parts?.[0]?.text;
-    if (text) {
-      return text.trim();
+    // Gemini 2.5 Flash는 thinking 파트(thought:true)가 parts[0]에 들어옴
+    const parts = candidate?.content?.parts || [];
+    const textPart = parts.find(pt => !pt.thought && pt.text);
+    if (textPart) {
+      return textPart.text.trim();
     }
     console.warn(`  [Gemini] 응답 파싱 실패 (finishReason: ${finishReason || 'unknown'}) - 기본 content 사용`);
     return policy.content;
@@ -519,3 +521,6 @@ async function main() {
 }
 
 main();
+
+
+

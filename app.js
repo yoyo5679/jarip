@@ -815,6 +815,26 @@ ${p.link}
         showToast("🗑️ 지원 정보가 삭제되었습니다.");
       }
     });
+
+    // 🔑 관리자 페이지 진입용 숨겨진 로직 (로고 7번 연속 터치 시 admin.html 이동)
+    let logoClicks = 0;
+    let clickTimeout;
+    const handleLogoClick = () => {
+      logoClicks++;
+      if (logoClicks >= 7) {
+        logoClicks = 0;
+        window.location.href = "admin.html";
+      }
+      clearTimeout(clickTimeout);
+      clickTimeout = setTimeout(() => {
+        logoClicks = 0;
+      }, 3000); // 3초간 입력이 없으면 초기화
+    };
+
+    const desktopLogo = document.querySelector(".logo-section");
+    const mobileLogo = document.querySelector(".mobile-logo");
+    if (desktopLogo) desktopLogo.addEventListener("click", handleLogoClick);
+    if (mobileLogo) mobileLogo.addEventListener("click", handleLogoClick);
   }
 
   // 15. HTML 이스케이프 유틸리티 (XSS 방지)
