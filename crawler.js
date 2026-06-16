@@ -1,4 +1,4 @@
-﻿const fs = require('fs');
+const fs = require('fs');
 
 // .env 파일 직접 파싱 (dotenv 패키지 불필요)
 const envPath = require('path').join(__dirname, '.env');
@@ -358,6 +358,92 @@ async function crawlJaripon() {
 }
 
 
+// 3.6. 부산광역시자립지원전담기관 크롤링
+async function crawlBusan() {
+  console.log('--- 부산광역시자립지원전담기관 크롤링 시작 ---');
+  const listUrl = 'https://www.busanjarip.or.kr/edu/sub5.php';
+  const newPolicies = [];
+
+  // 2페이지까지 순회 (목록이 페이지네이션됨)
+  for (let page = 1; page <= 2; page++) {
+    let pageUrl = listUrl;
+    try {
+      const response = await axiosInstance.get(pageUrl + (page > 1 ? `?page=${page}` : ''));
+      if (response.status !== 200) {
+        console.error(`부산 사이트 응답 에러: ${response.status}`);
+        break;
+      }
+
+      const $ = cheerio.load(response.data);
+
+      // 각 사업 항목 파싱: <a href="sub5_2.php?zipEncode=...">...
+      $('a[href*="sub5_2.php"]').each((i, el) => {
+        const a = $(el);
+        const href = a.attr('href') || '';
+        if (!href.includes('zipEncode=')) return;
+
+        const fullText = a.text().replace(/\s+/g, ' ').trim();
+        if (!fullText) return;
+
+        // 상태 추출: 접수중 | 종료 | 접수마감 등
+        let statusText = '';
+        let title = '';
+        let dateText = '';
+
+        // 텍스트 구조: "제목\n날짜범위\n상태"
+        const parts = a.text().split('\n').map(s => s.trim()).filter(Boolean);
+        title = parts[0] || '';
+        // 날짜: 2026-06-10 ~ 2026-06-19 형태
+        const datePart = parts.find(p => /\d{4}-\d{2}-\d{2}/.test(p));
+        if (datePart) dateText = datePart.trim();
+        // 상태
+        const statusPart = parts.find(p => ['접수중', '종료', '접수마감', '접수예정'].includes(p.trim()));
+        if (statusPart) statusText = statusPart.trim();
+
+        // 접수중인 사업만 수집
+        if (statusText !== '접수중') return;
+
+        // 블랙리스트 필터
+        const shouldSkip = BLACKLIST.some(word => title.includes(word));
+        if (shouldSkip || !title) return;
+
+        const link = `https://www.busanjarip.or.kr/edu/${href}`;
+
+        newPolicies.push({
+          title: title.startsWith('[') ? title : `[부산자립지원전담기관] ${title}`,
+          category: detectCategory(title),
+          type: '공공·지자체',
+          provider: '부산광역시보호아동자립지원센터',
+          region: '부산',
+          target: '부산 거주 보호연장아동 및 자립준비청년',
+          content: `부산광역시보호아동자립지원센터에서 우리 자립준비청년들을 위해 준비한 [${title}] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 우측 하단의 '원문 바로가기' 링크를 꾹~ 눌러서 꼼꼼히 확인해봐요! 😉`,
+          tip: '제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.',
+          link: link,
+          date: dateText || '상시 모집',
+          status: '모집중',
+          source: '부산광역시자립지원전담기관'
+        });
+      });
+    } catch (error) {
+      console.error(`부산 사이트 크롤링 오류 (페이지 ${page}):`, error.message);
+      break;
+    }
+  }
+
+  // 중복 링크 제거
+  const unique = [];
+  const seen = new Set();
+  for (const p of newPolicies) {
+    if (!seen.has(p.link)) {
+      seen.add(p.link);
+      unique.push(p);
+    }
+  }
+
+  console.log(`부산 자립 공고 ${unique.length}건 수집 완료`);
+  return unique;
+}
+
 // 4. 서울광역청년센터 크롤링 (자립준비청년 키워드 포함 글만)
 async function crawlSmyc() {
   console.log('--- 서울광역청년센터(SMYC) 크롤링 시작 ---');
@@ -445,12 +531,13 @@ async function crawlSmyc() {
 // 5. 수집 데이터를 data.js에 업데이트하는 메인 함수
 async function main() {
   try {
-    // 네 사이트 데이터 수집
+    // 다섯 사이트 데이터 수집
     const ggData = await crawlGyeonggi();
     const seoulData = await crawlSeoul();
     const jariponData = await crawlJaripon();
+    const busanData = await crawlBusan();
     const smycData = await crawlSmyc();
-    const scraped = [...ggData, ...seoulData, ...jariponData, ...smycData];
+    const scraped = [...ggData, ...seoulData, ...jariponData, ...busanData, ...smycData];
 
     if (scraped.length === 0) {
       console.log('수집된 신규 정책이 없습니다.');
