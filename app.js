@@ -458,6 +458,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <a href="${safeUrl(p.link)}" target="_blank" rel="noopener noreferrer" class="btn-card link">
             <span>원문 바로가기</span> 🔗
           </a>
+          ${!isAdmin ? `<button class="btn-card copy-link" data-link="${escapeHTML(p.link)}"><span>링크 전달하기</span> 📋</button>` : ''}
           ${isAdmin ? `<button class="btn-card share" data-id="${p.id}"><span>공유 정보 복사</span> 💬</button>` : ''}
           ${isAdmin ? `<button class="btn-card edit" data-id="${p.id}" title="정책 수정/삭제">⚙️</button>` : ''}
         </div>
@@ -467,7 +468,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!isAdmin) {
         card.style.cursor = 'pointer';
         card.addEventListener('click', (e) => {
-          if (!e.target.closest('a')) openDetailModal(p.id);
+          if (!e.target.closest('a') && !e.target.closest('.copy-link')) openDetailModal(p.id);
         });
       }
 
@@ -475,6 +476,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // 이벤트 리스너 재바인딩
+    document.querySelectorAll(".btn-card.copy-link").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const link = e.currentTarget.getAttribute("data-link");
+        navigator.clipboard.writeText(link).then(() => {
+          showToast("📋 링크 주소가 복사되었습니다!");
+        }).catch(() => {
+          showToast("⚠️ 복사에 실패했습니다.");
+        });
+      });
+    });
+
     document.querySelectorAll(".btn-card.share").forEach(btn => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -531,10 +544,27 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>
       <p style="font-size:0.88rem;line-height:1.7;color:var(--color-text-muted);margin-bottom:1rem;">${escapeHTML(p.content)}</p>
       ${p.tip ? `<div class="card-tip" style="margin-bottom:1.25rem;">💡 <b>전담요원 꿀팁:</b> ${escapeHTML(p.tip)}</div>` : ''}
-      <a href="${safeUrl(p.link)}" target="_blank" rel="noopener noreferrer" class="btn-card link" style="display:inline-flex;">
-        <span>원문 바로가기</span> 🔗
-      </a>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <a href="${safeUrl(p.link)}" target="_blank" rel="noopener noreferrer" class="btn-card link" style="display:inline-flex;">
+          <span>원문 바로가기</span> 🔗
+        </a>
+        <button class="btn-card copy-link" data-link="${escapeHTML(p.link)}" style="cursor:pointer;"><span>링크 전달하기</span> 📋</button>
+      </div>
     `;
+    // 상세 모달 내 링크 전달하기 버튼 이벤트 바인딩
+    const detailCopyBtn = content.querySelector('.copy-link');
+    if (detailCopyBtn) {
+      detailCopyBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const link = detailCopyBtn.getAttribute('data-link');
+        navigator.clipboard.writeText(link).then(() => {
+          showToast('📋 링크 주소가 복사되었습니다!');
+        }).catch(() => {
+          showToast('⚠️ 복사에 실패했습니다.');
+        });
+      });
+    }
+
     modal.style.display = 'flex';
   }
 
