@@ -376,7 +376,7 @@ async function crawlBusan() {
 
       const $ = cheerio.load(response.data);
 
-      // 각 사업 항목 파싱: <a href="sub5_2.php?zipEncode=...">...
+      // 각 사업 항목 파싱: <a href="/edu/sub5_2.php?zipEncode=...">...
       $('a[href*="sub5_2.php"]').each((i, el) => {
         const a = $(el);
         const href = a.attr('href') || '';
@@ -407,7 +407,11 @@ async function crawlBusan() {
         const shouldSkip = BLACKLIST.some(word => title.includes(word));
         if (shouldSkip || !title) return;
 
-        const link = `https://www.busanjarip.or.kr/edu/${href}`;
+        // href가 절대경로(/edu/sub5_2.php?...)이면 루트 기준으로 처리
+        // href가 상대경로(sub5_2.php?...)이면 /edu/ 붙이기
+        const link = href.startsWith('/') 
+          ? `https://www.busanjarip.or.kr${href}`
+          : `https://www.busanjarip.or.kr/edu/${href}`;
 
         newPolicies.push({
           title: title.startsWith('[') ? title : `[부산자립지원전담기관] ${title}`,
@@ -560,14 +564,97 @@ async function main() {
     let existingPolicies = [];
     eval(`existingPolicies = ${existingPoliciesText}`);
 
+    const allProviders = [...new Set(existingPolicies.map(p => p.provider).filter(Boolean))];
+
+    // 제목 정규화 및 핵심 텍스트 비교 함수
+    const cleanTitleForCompare = (title, provider = '') => {
+      let t = title.toLowerCase();
+      
+      // 1. 대괄호 태그 및 괄호 내용 제거
+      t = t.replace(/\[.*?\]/g, '');
+      t = t.replace(/\(.*?\)/g, '');
+      t = t.replace(/\{.*?\}/g, '');
+      
+      // 2. 해당 아이템의 provider 및 전체 provider 목록 제거
+      if (provider) {
+        const escapedProv = provider.toLowerCase().replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+        t = t.replace(new RegExp(escapedProv, 'g'), '');
+      }
+      for (const p of allProviders) {
+        if (p && p.length > 1) {
+          const escapedP = p.toLowerCase().replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+          t = t.replace(new RegExp(escapedP, 'g'), '');
+        }
+      }
+      
+      // 3. 기수, 연도, 월 패턴 제거
+      t = t.replace(/\d+기/g, '');
+      t = t.replace(/\d+년/g, '');
+      t = t.replace(/\d+월/g, '');
+      
+      // 4. 공백 제거
+      t = t.replace(/\s+/g, '');
+      
+      // 5. 불용어 제거 (공백 없는 텍스트 기준)
+      const stopWords = [
+        '참여자모집', '참가자모집', '교육생모집', '훈련생모집', '인턴모집', '회원모집',
+        '참여자', '참가자', '모집안내', '모집공고', '모집', '신청안내', '신청',
+        '지원사업', '지원금', '지원', '프로그램', '교실', '교육', '특강', '체험',
+        '행사', '안내', '일정', '사업', '상반기', '하반기', '여름방학', '겨울방학',
+        '클래스', '아카데미', '캠프', '프로젝트', '페스티벌', '콘서트', '자립'
+      ];
+      
+      for (const word of stopWords) {
+        t = t.replace(new RegExp(word, 'g'), '');
+      }
+      
+      // 특수문자 제거
+      t = t.replace(/[^a-zA-Z0-9가-힣]/g, '');
+      
+      return t;
+    };
+
+    // 교차 소스 중복 판별
+    const isSimilarTitle = (p1, p2) => {
+      const c1 = cleanTitleForCompare(p1.title, p1.provider);
+      const c2 = cleanTitleForCompare(p2.title, p2.provider);
+      
+      // 정규화된 텍스트가 완전히 같으면 중복
+      if (c1 === c2) return true;
+      
+      // 한쪽이 다른 쪽을 포함하면 중복 (핵심 텍스트가 4글자 이상일 때)
+      if (c1.length >= 4 && c2.length >= 4) {
+        if (c1.includes(c2) || c2.includes(c1)) return true;
+      }
+      
+      return false;
+    };
+
     // 중복 제거 및 신규 데이터 추가
     let addedCount = 0;
+    let skippedDuplicates = 0;
     let nextId = Math.max(...existingPolicies.map(p => typeof p.id === 'number' ? p.id : 0), 600) + 1;
 
     for (const newItem of scraped) {
-      // 제목 또는 링크가 동일하면 중복 처리
-      const isDuplicate = existingPolicies.some(p => p.title === newItem.title || p.link === newItem.link);
-      if (!isDuplicate) {
+      // zipEncode 파라미터 추출 함수 (부산 사이트 중복 정규화)
+      const extractZipEncode = (url) => {
+        try { return new URL(url).searchParams.get('zipEncode') || ''; } catch { return ''; }
+      };
+      const newZip = extractZipEncode(newItem.link);
+
+      // 제목, 링크, 또는 교차 소스 유사도 기반 중복 판별
+      const isDuplicate = existingPolicies.some(p => {
+        if (p.title === newItem.title) return true;
+        if (p.link === newItem.link) return true;
+        // zipEncode 파라미터 값이 같으면 동일 사업 (부산 링크 경로 오류 대응)
+        if (newZip && newZip === extractZipEncode(p.link)) return true;
+        // 교차 소스 중복: 제목 유사도 기반 판별
+        if (isSimilarTitle(p, newItem)) return true;
+        return false;
+      });
+      if (isDuplicate) {
+        skippedDuplicates++;
+      } else {
         newItem.id = nextId++;
         // Gemini로 content 친근하게 재작성
         console.log(`  [Gemini] "${newItem.title.slice(0, 30)}..." content 재작성 중...`);
