@@ -607,13 +607,15 @@ body {
   white-space: nowrap;
 }
 
-.btn-card.link {
+.btn-card.link,
+.btn-card.copy-link {
   background-color: var(--bg-app);
   border: 1px solid var(--border-color);
   color: var(--color-text-main);
 }
 
-.btn-card.link:hover {
+.btn-card.link:hover,
+.btn-card.copy-link:hover {
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
