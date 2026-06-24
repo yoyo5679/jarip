@@ -1,6 +1,6 @@
 // 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관 + 부산자립지원전담기관)
 // 마지막 크롤링 일시: 2026-06-16
-window.initialDataVersion = "v2026.06.24_v56";
+window.initialDataVersion = "v2026.06.24_v57";
 window.initialPolicies = [
   {
     "id": 104,
