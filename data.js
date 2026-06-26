@@ -1137,7 +1137,7 @@ window.regionalCenters = [
     "region": "울산",
     "name": "울산광역시 자립지원전담기관",
     "phone": "052-243-7942",
-    "website": "http://usjarip.or.kr",
+    "website": "https://blog.naver.com/ulsan_jarip",
     "kakao": "울산광역시자립지원전담기관",
     "address": "울산광역시"
   },
