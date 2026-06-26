@@ -1177,7 +1177,7 @@ window.regionalCenters = [
     "region": "충남",
     "name": "충청남도 자립지원전담기관",
     "phone": "041-541-6553",
-    "website": "http://cnjarip.or.kr",
+    "website": "http://www.cnjarip.co.kr/",
     "kakao": "충남자립지원전담기관",
     "address": "충청남도 아산시"
   },
