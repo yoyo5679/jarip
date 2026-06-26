@@ -1209,7 +1209,7 @@ window.regionalCenters = [
     "region": "경남",
     "name": "경상남도 자립지원전담기관",
     "phone": "055-265-7942",
-    "website": "http://gnjarip.or.kr",
+    "website": "https://changwon1.goodneighbors.kr/",
     "kakao": "경남자립지원전담기관",
     "address": "경상남도 창원시"
   },
