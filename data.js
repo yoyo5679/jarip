@@ -1185,7 +1185,7 @@ window.regionalCenters = [
     "region": "전북",
     "name": "전라북도 자립지원전담기관",
     "phone": "063-714-3329",
-    "website": "https://jbjarip.or.kr",
+    "website": "https://jbjarip.goodneighbors.kr/",
     "kakao": "전북자립지원전담기관",
     "address": "전라북도 전주시"
   },
