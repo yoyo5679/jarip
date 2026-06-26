@@ -1113,7 +1113,7 @@ window.regionalCenters = [
     "region": "인천",
     "name": "인천광역시 자립지원전담기관",
     "phone": "032-421-2340",
-    "website": "http://incheonjarip.or.kr",
+    "website": "https://www.injarip.or.kr/",
     "kakao": "인천자립지원전담기관",
     "address": "인천광역시"
   },
