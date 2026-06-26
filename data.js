@@ -1161,7 +1161,7 @@ window.regionalCenters = [
     "region": "강원",
     "name": "강원특별자치도 자립지원전담기관",
     "phone": "033-261-2340",
-    "website": "https://gangwon.pass.or.kr",
+    "website": "https://gwjarip.or.kr/",
     "kakao": "강원특별자치도자립지원전담기관",
     "address": "강원특별자치도 춘천시"
   },
