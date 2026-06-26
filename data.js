@@ -1201,7 +1201,7 @@ window.regionalCenters = [
     "region": "경북",
     "name": "경상북도 자립지원전담기관",
     "phone": "054-880-4543",
-    "website": "https://www.gb.go.kr",
+    "website": "https://www.kbjarip.or.kr/",
     "kakao": "경북자립지원전담기관",
     "address": "경상북도 안동시"
   },
