@@ -1169,7 +1169,7 @@ window.regionalCenters = [
     "region": "충북",
     "name": "충청북도 자립지원전담기관",
     "phone": "043-238-5393",
-    "website": "http://cbjarip.or.kr",
+    "website": "http://cbjarip.kr/",
     "kakao": "충북자립지원전담기관",
     "address": "충청북도 청주시"
   },
