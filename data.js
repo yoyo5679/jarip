@@ -1145,7 +1145,7 @@ window.regionalCenters = [
     "region": "세종",
     "name": "세종특별자치시 자립지원전담기관",
     "phone": "044-864-7942",
-    "website": "https://jaripon.ncrc.or.kr",
+    "website": "https://blog.naver.com/sjjarip/223060660985",
     "kakao": "세종특별자치시자립지원전담기관",
     "address": "세종특별자치시"
   },
