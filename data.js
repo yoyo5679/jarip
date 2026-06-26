@@ -1105,7 +1105,7 @@ window.regionalCenters = [
     "region": "대구",
     "name": "대구광역시 자립지원전담기관",
     "phone": "053-756-3329",
-    "website": "https://dgjarip.or.kr",
+    "website": "http://www.dgyjarip.or.kr/",
     "kakao": "대구광역시자립지원전담기관",
     "address": "대구광역시"
   },
