@@ -587,10 +587,10 @@ async function main() {
         }
       }
       
-      // 3. 기수, 연도, 월 패턴 제거
-      t = t.replace(/\d+기/g, '');
-      t = t.replace(/\d+년/g, '');
-      t = t.replace(/\d+월/g, '');
+      // 3. 기수, 연도, 월 패턴 제거 (상이한 연도/월/기수의 사업은 별개 사업이므로 비교 문자열에 남김)
+      // t = t.replace(/\d+기/g, '');
+      // t = t.replace(/\d+년/g, '');
+      // t = t.replace(/\d+월/g, '');
       
       // 4. 공백 제거
       t = t.replace(/\s+/g, '');
@@ -616,6 +616,9 @@ async function main() {
 
     // 교차 소스 중복 판별
     const isSimilarTitle = (p1, p2) => {
+      // 동일 제공기관(provider)의 다른 사업인 경우 중복으로 보지 않음 (다른 공고임)
+      if (p1.provider === p2.provider) return false;
+
       const c1 = cleanTitleForCompare(p1.title, p1.provider);
       const c2 = cleanTitleForCompare(p2.title, p2.provider);
       
