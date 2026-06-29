@@ -1,6 +1,6 @@
 // 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관 + 부산자립지원전담기관)
 // 마지막 크롤링 일시: 2026-06-16
-window.initialDataVersion = "v2026.06.26_v63";
+window.initialDataVersion = "v2026.06.26_v64";
 window.initialPolicies = [
   {
     "id": 104,
@@ -1096,6 +1096,21 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "자립정보ON",
     "id": 748
+  },
+  {
+    "title": "[모집 중] 립 클래스 「바리스타 자격과정」 교육 참여자 모집 안내",
+    "category": "education",
+    "type": "공공·지자체",
+    "provider": "경기도자립지원전담기관",
+    "region": "경기",
+    "target": "경기도 거주 보호아동 및 자립준비청년",
+    "content": "☕️커피 향 가득한 바리스타의 꿈, 경기도자립지원전담기관에서 이뤄봐요!  barista자격증 따고 싶었던 친구들 주목! 찐 전문 바리스타 되는 법, 경기 지역에서 만날 수 있는 이번 기회 놓치지 마세요! 🗓️ 모집은 6월 29일부터 쭉~ 진행되니 서둘러 신청해요! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
+    "link": "https://www.ggjarip.or.kr/community_01.html?actobj=notice&acttype=VIEWINFO&bbs_code=notice&bbs_key=79739370908149_6a41b9ea85922",
+    "date": "2026-06-29 ~ 모집 시까지",
+    "status": "모집중",
+    "source": "경기도자립지원전담기관",
+    "id": 749
   }
 ];
 
