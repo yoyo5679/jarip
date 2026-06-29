@@ -1,6 +1,6 @@
 // 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관 + 부산자립지원전담기관)
 // 마지막 크롤링 일시: 2026-06-16
-window.initialDataVersion = "v2026.06.26_v62";
+window.initialDataVersion = "v2026.06.26_v63";
 window.initialPolicies = [
   {
     "id": 104,
@@ -1081,6 +1081,21 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "희망디딤돌 인천센터",
     "id": 747
+  },
+  {
+    "title": "[자립정보ON] 함께성장교육 성장일터 청년반 모집",
+    "category": "education",
+    "type": "공공·지자체",
+    "provider": "사회적협동조합 함께성장교육",
+    "region": "서울 외 (1)",
+    "target": "자립준비청년 대상",
+    "content": "안녕! 🙋‍♀️ 혹시 진로 고민이나 취업 준비 때문에 막막한 친구들 있어? 🥺 사회적협동조합 함께성장교육에서 자립준비청년들을 위한 '성장일터 청년반'을 모집한대! 서울 외 지역 친구들도 참여 가능하고, 7월 31일까지 신청할 수 있으니 놓치지 마! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=1942&menuPos=1",
+    "date": "2026-06-26 ~ 2026-07-31",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 748
   }
 ];
 
