@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const filesToCopy = ['index.html', 'styles.css', 'app.js', 'data.js', 'manifest.json', 'sw.js'];
+const filesToCopy = ['index.html', 'styles.css', 'app.js', 'data.js', 'manifest.json', 'sw.js', 'robots.txt', 'sitemap.xml'];
 const destDir = path.join(__dirname, 'www');
 
 console.log('Building web assets for Capacitor...');
