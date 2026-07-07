@@ -558,11 +558,17 @@ async function main() {
       throw new Error('data.js 파일에서 initialPolicies 파악 실패');
     }
 
-    // JSON 형식처럼 파싱 가능한 문자열로 가다듬기
+    // 배열 리터럴 텍스트를 파싱 (eval 미사용: 격리된 Function 스코프에서 값만 반환)
     let existingPoliciesText = match[1].trim();
-    // 안전한 파싱을 위해 임시 변수에 대입하여 실행 평가
     let existingPolicies = [];
-    eval(`existingPolicies = ${existingPoliciesText}`);
+    try {
+      existingPolicies = new Function(`return (${existingPoliciesText});`)();
+    } catch (parseErr) {
+      throw new Error(`data.js의 initialPolicies 파싱 실패: ${parseErr.message}`);
+    }
+    if (!Array.isArray(existingPolicies)) {
+      throw new Error('data.js의 initialPolicies가 배열이 아닙니다.');
+    }
 
     const allProviders = [...new Set(existingPolicies.map(p => p.provider).filter(Boolean))];
 
