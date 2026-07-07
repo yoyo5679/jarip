@@ -570,6 +570,30 @@ async function main() {
       throw new Error('data.js의 initialPolicies가 배열이 아닙니다.');
     }
 
+    // 마감된 사업 필터링 함수
+    const isExpired = (dateText) => {
+      if (!dateText || dateText.includes('상시')) return false;
+      const matches = dateText.match(/\\d{4}[-.]\\d{2}[-.]\\d{2}/g);
+      if (!matches) return false;
+      const lastDateStr = matches[matches.length - 1].replace(/\\./g, '-');
+      
+      const now = new Date();
+      const kst = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+      const todayStr = kst.toISOString().split('T')[0];
+      
+      return lastDateStr < todayStr;
+    };
+
+    // 기존 데이터에서 마감되거나 키워드 포함된 사업 제거
+    const originalCount = existingPolicies.length;
+    existingPolicies = existingPolicies.filter(p => {
+      const title = p.title || '';
+      const isClosedKeyword = ['모집완료', '마감', '종료'].some(word => title.includes(word));
+      if (isClosedKeyword || isExpired(p.date)) return false;
+      return true;
+    });
+    console.log(`기존 데이터 ${originalCount}건 중 마감된 사업 제외 후 ${existingPolicies.length}건 남음`);
+
     const allProviders = [...new Set(existingPolicies.map(p => p.provider).filter(Boolean))];
 
     // 제목 정규화 및 핵심 텍스트 비교 함수
@@ -645,6 +669,10 @@ async function main() {
     let nextId = Math.max(...existingPolicies.map(p => typeof p.id === 'number' ? p.id : 0), 600) + 1;
 
     for (const newItem of scraped) {
+      if (['모집완료', '마감', '종료'].some(word => (newItem.title || '').includes(word)) || isExpired(newItem.date)) {
+        continue;
+      }
+
       // zipEncode 파라미터 추출 함수 (부산 사이트 중복 정규화)
       const extractZipEncode = (url) => {
         try { return new URL(url).searchParams.get('zipEncode') || ''; } catch { return ''; }
