@@ -144,8 +144,9 @@
       <div class="header-section">
         <div class="search-filter-bar">
           <div class="search-input-wrapper">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="searchInput" placeholder="지원사업명, 지원주체, 키워드를 검색하세요...">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            <label for="searchInput" class="sr-only">지원사업 검색</label>
+            <input type="text" id="searchInput" placeholder="지원사업명, 지원주체, 키워드를 검색하세요..." aria-label="지원사업 검색">
           </div>
           <select id="regionFilter" class="select-filter">
             <!-- JS에서 동적 로드됨 -->
@@ -157,8 +158,8 @@
           </select>
         </div>
         
-        <!-- 봄맞이 미니 정원 (고양이와 잔디밭) -->
-        <div class="header-garden">
+        <!-- 봄맞이 미니 정원 (고양이와 잔디밭) - 장식용 -->
+        <div class="header-garden" aria-hidden="true">
           <div class="grass-field">
             <span class="flower flower-1">🌸</span>
             <span class="flower flower-2">🌼</span>
@@ -173,7 +174,7 @@
         </div>
         
         <div class="header-actions desktop-only">
-          <button id="themeToggle" class="theme-toggle" title="화면 테마 변경">🌙</button>
+          <button id="themeToggle" class="theme-toggle" title="화면 테마 변경" aria-label="화면 테마 변경">🌙</button>
         </div>
       </div>
 
@@ -227,7 +228,8 @@
           </div>
         </div>
         <div class="sort-section">
-          <select id="sortFilter" class="sort-select">
+          <button id="bookmarkFilterBtn" class="type-btn bookmark-filter-btn" type="button" aria-pressed="false" title="즐겨찾기한 사업만 보기">⭐ 즐겨찾기</button>
+          <select id="sortFilter" class="sort-select" aria-label="정렬 기준">
             <option value="newest">최신순</option>
             <option value="closing_soon">마감임박순</option>
           </select>
@@ -346,7 +348,7 @@
   </div>
 
   <!-- 토스트 알림 표시 컨테이너 -->
-  <div id="toastContainer" class="toast-container"></div>
+  <div id="toastContainer" class="toast-container" role="status" aria-live="polite" aria-atomic="true"></div>
 
   <!-- 자립해봄 어플리케이션 스크립트 로드 -->
   <script src="data.js?v=20260608_14"></script>

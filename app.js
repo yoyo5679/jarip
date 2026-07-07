@@ -12,6 +12,27 @@ document.addEventListener("DOMContentLoaded", () => {
   let searchQuery = "";
   let currentSource = "all"; // 출처 필터 상태 추가
   let editingPolicyId = null; // 수정 중인 정책 ID (null이면 새 글 등록)
+  let showBookmarksOnly = false; // 즐겨찾기만 보기 토글
+
+  // 즐겨찾기(북마크) 상태: localStorage에 정책 ID 집합 저장
+  let bookmarks = new Set();
+  function loadBookmarks() {
+    try {
+      const raw = localStorage.getItem("jarip_bookmarks");
+      if (raw) bookmarks = new Set(JSON.parse(raw).map(String));
+    } catch { bookmarks = new Set(); }
+  }
+  function saveBookmarks() {
+    localStorage.setItem("jarip_bookmarks", JSON.stringify([...bookmarks]));
+  }
+  function isBookmarked(id) { return bookmarks.has(String(id)); }
+  function toggleBookmark(id) {
+    const key = String(id);
+    if (bookmarks.has(key)) { bookmarks.delete(key); }
+    else { bookmarks.add(key); }
+    saveBookmarks();
+    return bookmarks.has(key);
+  }
 
   // 2. DOM 요소 참조
   const cardsGrid = document.getElementById("cardsGrid");
@@ -111,6 +132,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 3-1. 초기화 함수
   function init() {
+    loadBookmarks();
     setupAdminUI();
     loadPolicies();
     loadTheme();
@@ -330,7 +352,35 @@ document.addEventListener("DOMContentLoaded", () => {
       '정기': '#3b82f6'
     };
     const color = colors[status] || '#64748b';
-    return `<span style="background:${color};color:#fff;padding:2px 8px;border-radius:10px;font-size:0.7rem;font-weight:700;">${status}</span>`;
+    return `<span style="background:${color};color:#fff;padding:2px 8px;border-radius:10px;font-size:0.7rem;font-weight:700;">${escapeHTML(status)}</span>`;
+  }
+
+  // 마감일까지 남은 일수 계산 (신청기간 문자열에서 마지막 날짜를 마감일로 간주)
+  function getDaysUntilDeadline(dateStr) {
+    if (!dateStr) return null;
+    const matches = dateStr.match(/\d{4}[-.]\d{2}[-.]\d{2}/g);
+    if (!matches || matches.length === 0) return null;
+    const endStr = matches[matches.length - 1].replace(/\./g, '-');
+    const end = new Date(endStr + 'T23:59:59');
+    if (isNaN(end.getTime())) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffMs = end.getTime() - today.getTime();
+    return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  }
+
+  // 마감 D-day 배지 HTML 생성 (임박할수록 강조)
+  function getDdayBadge(dateStr) {
+    const days = getDaysUntilDeadline(dateStr);
+    if (days === null) return '';
+    if (days < 0) {
+      return `<span class="dday-badge dday-closed" aria-label="접수 마감됨">마감</span>`;
+    }
+    let cls = 'dday-far';
+    if (days <= 3) cls = 'dday-urgent';
+    else if (days <= 7) cls = 'dday-soon';
+    const label = days === 0 ? 'D-DAY' : `D-${days}`;
+    return `<span class="dday-badge ${cls}" aria-label="마감 ${days === 0 ? '오늘' : days + '일 남음'}">${label}</span>`;
   }
 
   // 8. 카테고리 한글 변환 헬퍼
@@ -363,7 +413,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const matchRegion = currentRegion === "all" || p.region === currentRegion || p.region === "전국";
       const matchType = currentType === "all" || p.type === currentType;
       const matchSource = currentSource === "all" || p.source === currentSource;
-      
+      const matchBookmark = !showBookmarksOnly || isBookmarked(p.id);
+
       const searchLower = searchQuery.toLowerCase();
       const matchSearch = searchQuery === "" || 
         p.title.toLowerCase().includes(searchLower) ||
@@ -371,7 +422,7 @@ document.addEventListener("DOMContentLoaded", () => {
         p.content.toLowerCase().includes(searchLower) ||
         (p.tip && p.tip.toLowerCase().includes(searchLower));
 
-      return matchCategory && matchRegion && matchSearch && matchType && matchSource;
+      return matchCategory && matchRegion && matchSearch && matchType && matchSource && matchBookmark;
     });
 
     // 정렬 로직
@@ -425,8 +476,13 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="card-top">
           <span class="badge ${p.category}">${getCategoryLabel(p.category)}</span>
           <div style="display:flex;gap:0.4rem;align-items:center;">
+            ${getDdayBadge(p.date)}
             ${getStatusBadge(p.status)}
-            <span class="card-region">${p.region}</span>
+            <span class="card-region">${escapeHTML(p.region)}</span>
+            <button class="btn-bookmark${isBookmarked(p.id) ? ' marked' : ''}" data-id="${escapeHTML(String(p.id))}"
+              aria-pressed="${isBookmarked(p.id)}"
+              aria-label="${isBookmarked(p.id) ? '즐겨찾기 해제' : '즐겨찾기 추가'}"
+              title="${isBookmarked(p.id) ? '즐겨찾기 해제' : '즐겨찾기 추가'}">${isBookmarked(p.id) ? '⭐' : '☆'}</button>
           </div>
         </div>
         <h4 class="card-title">${escapeHTML(p.title)}</h4>
@@ -458,17 +514,30 @@ document.addEventListener("DOMContentLoaded", () => {
           <a href="${safeUrl(p.link)}" target="_blank" rel="noopener noreferrer" class="btn-card link">
             <span>원문 바로가기</span> 🔗
           </a>
-          ${!isAdmin ? `<button class="btn-card copy-link" data-link="${escapeHTML(p.link)}"><span>링크 전달하기</span> 📋</button>` : ''}
-          ${isAdmin ? `<button class="btn-card share" data-id="${p.id}"><span>공유 정보 복사</span> 💬</button>` : ''}
-          ${isAdmin ? `<button class="btn-card edit" data-id="${p.id}" title="정책 수정/삭제">⚙️</button>` : ''}
+          ${!isAdmin ? `<button class="btn-card web-share" data-id="${escapeHTML(String(p.id))}"><span>공유하기</span> 📤</button>` : ''}
+          ${isAdmin ? `<button class="btn-card share" data-id="${escapeHTML(String(p.id))}"><span>공유 정보 복사</span> 💬</button>` : ''}
+          ${isAdmin ? `<button class="btn-card edit" data-id="${escapeHTML(String(p.id))}" title="정책 수정/삭제">⚙️</button>` : ''}
         </div>
       `;
 
       // 일반 방문자: 카드 클릭 시 상세 모달
       if (!isAdmin) {
         card.style.cursor = 'pointer';
-        card.addEventListener('click', (e) => {
-          if (!e.target.closest('a') && !e.target.closest('.copy-link')) openDetailModal(p.id);
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('aria-label', `${p.title} 상세 정보 보기`);
+        const openIfNotControl = (e) => {
+          if (!e.target.closest('a') && !e.target.closest('.copy-link') &&
+              !e.target.closest('.web-share') && !e.target.closest('.btn-bookmark')) {
+            openDetailModal(p.id);
+          }
+        };
+        card.addEventListener('click', openIfNotControl);
+        card.addEventListener('keydown', (e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && e.target === card) {
+            e.preventDefault();
+            openDetailModal(p.id);
+          }
         });
       }
 
@@ -485,6 +554,38 @@ document.addEventListener("DOMContentLoaded", () => {
         }).catch(() => {
           showToast("⚠️ 복사에 실패했습니다.");
         });
+      });
+    });
+
+    // 즐겨찾기 토글 버튼
+    document.querySelectorAll(".btn-bookmark").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const rawId = e.currentTarget.getAttribute("data-id");
+        const id = /^\d+$/.test(rawId) ? parseInt(rawId) : rawId;
+        const nowMarked = toggleBookmark(id);
+        showToast(nowMarked ? "⭐ 즐겨찾기에 추가했어요!" : "☆ 즐겨찾기에서 뺐어요.");
+        // 즐겨찾기 전용 보기 중이면 목록을 다시 그려 즉시 반영
+        if (showBookmarksOnly) {
+          renderPolicies();
+        } else {
+          const b = e.currentTarget;
+          b.textContent = nowMarked ? '⭐' : '☆';
+          b.classList.toggle('marked', nowMarked);
+          b.setAttribute('aria-pressed', String(nowMarked));
+          b.setAttribute('aria-label', nowMarked ? '즐겨찾기 해제' : '즐겨찾기 추가');
+          b.setAttribute('title', nowMarked ? '즐겨찾기 해제' : '즐겨찾기 추가');
+        }
+      });
+    });
+
+    // 공유하기 버튼 (Web Share API 우선, 미지원 시 클립보드 폴백)
+    document.querySelectorAll(".btn-card.web-share").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const rawId = e.currentTarget.getAttribute("data-id");
+        const id = /^\d+$/.test(rawId) ? parseInt(rawId) : rawId;
+        webSharePolicy(id);
       });
     });
 
@@ -531,6 +632,7 @@ document.addEventListener("DOMContentLoaded", () => {
     content.innerHTML = `
       <div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.75rem;flex-wrap:wrap;">
         <span class="badge ${p.category}">${getCategoryLabel(p.category)}</span>
+        ${getDdayBadge(p.date)}
         ${getStatusBadge(p.status)}
         <span class="card-region">${escapeHTML(p.region)}</span>
       </div>
@@ -582,7 +684,7 @@ document.addEventListener("DOMContentLoaded", () => {
       item.innerHTML = `
         <div class="center-header">
           <span>${escapeHTML(c.name)}</span>
-          <span class="center-tag">${c.region}</span>
+          <span class="center-tag">${escapeHTML(c.region)}</span>
         </div>
         <div class="center-details">
           <div>📞 연락처: <b>${escapeHTML(c.phone)}</b></div>
@@ -590,7 +692,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
         <div class="center-links">
           <a href="${safeUrl(c.website)}" target="_blank" rel="noopener noreferrer" class="btn-mini">홈페이지 🔗</a>
-          <button class="btn-mini btn-copy-contact" data-phone="${c.phone}" data-name="${c.name}">연락처 복사 📋</button>
+          <button class="btn-mini btn-copy-contact" data-phone="${escapeHTML(c.phone)}" data-name="${escapeHTML(c.name)}">연락처 복사 📋</button>
         </div>
       `;
       listContainer.appendChild(item);
@@ -639,6 +741,38 @@ ${p.link}
     }).catch(err => {
       console.error("클립보드 복사 실패: ", err);
       showToast("⚠️ 복사에 실패했습니다. 권한을 확인해 주세요.");
+    });
+  }
+
+  // 11-1. Web Share API 기반 공유 (일반 방문자용, 미지원 시 클립보드 폴백)
+  function webSharePolicy(id) {
+    const p = policies.find(item => String(item.id) === String(id));
+    if (!p) return;
+
+    const shareTitle = p.title;
+    const shareText = `📢 ${p.title}\n🏢 ${p.provider}\n📍 ${p.region}\n⏰ ${p.date}`;
+    const shareUrl = safeUrl(p.link);
+    const canShareUrl = shareUrl && shareUrl !== '#';
+
+    if (navigator.share) {
+      const payload = { title: shareTitle, text: shareText };
+      if (canShareUrl) payload.url = shareUrl;
+      navigator.share(payload).catch((err) => {
+        // 사용자가 공유 시트를 취소한 경우(AbortError)는 조용히 무시
+        if (err && err.name === 'AbortError') return;
+        copyShareFallback(shareText, shareUrl, canShareUrl);
+      });
+    } else {
+      copyShareFallback(shareText, shareUrl, canShareUrl);
+    }
+  }
+
+  function copyShareFallback(shareText, shareUrl, canShareUrl) {
+    const full = canShareUrl ? `${shareText}\n🔗 ${shareUrl}` : shareText;
+    navigator.clipboard.writeText(full).then(() => {
+      showToast("📋 공유 내용이 복사되었어요! 카톡 등에 붙여넣어 보내세요.");
+    }).catch(() => {
+      showToast("⚠️ 공유에 실패했습니다.");
     });
   }
 
@@ -734,6 +868,17 @@ ${p.link}
       currentSource = e.target.value;
       renderPolicies();
     });
+
+    // 즐겨찾기만 보기 토글
+    const bookmarkFilterBtn = document.getElementById("bookmarkFilterBtn");
+    if (bookmarkFilterBtn) {
+      bookmarkFilterBtn.addEventListener("click", () => {
+        showBookmarksOnly = !showBookmarksOnly;
+        bookmarkFilterBtn.classList.toggle("active", showBookmarksOnly);
+        bookmarkFilterBtn.setAttribute("aria-pressed", String(showBookmarksOnly));
+        renderPolicies();
+      });
+    }
 
     // 카테고리 탭 클릭
     tabButtons.forEach(btn => {

@@ -1717,3 +1717,75 @@ body {
 
 
 
+
+/* ===== 마감 D-day 배지 ===== */
+.dday-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #fff;
+  line-height: 1.4;
+}
+.dday-urgent {
+  background: #dc2626;
+  animation: ddayPulse 1.4s ease-in-out infinite;
+}
+.dday-soon { background: #ea580c; }
+.dday-far { background: #0284c7; }
+.dday-closed { background: #6b7280; }
+@keyframes ddayPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
+  50% { transform: scale(1.06); box-shadow: 0 0 0 4px rgba(220, 38, 38, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dday-urgent { animation: none; }
+}
+
+/* ===== 즐겨찾기(북마크) 버튼 ===== */
+.btn-bookmark {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.15rem;
+  line-height: 1;
+  padding: 0.15rem;
+  border-radius: 6px;
+  transition: transform 0.12s ease, background 0.2s;
+}
+.btn-bookmark:hover { background: rgba(0,0,0,0.06); }
+.btn-bookmark:active { transform: scale(0.85); }
+.btn-bookmark:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.btn-bookmark.marked { animation: bookmarkPop 0.3s ease; }
+@keyframes bookmarkPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+/* 필터 버튼 활성화(즐겨찾기 보기) */
+.bookmark-filter-btn.active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+/* ===== 접근성: 포커스 가시성 & 스크린리더 전용 ===== */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
