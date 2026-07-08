@@ -1,6 +1,6 @@
 // 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관 + 부산자립지원전담기관)
 // 마지막 크롤링 일시: 2026-06-16
-window.initialDataVersion = "v2026.06.26_v73";
+window.initialDataVersion = "v2026.06.26_v74";
 window.initialPolicies = [
   {
     "id": 104,
@@ -1756,6 +1756,51 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "자립정보ON",
     "id": 792
+  },
+  {
+    "title": "[자립정보ON] 2026년도 자립준비청년 대상 재무상담",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "금융감독원",
+    "region": "전국",
+    "target": "자립준비청년 대상",
+    "content": "얘들아, 돈 관리 어떻게 해야 할지 막막했던 친구들 주목! 🙋‍♀️ 금융감독원에서 2026년에 너희를 위한 재무상담을 준비했대! 돈쭐 낼 준비된 친구들은 7월 14일부터 28일까지 신청 잊지 말고, 전국 어디든 참여 가능하대. 💰✨ 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=1968&menuPos=1",
+    "date": "2026-07-14 ~ 2026-07-28",
+    "status": "모집예정",
+    "source": "자립정보ON",
+    "id": 793
+  },
+  {
+    "title": "[부산자립지원전담기관] 주거비 지원 참여자 모집(월드비전 중앙)",
+    "category": "housing",
+    "type": "공공·지자체",
+    "provider": "부산광역시보호아동자립지원센터",
+    "region": "부산",
+    "target": "부산 거주 보호연장아동 및 자립준비청년",
+    "content": "부산 친구들 주목! 👀 월드비전에서 주거비 지원해주는 꿀 소식 가져왔어! 🏠 부산 사는 보호연장아동이랑 자립준비청년이라면 누구나 신청 가능하고, 7월 8일부터 18일까지니까 놓치지 마! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
+    "link": "https://www.busanjarip.or.kr/edu/sub5_2.php?zipEncode=9G2yYfwztb3B0zspKXwzPzwELTMj9uwBH5wELTMjX0tzNfgC39MBMGtn10tB150BM5wAMetpSfMvWLME",
+    "date": "2026-07-08 ~ 2026-07-18",
+    "status": "모집중",
+    "source": "부산광역시자립지원전담기관",
+    "id": 794
+  },
+  {
+    "title": "[부산자립지원전담기관] 긴급생계비 지원 참여자 모집(월드비전 중앙)",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "부산광역시보호아동자립지원센터",
+    "region": "부산",
+    "target": "부산 거주 보호연장아동 및 자립준비청년",
+    "content": "부산에 사는 친구들 주목! 📣 혹시 갑자기 돈 필요해서 맴찢했던 경험 있다면? 월드비전 중앙에서 긴급생계비 지원해 준대! 💸 부산 보호연장아동이랑 자립준비청년이라면 7월 8일부터 18일까지 부산자립지원전담기관에서 신청 가능하니까 놓치지 마! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
+    "link": "https://www.busanjarip.or.kr/edu/sub5_2.php?zipEncode=9G2yYfwztb3B0zspKXwzPzwELTMj9uwBH5wELTMjX0tzNfgC39MBMCtn10tB150BM5wAMetpSfMvWLME",
+    "date": "2026-07-08 ~ 2026-07-18",
+    "status": "모집중",
+    "source": "부산광역시자립지원전담기관",
+    "id": 795
   }
 ];
 
