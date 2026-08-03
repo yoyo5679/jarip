@@ -1818,6 +1818,7 @@ select:focus-visible {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-shrink: 0; /* main-content(flex column, height:100vh)에서 overflow:hidden로 인한 세로 찌그러짐 방지 */
   margin-bottom: 1.25rem;
   padding: 1.1rem 1.4rem;
   border-radius: 18px;
