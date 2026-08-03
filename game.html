@@ -320,7 +320,7 @@ button{font-family:inherit}
 
     <div class="win-actions">
       <button class="btn-primary" id="replayBtn">🔄 다시 도전</button>
-      <button class="btn-ghost" id="shareBtn">📋 결과 복사</button>
+      <button class="btn-ghost" id="shareBtn">📸 결과 이미지</button>
       <a class="btn-ghost" href="/">🏠 대시보드로</a>
     </div>
 
@@ -762,6 +762,7 @@ function finish(){
   else if(score<=4){ rank='노련한 탈출러'; emoji='🥈'; }
   else if(score<=9){ rank='성실한 탈출 도전자'; emoji='🥉'; }
   else { rank='끝까지 해낸 탈출자'; emoji='🎖️'; }
+  S.rank=rank; S.rankEmoji=emoji;
   el('rankLine').innerHTML=emoji+' 당신의 등급 : <span style="color:var(--accent-2)">'+rank+'</span>';
 
   // best record (fewest hints+misses, then time)
@@ -779,17 +780,149 @@ function finish(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-/* ---------- share ---------- */
-el('shareBtn').addEventListener('click',()=>{
-  const txt='🔓 자립 방탈출 클리어!\n⏱️ '+el('rTime').textContent+' · 💡 힌트 '+S.hintsUsed+'회 · ❌ 오답 '+S.misses+'회\n자립준비청년 정책 방탈출 (15방) — 자립해봄';
-  if(navigator.share){
-    navigator.share({title:'자립 방탈출', text:txt}).catch(()=>{});
-  } else if(navigator.clipboard){
-    navigator.clipboard.writeText(txt).then(()=>{
-      el('shareBtn').textContent='✅ 복사됨!';
-      setTimeout(()=>el('shareBtn').textContent='📋 결과 복사',1800);
-    }).catch(()=>{});
+/* ---------- share (결과 이미지 카드 생성) ---------- */
+const KOFONT = "'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif";
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+function buildResultCanvas(){
+  const W=1080, H=1350;
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const x=c.getContext('2d');
+  const cx=W/2;
+
+  // 배경 그라디언트
+  const bg=x.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#0a0f1f'); bg.addColorStop(0.55,'#141c34'); bg.addColorStop(1,'#0c2330');
+  x.fillStyle=bg; x.fillRect(0,0,W,H);
+  // 은은한 글로우
+  function glow(gx,gy,gr,col){ const g=x.createRadialGradient(gx,gy,0,gx,gy,gr); g.addColorStop(0,col); g.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=g; x.fillRect(0,0,W,H); }
+  glow(150,120,520,'rgba(91,140,255,0.32)');
+  glow(980,180,520,'rgba(181,123,255,0.28)');
+  glow(cx,1320,640,'rgba(49,224,200,0.20)');
+  // 외곽 테두리
+  x.strokeStyle='rgba(140,170,255,0.25)'; x.lineWidth=3;
+  roundRect(x,20,20,W-40,H-40,40); x.stroke();
+
+  x.textAlign='center'; x.textBaseline='alphabetic';
+
+  // 상단 브랜드
+  x.fillStyle='rgba(159,176,214,0.95)';
+  x.font="600 34px "+KOFONT;
+  x.fillText('🌸 자립해봄  ·  자립 방탈출', cx, 110);
+
+  // 배지
+  x.font="700 26px "+KOFONT;
+  const badge='온라인 스토리 방탈출';
+  const bw=x.measureText(badge).width+56;
+  x.fillStyle='rgba(91,140,255,0.16)';
+  roundRect(x,cx-bw/2,140,bw,50,25); x.fill();
+  x.fillStyle='#31e0c8'; x.fillText(badge, cx, 174);
+
+  // 큰 이모지
+  x.font="130px "+KOFONT;
+  x.fillText('🎉', cx, 330);
+
+  // 헤드라인 (그라디언트)
+  x.font="800 96px "+KOFONT;
+  const hl='탈출 성공!';
+  const hw=x.measureText(hl).width;
+  const hg=x.createLinearGradient(cx-hw/2,0,cx+hw/2,0);
+  hg.addColorStop(0,'#ffce56'); hg.addColorStop(1,'#31e0c8');
+  x.fillStyle=hg; x.fillText(hl, cx, 450);
+
+  // 서브 문구
+  x.fillStyle='rgba(210,220,245,0.92)';
+  x.font="600 37px "+KOFONT;
+  x.fillText('열여덟 하람이의 자립 여정,', cx, 528);
+  x.fillText('15개의 방을 모두 열었다.', cx, 578);
+
+  // 스탯 타일 3개
+  const tiles=[
+    {v:el('rTime').textContent, l:'탈출 시간'},
+    {v:String(S.hintsUsed), l:'사용 힌트'},
+    {v:String(S.misses), l:'오답 횟수'}
+  ];
+  const pad=70, gap=26, tw=(W-pad*2-gap*2)/3, ty=640, th=190;
+  tiles.forEach((t,i)=>{
+    const tx=pad+i*(tw+gap);
+    x.fillStyle='rgba(255,255,255,0.05)';
+    roundRect(x,tx,ty,tw,th,26); x.fill();
+    x.strokeStyle='rgba(140,170,255,0.18)'; x.lineWidth=2;
+    roundRect(x,tx,ty,tw,th,26); x.stroke();
+    x.fillStyle='#eaf0ff';
+    x.font="800 70px "+KOFONT;
+    x.fillText(t.v, tx+tw/2, ty+96);
+    x.fillStyle='rgba(150,165,200,0.95)';
+    x.font="600 30px "+KOFONT;
+    x.fillText(t.l, tx+tw/2, ty+150);
+  });
+
+  // 등급 pill
+  const rankTxt=(S.rankEmoji||'🏅')+'  '+(S.rank||'탈출자');
+  x.font="800 44px "+KOFONT;
+  const rw=x.measureText(rankTxt).width+80;
+  const ry=900;
+  x.fillStyle='rgba(181,123,255,0.16)';
+  roundRect(x,cx-rw/2,ry,rw,80,40); x.fill();
+  x.strokeStyle='rgba(181,123,255,0.45)'; x.lineWidth=2;
+  roundRect(x,cx-rw/2,ry,rw,80,40); x.stroke();
+  x.fillStyle='#eaf0ff'; x.fillText(rankTxt, cx, ry+55);
+
+  // 감성 문구
+  x.fillStyle='rgba(190,202,230,0.92)';
+  x.font="500 34px "+KOFONT;
+  x.fillText('“진짜 혼자인 줄 알았지만,', cx, 1075);
+  x.fillText('수많은 사람과 사회, 정부가 함께였다.”', cx, 1120);
+
+  // CTA
+  x.fillStyle='#7fa6ff';
+  x.font="700 36px "+KOFONT;
+  x.fillText('▶ 나도 도전하기 :  jarip.vercel.app', cx, 1210);
+
+  // 해시태그
+  x.fillStyle='rgba(140,155,190,0.9)';
+  x.font="600 30px "+KOFONT;
+  x.fillText('#자립준비청년  #자립방탈출  #자립해봄', cx, 1268);
+
+  return c;
+}
+
+function canvasToBlob(c){
+  return new Promise(res=>{ if(c.toBlob) c.toBlob(res,'image/png'); else res(dataURLtoBlob(c.toDataURL('image/png'))); });
+}
+function dataURLtoBlob(d){ const a=d.split(','),m=a[0].match(/:(.*?);/)[1],b=atob(a[1]),n=b.length,u=new Uint8Array(n); for(let i=0;i<n;i++)u[i]=b.charCodeAt(i); return new Blob([u],{type:m}); }
+
+el('shareBtn').addEventListener('click', async ()=>{
+  const btn=el('shareBtn'); const orig='📸 결과 이미지';
+  btn.disabled=true; btn.textContent='🎨 이미지 만드는 중…';
+  try{
+    const canvas=buildResultCanvas();
+    const blob=await canvasToBlob(canvas);
+    const file=new File([blob],'자립방탈출_결과.png',{type:'image/png'});
+    const shareText='🔓 자립 방탈출 클리어! ⏱️'+el('rTime').textContent+' · '+(S.rankEmoji||'')+(S.rank||'')+'\n자립준비청년 정책으로 15개의 방을 탈출하는 스토리 게임 → jarip.vercel.app';
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:'자립 방탈출', text:shareText});
+      btn.textContent='✅ 공유 완료';
+    } else {
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; a.download='자립방탈출_결과.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),4000);
+      btn.textContent='✅ 이미지 저장됨';
+    }
+  }catch(e){
+    btn.textContent='⚠️ 다시 시도';
   }
+  setTimeout(()=>{ btn.disabled=false; btn.textContent=orig; },2000);
 });
 
 /* ---------- confetti ---------- */
