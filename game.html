@@ -345,7 +345,7 @@ button{font-family:inherit}
 
     <div class="win-actions">
       <button class="btn-primary" id="replayBtn">🔄 다시 도전</button>
-      <button class="btn-ghost" id="shareBtn">📸 결과 이미지</button>
+      <button class="btn-ghost" id="shareBtn">📸 이미지로 공유하기</button>
       <a class="btn-ghost" href="/">🏠 대시보드로</a>
     </div>
 
@@ -955,7 +955,7 @@ document.querySelectorAll('.ctp-btn').forEach(b=>{
 });
 
 el('shareBtn').addEventListener('click', async ()=>{
-  const btn=el('shareBtn'); const orig='📸 결과 이미지';
+  const btn=el('shareBtn'); const orig='📸 이미지로 공유하기';
   btn.disabled=true; btn.textContent='🎨 이미지 만드는 중…';
   try{
     const canvas=buildResultCanvas(cardTheme);
