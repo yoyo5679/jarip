@@ -902,16 +902,22 @@ function buildResultCanvas(theme){
     x.fillText(t.l, tx+tw/2, ty+150);
   });
 
-  // 등급 pill
-  const rankTxt=(S.rankEmoji||'🏅')+'  '+(S.rank||'탈출자');
+  // 등급 pill — 이모지+텍스트를 따로 그려 기기별 measureText 편차로 인한 정렬 틀어짐 방지
+  const rEmoji=(S.rankEmoji||'🏅'), rLabel=(S.rank||'탈출자');
   x.font="800 44px "+KOFONT;
-  const rw=x.measureText(rankTxt).width+80;
-  const ry=900;
+  const eSlot=66;                                   // 이모지 고정 슬롯
+  const lblW=x.measureText(rLabel).width;
+  const contentW=eSlot+lblW;
+  const rw=contentW+70, ry=900, sx=cx-contentW/2;   // 이모지+텍스트 블록을 중앙정렬
   x.fillStyle=P.pillBg;
   roundRect(x,cx-rw/2,ry,rw,80,40); x.fill();
   x.strokeStyle=P.pillBorder; x.lineWidth=2;
   roundRect(x,cx-rw/2,ry,rw,80,40); x.stroke();
-  x.fillStyle=P.pillTx; x.fillText(rankTxt, cx, ry+55);
+  x.fillStyle=P.pillTx;
+  x.textAlign='left';
+  x.fillText(rEmoji, sx, ry+55);
+  x.fillText(rLabel, sx+eSlot, ry+55);
+  x.textAlign='center';
 
   // 감성 문구
   x.fillStyle=P.quote;
