@@ -108,7 +108,6 @@ button{font-family:inherit}
 }
 .btn-primary:hover{transform:translateY(-2px);box-shadow:0 22px 50px -12px rgba(91,140,255,0.85)}
 .btn-primary:active{transform:translateY(0)}
-.best-note{margin-top:16px;font-size:.82rem;color:var(--txt-faint);position:relative}
 
 /* ===== HUD ===== */
 .hud{display:flex;align-items:center;gap:12px;margin-bottom:14px}
@@ -297,7 +296,6 @@ button{font-family:inherit}
 
     <div class="cta">
       <button class="btn-primary" id="startBtn">🚪 탈출 시작하기</button>
-      <div class="best-note" id="bestNote"></div>
     </div>
   </section>
 
@@ -566,12 +564,6 @@ el('themeBtn').addEventListener('click',()=>{
   syncThemeIcon();
 });
 
-/* ---------- best record ---------- */
-(function showBest(){
-  const b = localStorage.getItem('escape_best');
-  if(b){ el('bestNote').innerHTML = '🏅 나의 최고 기록 · <b>'+b+'</b>'; }
-})();
-
 /* ---------- helpers ---------- */
 function normalize(str){
   return (str||"").toString().trim().toLowerCase()
@@ -795,17 +787,6 @@ function finish(){
   else { rank='끝까지 해낸 탈출자'; emoji='🎖️'; }
   S.rank=rank; S.rankEmoji=emoji;
   el('rankLine').innerHTML=emoji+' 당신의 등급 : <span style="color:var(--accent-2)">'+rank+'</span>';
-
-  // best record (fewest hints+misses, then time)
-  const prevBest=localStorage.getItem('escape_best');
-  const curLabel=tStr+' · 힌트'+S.hintsUsed+' · 오답'+S.misses;
-  const curKey=parseInt(localStorage.getItem('escape_best_key')||'999999',10);
-  const thisKey=score*100000 + total;
-  if(!prevBest || thisKey<curKey){
-    localStorage.setItem('escape_best',curLabel);
-    localStorage.setItem('escape_best_key',String(thisKey));
-    el('bestNote').innerHTML='🏅 나의 최고 기록 · <b>'+curLabel+'</b>';
-  }
 
   launchConfetti();
   window.scrollTo({top:0,behavior:'smooth'});
