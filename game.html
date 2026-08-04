@@ -223,6 +223,11 @@ button{font-family:inherit}
 .result-cell .rc-val{font-size:1.6rem;font-weight:800;font-family:var(--mono);letter-spacing:-0.01em}
 .result-cell .rc-lab{font-size:.76rem;color:var(--txt-faint);margin-top:5px;font-weight:600}
 .rank-line{font-size:1.05rem;font-weight:700;margin-bottom:6px}
+.card-theme-pick{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:2px 0 14px}
+.card-theme-pick .ctp-label{font-size:.82rem;color:var(--txt-faint);font-weight:600;margin-right:4px}
+.ctp-btn{padding:8px 15px;border-radius:12px;border:1px solid var(--stroke);background:var(--panel);color:var(--txt-dim);font-weight:700;font-size:.85rem;cursor:pointer;transition:.18s}
+.ctp-btn:hover{border-color:var(--stroke-strong)}
+.ctp-btn.active{border-color:var(--accent);color:var(--txt);background:rgba(91,140,255,0.16)}
 .win-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px}
 .epilogue{margin-top:26px;text-align:left;background:rgba(0,0,0,0.16);border:1px solid var(--stroke);border-radius:16px;padding:18px 20px}
 [data-theme="light"] .epilogue{background:rgba(40,70,150,0.05)}
@@ -317,6 +322,12 @@ button{font-family:inherit}
     </div>
 
     <div class="rank-line" id="rankLine"></div>
+
+    <div class="card-theme-pick" role="group" aria-label="공유 카드 테마 선택">
+      <span class="ctp-label">공유 카드</span>
+      <button class="ctp-btn active" data-cardtheme="dark" type="button">🌙 다크</button>
+      <button class="ctp-btn" data-cardtheme="light" type="button">☀️ 라이트</button>
+    </div>
 
     <div class="win-actions">
       <button class="btn-primary" id="replayBtn">🔄 다시 도전</button>
@@ -793,7 +804,32 @@ function roundRect(ctx,x,y,w,h,r){
   ctx.closePath();
 }
 
-function buildResultCanvas(){
+function buildResultCanvas(theme){
+  const dark = theme!=='light';
+  const P = dark ? {
+    bg0:'#0a0f1f', bg1:'#141c34', bg2:'#0c2330',
+    g1:'rgba(91,140,255,0.32)', g2:'rgba(181,123,255,0.28)', g3:'rgba(49,224,200,0.20)',
+    border:'rgba(140,170,255,0.25)',
+    brand:'rgba(159,176,214,0.95)',
+    badgeBg:'rgba(91,140,255,0.16)', badgeTx:'#31e0c8',
+    hlA:'#ffce56', hlB:'#31e0c8',
+    sub:'rgba(210,220,245,0.92)',
+    tileBg:'rgba(255,255,255,0.05)', tileBorder:'rgba(140,170,255,0.18)', tileVal:'#eaf0ff', tileLab:'rgba(150,165,200,0.95)',
+    pillBg:'rgba(181,123,255,0.16)', pillBorder:'rgba(181,123,255,0.45)', pillTx:'#eaf0ff',
+    quote:'rgba(190,202,230,0.92)', cta:'#7fa6ff', tag:'rgba(140,155,190,0.9)'
+  } : {
+    bg0:'#eef2fc', bg1:'#f6f8ff', bg2:'#e7f8f3',
+    g1:'rgba(91,140,255,0.20)', g2:'rgba(181,123,255,0.16)', g3:'rgba(13,148,136,0.12)',
+    border:'rgba(40,70,150,0.16)',
+    brand:'rgba(90,104,130,0.95)',
+    badgeBg:'rgba(91,140,255,0.14)', badgeTx:'#0d9488',
+    hlA:'#7c3aed', hlB:'#0d9488',
+    sub:'rgba(40,54,84,0.92)',
+    tileBg:'rgba(20,28,48,0.045)', tileBorder:'rgba(40,70,150,0.16)', tileVal:'#16213c', tileLab:'rgba(90,104,130,0.95)',
+    pillBg:'rgba(124,58,237,0.10)', pillBorder:'rgba(124,58,237,0.40)', pillTx:'#1e1b3a',
+    quote:'rgba(55,68,96,0.92)', cta:'#4f46e5', tag:'rgba(120,132,160,0.95)'
+  };
+
   const W=1080, H=1350;
   const c=document.createElement('canvas'); c.width=W; c.height=H;
   const x=c.getContext('2d');
@@ -801,21 +837,21 @@ function buildResultCanvas(){
 
   // 배경 그라디언트
   const bg=x.createLinearGradient(0,0,0,H);
-  bg.addColorStop(0,'#0a0f1f'); bg.addColorStop(0.55,'#141c34'); bg.addColorStop(1,'#0c2330');
+  bg.addColorStop(0,P.bg0); bg.addColorStop(0.55,P.bg1); bg.addColorStop(1,P.bg2);
   x.fillStyle=bg; x.fillRect(0,0,W,H);
   // 은은한 글로우
   function glow(gx,gy,gr,col){ const g=x.createRadialGradient(gx,gy,0,gx,gy,gr); g.addColorStop(0,col); g.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=g; x.fillRect(0,0,W,H); }
-  glow(150,120,520,'rgba(91,140,255,0.32)');
-  glow(980,180,520,'rgba(181,123,255,0.28)');
-  glow(cx,1320,640,'rgba(49,224,200,0.20)');
+  glow(150,120,520,P.g1);
+  glow(980,180,520,P.g2);
+  glow(cx,1320,640,P.g3);
   // 외곽 테두리
-  x.strokeStyle='rgba(140,170,255,0.25)'; x.lineWidth=3;
+  x.strokeStyle=P.border; x.lineWidth=3;
   roundRect(x,20,20,W-40,H-40,40); x.stroke();
 
   x.textAlign='center'; x.textBaseline='alphabetic';
 
   // 상단 브랜드
-  x.fillStyle='rgba(159,176,214,0.95)';
+  x.fillStyle=P.brand;
   x.font="600 34px "+KOFONT;
   x.fillText('🌸 자립해봄  ·  자립 방탈출', cx, 110);
 
@@ -823,9 +859,9 @@ function buildResultCanvas(){
   x.font="700 26px "+KOFONT;
   const badge='온라인 스토리 방탈출';
   const bw=x.measureText(badge).width+56;
-  x.fillStyle='rgba(91,140,255,0.16)';
+  x.fillStyle=P.badgeBg;
   roundRect(x,cx-bw/2,140,bw,50,25); x.fill();
-  x.fillStyle='#31e0c8'; x.fillText(badge, cx, 174);
+  x.fillStyle=P.badgeTx; x.fillText(badge, cx, 174);
 
   // 큰 이모지
   x.font="130px "+KOFONT;
@@ -836,11 +872,11 @@ function buildResultCanvas(){
   const hl='탈출 성공!';
   const hw=x.measureText(hl).width;
   const hg=x.createLinearGradient(cx-hw/2,0,cx+hw/2,0);
-  hg.addColorStop(0,'#ffce56'); hg.addColorStop(1,'#31e0c8');
+  hg.addColorStop(0,P.hlA); hg.addColorStop(1,P.hlB);
   x.fillStyle=hg; x.fillText(hl, cx, 450);
 
   // 서브 문구
-  x.fillStyle='rgba(210,220,245,0.92)';
+  x.fillStyle=P.sub;
   x.font="600 37px "+KOFONT;
   x.fillText('열여덟 하람이의 자립 여정,', cx, 528);
   x.fillText('15개의 방을 모두 열었다.', cx, 578);
@@ -854,14 +890,14 @@ function buildResultCanvas(){
   const pad=70, gap=26, tw=(W-pad*2-gap*2)/3, ty=640, th=190;
   tiles.forEach((t,i)=>{
     const tx=pad+i*(tw+gap);
-    x.fillStyle='rgba(255,255,255,0.05)';
+    x.fillStyle=P.tileBg;
     roundRect(x,tx,ty,tw,th,26); x.fill();
-    x.strokeStyle='rgba(140,170,255,0.18)'; x.lineWidth=2;
+    x.strokeStyle=P.tileBorder; x.lineWidth=2;
     roundRect(x,tx,ty,tw,th,26); x.stroke();
-    x.fillStyle='#eaf0ff';
+    x.fillStyle=P.tileVal;
     x.font="800 70px "+KOFONT;
     x.fillText(t.v, tx+tw/2, ty+96);
-    x.fillStyle='rgba(150,165,200,0.95)';
+    x.fillStyle=P.tileLab;
     x.font="600 30px "+KOFONT;
     x.fillText(t.l, tx+tw/2, ty+150);
   });
@@ -871,25 +907,25 @@ function buildResultCanvas(){
   x.font="800 44px "+KOFONT;
   const rw=x.measureText(rankTxt).width+80;
   const ry=900;
-  x.fillStyle='rgba(181,123,255,0.16)';
+  x.fillStyle=P.pillBg;
   roundRect(x,cx-rw/2,ry,rw,80,40); x.fill();
-  x.strokeStyle='rgba(181,123,255,0.45)'; x.lineWidth=2;
+  x.strokeStyle=P.pillBorder; x.lineWidth=2;
   roundRect(x,cx-rw/2,ry,rw,80,40); x.stroke();
-  x.fillStyle='#eaf0ff'; x.fillText(rankTxt, cx, ry+55);
+  x.fillStyle=P.pillTx; x.fillText(rankTxt, cx, ry+55);
 
   // 감성 문구
-  x.fillStyle='rgba(190,202,230,0.92)';
+  x.fillStyle=P.quote;
   x.font="500 34px "+KOFONT;
   x.fillText('“진짜 혼자인 줄 알았지만,', cx, 1075);
   x.fillText('수많은 사람과 사회, 정부가 함께였다.”', cx, 1120);
 
   // CTA
-  x.fillStyle='#7fa6ff';
+  x.fillStyle=P.cta;
   x.font="700 36px "+KOFONT;
   x.fillText('▶ 나도 도전하기 :  jarip.vercel.app', cx, 1198);
 
   // 해시태그 (2줄)
-  x.fillStyle='rgba(140,155,190,0.9)';
+  x.fillStyle=P.tag;
   x.font="600 30px "+KOFONT;
   x.fillText('#자립준비청년  #자립방탈출  #자립해봄', cx, 1252);
   x.fillText('#서울시아동공동생활가정지원센터', cx, 1296);
@@ -902,11 +938,20 @@ function canvasToBlob(c){
 }
 function dataURLtoBlob(d){ const a=d.split(','),m=a[0].match(/:(.*?);/)[1],b=atob(a[1]),n=b.length,u=new Uint8Array(n); for(let i=0;i<n;i++)u[i]=b.charCodeAt(i); return new Blob([u],{type:m}); }
 
+// 공유 카드 테마 선택 (다크/라이트)
+let cardTheme='dark';
+document.querySelectorAll('.ctp-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    cardTheme=b.dataset.cardtheme;
+    document.querySelectorAll('.ctp-btn').forEach(o=>o.classList.toggle('active',o===b));
+  });
+});
+
 el('shareBtn').addEventListener('click', async ()=>{
   const btn=el('shareBtn'); const orig='📸 결과 이미지';
   btn.disabled=true; btn.textContent='🎨 이미지 만드는 중…';
   try{
-    const canvas=buildResultCanvas();
+    const canvas=buildResultCanvas(cardTheme);
     const blob=await canvasToBlob(canvas);
     const file=new File([blob],'자립방탈출_결과.png',{type:'image/png'});
     const shareText='🔓 자립 방탈출 클리어! ⏱️'+el('rTime').textContent+' · '+(S.rankEmoji||'')+(S.rank||'')+'\n자립준비청년 정책으로 15개의 방을 탈출하는 스토리 게임 → jarip.vercel.app';
