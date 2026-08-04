@@ -228,6 +228,14 @@ button{font-family:inherit}
 .ctp-btn{padding:8px 15px;border-radius:12px;border:1px solid var(--stroke);background:var(--panel);color:var(--txt-dim);font-weight:700;font-size:.85rem;cursor:pointer;transition:.18s}
 .ctp-btn:hover{border-color:var(--stroke-strong)}
 .ctp-btn.active{border-color:var(--accent);color:var(--txt);background:rgba(91,140,255,0.16)}
+.speed-notice{display:flex;gap:14px;align-items:flex-start;text-align:left;margin:0 auto 22px;max-width:520px;padding:16px 18px;border-radius:16px;border:1px dashed rgba(255,206,86,0.55);background:rgba(255,206,86,0.10);animation:cardIn .5s cubic-bezier(.2,.8,.2,1)}
+.speed-notice .sn-emoji{font-size:2rem;flex:none;line-height:1.1}
+.speed-notice .sn-body{display:flex;flex-direction:column;gap:9px;min-width:0}
+.speed-notice .sn-body b{color:var(--gold)}
+.speed-notice .sn-body>b{font-size:1.02rem}
+.speed-notice .sn-body span{color:var(--txt-dim);font-size:.93rem;line-height:1.65}
+.sn-btn{align-self:flex-start;margin-top:2px;padding:10px 17px;border-radius:12px;border:1px solid rgba(255,206,86,0.5);background:rgba(255,206,86,0.15);color:var(--txt);font-weight:700;font-size:.87rem;cursor:pointer;transition:.18s}
+.sn-btn:hover{background:rgba(255,206,86,0.26)}
 .win-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px}
 .epilogue{margin-top:26px;text-align:left;background:rgba(0,0,0,0.16);border:1px solid var(--stroke);border-radius:16px;padding:18px 20px}
 [data-theme="light"] .epilogue{background:rgba(40,70,150,0.05)}
@@ -311,6 +319,14 @@ button{font-family:inherit}
 
   <!-- ===================== WIN ===================== -->
   <section id="winScreen" class="panel win hidden">
+    <div id="speedNotice" class="speed-notice hidden">
+      <span class="sn-emoji">🕵️</span>
+      <div class="sn-body">
+        <b>초고속 탈출 감지!</b>
+        <span>정답은 맞췄지만… 하람이 이야기는 안 읽으셨죠? 😅 하람이가 “나 좀 봐줘요~” 하고 있어요. 이번엔 천천히, <b>이야기까지</b> 클리어해볼까요?</span>
+        <button id="rereadBtn" class="sn-btn" type="button">🐢 천천히 다시 읽기</button>
+      </div>
+    </div>
     <div class="trophy">🏡</div>
     <h2><span class="grad">자립의 문, 열렸다!</span></h2>
     <p class="sub">진짜 혼자 해냈다고 생각했던 하람. 하지만 수많은 사람과 사회, 그리고 정부가 보이지 않는 순간에도 처음부터 곁에 있었습니다. 이 여정에서 만난 제도들은 실제로 당신 곁의 자립준비청년에게 열쇠가 됩니다.</p>
@@ -573,6 +589,7 @@ function elapsed(){ return Math.floor((Date.now()-S.startTime)/1000); }
 /* ---------- flow ---------- */
 el('startBtn').addEventListener('click', startGame);
 el('replayBtn').addEventListener('click', startGame);
+el('rereadBtn').addEventListener('click', startGame);
 
 function startGame(){
   S.idx=0; S.hintsUsed=0; S.misses=0; S.startTime=Date.now();
@@ -765,6 +782,9 @@ function finish(){
   el('rTime').textContent=tStr;
   el('rHints').textContent=S.hintsUsed;
   el('rMiss').textContent=S.misses;
+
+  // 스토리 스킵 감지 — 20초 이내 탈출 시 유쾌하게 안내
+  el('speedNotice').classList.toggle('hidden', !(total<20));
 
   // rank
   let rank, emoji;
