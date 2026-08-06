@@ -1,6 +1,6 @@
 // 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관 + 부산자립지원전담기관)
 // 마지막 크롤링 일시: 2026-06-16
-window.initialDataVersion = "v2026.06.26_v85";
+window.initialDataVersion = "v2026.06.26_v86";
 window.initialPolicies = [
   {
     "id": 106,
@@ -738,21 +738,6 @@ window.initialPolicies = [
     "id": 847
   },
   {
-    "title": "[부산자립지원전담기관] 자격증취득지원사업 추가모집 안내",
-    "category": "life",
-    "type": "공공·지자체",
-    "provider": "부산광역시보호아동자립지원센터",
-    "region": "부산",
-    "target": "부산 거주 보호연장아동 및 자립준비청년",
-    "content": "부산 친구들 주목! 🙋‍♀️ 미래를 위한 투자, 자격증 따고 싶은데 망설이고 있었다면 완전 꿀소식! 🍯 부산자립지원전담기관에서 자격증 취득 비용을 팍팍 지원해 준대! 💸 8월 5일까지 추가 모집이니까, 서둘러 신청해서 스펙업 제대로 해보자! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
-    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
-    "link": "https://www.busanjarip.or.kr/edu/sub5_2.php?zipEncode=9G2yYfwztb3B0zspKXwzPzwELTMj9uwBH5wELTMjX0tzNfgC39MBMKJn10tB150BM5wAMetpSfMvWLME",
-    "date": "2026-07-28 ~ 2026-08-05",
-    "status": "모집중",
-    "source": "부산광역시자립지원전담기관",
-    "id": 848
-  },
-  {
     "title": "[국가아동권리보장원] 팜러닝 자립준비청년 대상 농업일자리 체험교육",
     "category": "job",
     "type": "공공·지자체",
@@ -903,21 +888,6 @@ window.initialPolicies = [
     "id": 858
   },
   {
-    "title": "[부산자립지원전담기관] 자립축하사업 자립축하키트 지원 4회기 참여자 모집",
-    "category": "life",
-    "type": "공공·지자체",
-    "provider": "부산광역시보호아동자립지원센터",
-    "region": "부산",
-    "target": "부산 거주 보호연장아동 및 자립준비청년",
-    "content": "부산에 사는 친구들 주목! 📢 드디어 기다리던 자립축하키트 4회기 모집이 시작됐어! 🎉 부산자립지원전담기관에서 보호연장아동이랑 자립준비청년 친구들을 위해 알찬 키트를 준비했대. 2026년 7월 20일부터 8월 5일까지니까 놓치지 말고 꼭 신청해봐! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
-    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
-    "link": "https://www.busanjarip.or.kr/edu/sub5_2.php?zipEncode=9G2yYfwztb3B0zspKXwzPzwELTMj9uwBH5wELTMjX0tzNfgC39MBMuJn10tB150BM5wAMetpSfMvWLME",
-    "date": "2026-07-20 ~ 2026-08-05",
-    "status": "모집중",
-    "source": "부산광역시자립지원전담기관",
-    "id": 859
-  },
-  {
     "title": "[부산자립지원전담기관] 2026년 사회적지지체계형성사업 온기종기 참여자 모...",
     "category": "life",
     "type": "공공·지자체",
@@ -961,6 +931,51 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "자립정보ON",
     "id": 862
+  },
+  {
+    "title": "[자립정보ON] 「경기도자립준비청년 법률SOS (3차)」 참여자 모집",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "경기도자립지원전담기관",
+    "region": "경기",
+    "target": "자립준비청년 대상",
+    "content": "얘들아, 혹시 법률 문제로 맘 졸이고 있는 친구들 있어? 😥 경기도 사는 자립준비청년이라면 주목! 경기도자립지원전담기관에서 '법률SOS' 3차 참여자를 모집한대. 혼자 끙끙 앓지 말고 전문가 도움받아 똑똑하게 해결하자! 😮 신청은 8월 4일부터 18일까지니까 놓치지 말고 지금 바로 신청 고고! 🏃‍♀️ 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2024&menuPos=1",
+    "date": "2026-08-04 ~ 2026-08-18",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 863
+  },
+  {
+    "title": "[Develop Career] 생성형 AI 활용 교육",
+    "category": "education",
+    "type": "공공·지자체",
+    "provider": "한국표준협회",
+    "region": "세종 외 (2)",
+    "target": "자립준비청년 대상",
+    "content": "친구들, 요즘 핫한 생성형 AI, 혹시 나도 배워보고 싶었다면 주목! 🤩 한국표준협회에서 자립준비청년 친구들을 위한 ✨무료✨ AI 교육을 열었대. 세종 등 여러 지역에서 8월 5일부터 9월 6일까지 진행되니까, 미래 커리어를 확! 잡고 싶다면 놓치지 마! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2023&menuPos=1",
+    "date": "2026-08-05 ~ 2026-09-06",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 864
+  },
+  {
+    "title": "[자립정보ON] 자립준비청년 음악활동 자조모임 런런 앙상블",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "홀트아동복지회",
+    "region": "전국",
+    "target": "자립준비청년 대상",
+    "content": "친구들, 혹시 음악에 푹 빠져 살고 있거나, 새로운 취미 찾고 있다면 주목! 🎧 홀트아동복지회에서 전국 자립준비청년을 위한 음악 자조모임 '런런 앙상블'을 모집한대! 악기 연주 좀 하는 친구들도, 완전 초보도 모두 환영이니까 부담 없이 2026년 8월 5일부터 17일까지 신청해봐. 같이 음악 만들면서 스트레스 날리고, 찐친도 만들 기회 놓치지 마! 🎸 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2022&menuPos=1",
+    "date": "2026-08-05 ~ 2026-08-17",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 865
   }
 ];
 
