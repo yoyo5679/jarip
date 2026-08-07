@@ -1811,3 +1811,103 @@ select:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
+
+/* ===== 자립 방탈출 게임 입장 배너 ===== */
+.game-banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0; /* main-content(flex column, height:100vh)에서 overflow:hidden로 인한 세로 찌그러짐 방지 */
+  margin-bottom: 1.25rem;
+  padding: 1.1rem 1.4rem;
+  border-radius: 18px;
+  text-decoration: none;
+  color: #fff;
+  overflow: hidden;
+  background: linear-gradient(120deg, #4f46e5, #7c3aed 45%, #0d9488);
+  box-shadow: 0 14px 34px -14px rgba(79, 70, 229, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.game-banner:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 44px -14px rgba(79, 70, 229, 0.75);
+}
+.game-banner-glow {
+  position: absolute;
+  top: -60%;
+  right: -10%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.28), transparent 65%);
+  pointer-events: none;
+}
+.game-banner-icon {
+  font-size: 2.3rem;
+  flex: none;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
+  animation: bannerFloat 3.5s ease-in-out infinite;
+}
+@keyframes bannerFloat { 50% { transform: translateY(-6px); } }
+.game-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  z-index: 1;
+}
+.game-banner-title {
+  font-family: var(--font-accent), var(--font-base);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.game-banner-badge {
+  font-size: 0.66rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  letter-spacing: 0.03em;
+}
+.game-banner-desc {
+  font-size: 0.86rem;
+  opacity: 0.92;
+  line-height: 1.4;
+}
+.game-banner-cta {
+  margin-left: auto;
+  flex: none;
+  z-index: 1;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.6rem 1.05rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: background 0.2s ease;
+}
+.game-banner:hover .game-banner-cta { background: rgba(255, 255, 255, 0.28); }
+.game-banner-cta i { transition: transform 0.2s ease; }
+.game-banner:hover .game-banner-cta i { transform: translateX(3px); }
+
+@media (max-width: 768px) {
+  .game-banner { padding: 0.95rem 1.1rem; gap: 0.8rem; }
+  .game-banner-icon { font-size: 1.9rem; }
+  .game-banner-title { font-size: 1.02rem; }
+  .game-banner-desc { font-size: 0.78rem; }
+  .game-banner-cta { padding: 0.5rem 0.7rem; font-size: 0.8rem; }
+  .game-banner-cta span { display: none; }
+}
+@media (max-width: 480px) {
+  .game-banner-desc { display: none; }
+}
