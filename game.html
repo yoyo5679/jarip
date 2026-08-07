@@ -14,8 +14,8 @@
 
 :root{
   --bg-main:#070c18;
-  --panel-bg:rgba(18, 28, 48, 0.82);
-  --panel-border:rgba(140, 170, 255, 0.2);
+  --panel-bg:rgba(18, 28, 48, 0.88);
+  --panel-border:rgba(140, 170, 255, 0.22);
   --txt:#eaf0ff;
   --txt-dim:#94a3b8;
   --accent:#ffcc00;
@@ -82,8 +82,8 @@ canvas#gameCanvas{width:100%;height:100%;display:block;image-rendering:auto}
 }
 .btn-a:active{transform:scale(0.96)}
 
-/* ===== Quiz Modal ===== */
-.modal-mask{position:fixed;inset:0;z-index:200;background:rgba(5,9,20,0.85);backdrop-filter:blur(8px);display:grid;place-items:center;padding:16px;opacity:0;pointer-events:none;transition:.25s ease}
+/* ===== Quiz & Victory Modal Overlays ===== */
+.modal-mask{position:fixed;inset:0;z-index:250;background:rgba(5,9,20,0.88);backdrop-filter:blur(8px);display:grid;place-items:center;padding:16px;opacity:0;pointer-events:none;transition:.25s ease}
 .modal-mask.open{opacity:1;pointer-events:all}
 .modal-box{width:100%;max-width:580px;background:#121a2c;border:1px solid var(--panel-border);border-radius:24px;padding:24px;box-shadow:0 30px 70px rgba(0,0,0,0.9);position:relative;max-height:90vh;overflow-y:auto;color:#fff}
 .modal-close{position:absolute;top:18px;right:18px;width:34px;height:34px;border-radius:50%;border:1px solid var(--panel-border);background:rgba(255,255,255,0.08);color:#fff;cursor:pointer}
@@ -106,11 +106,13 @@ canvas#gameCanvas{width:100%;height:100%;display:block;image-rendering:auto}
 .feedback-msg.no{color:var(--danger)}
 .hint-text{margin-top:12px;padding:12px 14px;border-radius:12px;background:rgba(255,204,0,0.1);border:1px dashed var(--accent);font-size:0.88rem;color:var(--accent)}
 
-/* ===== Win Panel ===== */
-.win-panel{padding:32px;text-align:center;background:#121a2c;border:1px solid var(--panel-border);border-radius:24px;margin-top:16px}
-.win-title{font-family:var(--font-game);color:var(--accent);font-size:1.6rem;margin-bottom:12px}
-.win-desc{color:var(--txt-dim);line-height:1.75;margin-bottom:20px;font-size:0.98rem}
-.btn-restart{padding:16px 32px;border-radius:16px;border:none;background:linear-gradient(120deg,var(--accent-blue),#6366f1);color:#fff;font-family:var(--font-game);font-size:1.1rem;cursor:pointer}
+/* ===== Victory Modal Content ===== */
+.win-content{text-align:center;padding:10px 0}
+.win-trophy{font-size:4rem;margin-bottom:10px;animation:floatTrophy 2s ease-in-out infinite}
+@keyframes floatTrophy{50%{transform:translateY(-8px)}}
+.win-h2{font-family:var(--font-game);color:var(--accent);font-size:1.6rem;margin-bottom:12px}
+.win-p{color:var(--txt-dim);line-height:1.75;margin-bottom:20px;font-size:0.96rem}
+.btn-restart{padding:16px 32px;border-radius:16px;border:none;background:linear-gradient(120deg,var(--brand-green),var(--accent-blue));color:#fff;font-family:var(--font-game);font-size:1.1rem;cursor:pointer}
 
 .hidden{display:none!important}
 </style>
@@ -126,7 +128,7 @@ canvas#gameCanvas{width:100%;height:100%;display:block;image-rendering:auto}
   </header>
 
   <!-- Game Console Frame -->
-  <div class="game-frame">
+  <div class="game-frame" id="gameConsole">
     <!-- HUD Bar -->
     <div class="hud-bar">
       <div class="stage-badge">ROOM <span id="hudStageNum">01</span> / 15</div>
@@ -162,13 +164,6 @@ canvas#gameCanvas{width:100%;height:100%;display:block;image-rendering:auto}
       <button class="btn-a" id="btnA">🔍 [E] 조사</button>
     </div>
   </div>
-
-  <!-- Win Panel -->
-  <div id="winPanel" class="win-panel hidden">
-    <div class="win-title">🎉 15개 챕터 완벽 탈출 성공!</div>
-    <p class="win-desc">하람이는 15개 방을 모두 탐험하며 수많은 지지와 실제 자립 지원 정책들을 발견했습니다.<br>당당한 자립의 문을 연 하람이의 새로운 첫발을 축하해 주세요!</p>
-    <button class="btn-restart" id="btnRestart">🔄 처음부터 다시하기</button>
-  </div>
 </div>
 
 <!-- Interactive Quiz Modal -->
@@ -184,10 +179,23 @@ canvas#gameCanvas{width:100%;height:100%;display:block;image-rendering:auto}
   </div>
 </div>
 
+<!-- Final Victory Escape Modal -->
+<div class="modal-mask" id="winModal">
+  <div class="modal-box">
+    <button class="modal-close" id="winClose">✕</button>
+    <div class="win-content">
+      <div class="win-trophy">🏡🎉</div>
+      <div class="win-h2">15개 챕터 최종 탈출 성공!</div>
+      <p class="win-p">진짜 혼자 해냈다고 생각했던 하람. 하지만 수많은 사람과 사회, 그리고 정부가 보이지 않는 순간에도 처음부터 곁에 있었습니다.<br><br>당당한 자립의 문을 연 하람이의 아름다운 새 출발을 진심으로 축하해 주세요!</p>
+      <button class="btn-restart" id="btnRestart">🔄 처음부터 다시 도전하기</button>
+    </div>
+  </div>
+</div>
+
 <script>
 "use strict";
 
-/* ---------- STAGES Data (15 Original Story Rooms) ---------- */
+/* ---------- STAGES Data (15 Story Rooms) ---------- */
 const STAGES = [
   {
     num:1, name:"열여덟, 새 출발", kicker:"CHAPTER 01 · 그룹홈 나의 방",
@@ -414,7 +422,7 @@ function loop() {
 }
 
 function update() {
-  if (el('quizModal').classList.contains('open')) return;
+  if (el('quizModal').classList.contains('open') || el('winModal').classList.contains('open')) return;
 
   const speed = 4;
   let dx = 0, dy = 0;
@@ -451,7 +459,7 @@ function render() {
     ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
-  /* 2. Props & Door */
+  /* 2. Props & Door Marker */
   let nearbyTarget = null;
 
   stage.props.forEach(p => {
@@ -465,7 +473,7 @@ function render() {
     ctx.fillText(p.name, p.x, p.y + 36);
 
     const dist = Math.hypot(state.player.x - p.x, state.player.y - p.y);
-    if (dist < 55) nearbyTarget = p;
+    if (dist < 75) nearbyTarget = p;
   });
 
   /* 3. Render NPC */
@@ -479,7 +487,7 @@ function render() {
     ctx.fillText(npc.name, npc.x, npc.y + 24);
 
     const dist = Math.hypot(state.player.x - npc.x, state.player.y - npc.y);
-    if (dist < 55) nearbyTarget = { ...npc, type: 'npc', emoji: '💬' };
+    if (dist < 75) nearbyTarget = { ...npc, type: 'npc', emoji: '💬' };
   }
 
   /* 4. Render Original Companion '새싹이' (Jaripon Sprout Mascot) */
@@ -501,7 +509,7 @@ function render() {
 
     if (nearbyTarget.type === 'door') {
       el('rpgSpeaker').textContent = '🚪 출구 문';
-      el('rpgText').textContent = state.hasKey ? '🔑 [열쇠]를 얻었다! [E]키를 눌러 문을 열고 다음 챕터로 진행하자!' : '🔒 문이 굳게 잠겨 있다... (방 안의 가구나 NPC를 조사해 열쇠를 구하자!)';
+      el('rpgText').textContent = state.hasKey ? '🔑 [열쇠]를 얻었다! [E]키를 눌러 최종 문을 열고 탈출하자!' : '🔒 문이 굳게 잠겨 있다... (방 안의 가구나 NPC를 조사해 열쇠를 구하자!)';
     } else if (nearbyTarget.type === 'npc') {
       el('rpgSpeaker').textContent = `🗣️ ${nearbyTarget.name}`;
       el('rpgText').textContent = `${nearbyTarget.name}님에게 다가갔다. [E]키를 눌러 대화를 나누고 열쇠 퀴즈를 풀자!`;
@@ -523,8 +531,8 @@ function drawSproutCompanion(x, y) {
 
 function triggerAction() {
   const stage = STAGES[state.stageIdx];
-  const nearbyProp = stage.props.find(p => Math.hypot(state.player.x - p.x, state.player.y - p.y) < 60);
-  const nearbyNpc = stage.npc && Math.hypot(state.player.x - stage.npc.x, state.player.y - stage.npc.y) < 60;
+  const nearbyProp = stage.props.find(p => Math.hypot(state.player.x - p.x, state.player.y - p.y) < 75);
+  const nearbyNpc = stage.npc && Math.hypot(state.player.x - stage.npc.x, state.player.y - stage.npc.y) < 75;
 
   if (nearbyProp && nearbyProp.type === 'door') {
     if (state.hasKey) {
@@ -536,6 +544,7 @@ function triggerAction() {
         updateHud();
         setDialogue('🎉 탈출 성공!', `🔑 열쇠로 문을 열고 ${STAGES[state.stageIdx].num}번 방으로 들어왔다!`);
       } else {
+        /* Final Stage 15 Exit Door Unlocked -> Show Victory Overlay Modal! */
         showWin();
       }
     } else {
@@ -608,9 +617,18 @@ function checkChoice(idx) {
 function onQuizSuccess() {
   state.hasKey = true;
   updateHud();
-  el('modalFeedback').className = 'feedback-msg ok';
-  el('modalFeedback').textContent = '🎉 정답입니다! 🔑 [ROOM 열쇠]를 획득했습니다. 출구 문으로 가세요!';
-  setDialogue('🔑 열쇠 획득!', '열쇠를 획득했습니다! 오른쪽 출구 문(🚪)으로 이동해 문을 열고 탈출하세요!');
+  
+  if (state.stageIdx + 1 === STAGES.length) {
+    /* Final Room 15 Success -> Prompt escape */
+    el('modalFeedback').className = 'feedback-msg ok';
+    el('modalFeedback').textContent = '🎉 정답입니다! 🔑 [최종 자립 열쇠]를 획득했습니다! 오른쪽 탈출 문(🚪)을 선택하세요!';
+    setDialogue('🔑 최종 열쇠 획득!', '마지막 자립 열쇠를 획득했습니다! 오른쪽 최종 문(🚪)으로 가서 문을 열어 탈출을 완료하세요!');
+  } else {
+    el('modalFeedback').className = 'feedback-msg ok';
+    el('modalFeedback').textContent = '🎉 정답입니다! 🔑 [ROOM 열쇠]를 획득했습니다. 출구 문으로 가세요!';
+    setDialogue('🔑 열쇠 획득!', '열쇠를 획득했습니다! 오른쪽 출구 문(🚪)으로 이동해 문을 열고 탈출하세요!');
+  }
+
   setTimeout(() => {
     el('quizModal').classList.remove('open');
   }, 1200);
@@ -625,6 +643,7 @@ function onQuizWrong(msg) {
 }
 
 el('modalClose').onclick = () => el('quizModal').classList.remove('open');
+el('winClose').onclick = () => el('winModal').classList.remove('open');
 
 function updateHud() {
   const stage = STAGES[state.stageIdx];
@@ -642,12 +661,14 @@ function updateHud() {
 }
 
 function showWin() {
-  el('winPanel').classList.remove('hidden');
+  /* Open Victory Modal Popup over the screen! */
+  el('winModal').classList.add('open');
+  setDialogue('🏡 15개 챕터 완벽 탈출!', '수많은 지지와 정책 손길을 찾아낸 하람이의 자립 탈출을 진심으로 축하합니다!');
 }
 
 el('btnRestart').onclick = () => {
   state.stageIdx = 0; state.hasKey = false; state.player.x = 100; state.player.y = 240; state.follower.x = 70; state.follower.y = 240;
-  el('winPanel').classList.add('hidden');
+  el('winModal').classList.remove('open');
   updateHud();
 };
 
