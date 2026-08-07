@@ -35,7 +35,7 @@ html,body{height:100%;background-color:var(--gbc-bg);color:var(--txt-light);font
 .topbar{width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#1e293b;border:2px solid #334155;border-radius:14px;margin-bottom:10px}
 .brand{display:flex;align-items:center;gap:8px;font-family:var(--font-game);font-size:1.1rem;color:var(--poke-yellow)}
 .tb-actions{display:flex;gap:8px}
-.btn-icon{padding:6px 12px;border-radius:8px;border:2px solid #475569;background:#0f172a;color:#fff;font-family:var(--font-game);font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:6px;text-decoration:none}
+.btn-icon{padding:6px 14px;border-radius:8px;border:2px solid #475569;background:#0f172a;color:#fff;font-family:var(--font-game);font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:6px;text-decoration:none}
 
 /* ===== Game Boy Color Hardware Shell ===== */
 .gbc-hardware{
@@ -83,7 +83,7 @@ canvas#gbcCanvas{width:100%;height:100%;display:block;image-rendering:pixelated;
 .btn-round:active{transform:translateY(3px);box-shadow:0 2px 0 #7f1d1d}
 .btn-round.btn-b{background:#1e40af;border-color:#bfdbfe;box-shadow:0 5px 0 #1e3a8a}
 
-/* ===== API Key Modal ===== */
+/* ===== Quiz Modal ===== */
 .modal-mask{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.85);backdrop-filter:blur(6px);display:grid;place-items:center;padding:16px;opacity:0;pointer-events:none;transition:.25s ease}
 .modal-mask.open{opacity:1;pointer-events:all}
 .modal-box{width:100%;max-width:540px;background:#1e293b;border:3px solid var(--poke-yellow);border-radius:20px;padding:22px;box-shadow:0 25px 60px rgba(0,0,0,0.9);position:relative;max-height:90vh;overflow-y:auto;color:#fff}
@@ -119,12 +119,11 @@ canvas#gbcCanvas{width:100%;height:100%;display:block;image-rendering:pixelated;
   <header class="topbar">
     <div class="brand">⚡ 포켓몬스터 옐로우 GBC <span>(자립 방탈출)</span></div>
     <div class="tb-actions">
-      <button class="btn-icon" id="btnApiKey">🔑 API Key 설정</button>
       <a class="btn-icon" href="/">🏠 대시보드</a>
     </div>
   </header>
 
-  <!-- Game Boy Color Hardware -->
+  <!-- Game Boy Color Hardware Shell -->
   <div class="gbc-hardware">
     <div class="gbc-header-label">
       <span>GAME BOY COLOR</span>
@@ -176,20 +175,6 @@ canvas#gbcCanvas{width:100%;height:100%;display:block;image-rendering:pixelated;
     <div class="win-title">🎉 15개 챕터 완벽 탈출 성공!</div>
     <p class="win-desc">하람이는 15개 방을 모두 탐험하며 수많은 지지와 실제 자립 지원 정책들을 발견했습니다.<br>당당한 자립의 문을 연 하람이의 새 출발을 축하해 주세요!</p>
     <button class="btn-restart" id="btnRestart">🔄 처음부터 다시하기</button>
-  </div>
-</div>
-
-<!-- API Key Setting Modal (Secure Local Storage) -->
-<div class="modal-mask" id="apiModal">
-  <div class="modal-box">
-    <button class="modal-close" id="apiClose">✕</button>
-    <div class="modal-title">🔑 Nano Banana API Key 설정</div>
-    <div class="modal-desc">API 키는 본인 브라우저의 <b>localStorage</b>에만 안전하게 저장되며, 외부 서버나 깃허브로 절대로 전송되지 않습니다.</div>
-    <div class="input-row">
-      <input type="password" id="apiKeyInput" class="quiz-input" placeholder="나노바나나/Gemini API Key 입력">
-      <button class="btn-submit" id="btnSaveApi">저장</button>
-    </div>
-    <div id="apiStatus" style="font-size:0.85rem;color:#4ade80"></div>
   </div>
 </div>
 
@@ -380,18 +365,28 @@ const STAGES = [
   }
 ];
 
-/* ---------- Game Engine State ---------- */
+/* ---------- Game Engine State & Preloaded Assets ---------- */
 const state = {
   stageIdx: 0,
   hasKey: false,
   player: { x: 50, y: 140, facing: 'down' },
   follower: { x: 30, y: 140 },
-  keys: { up: false, down: false, left: false, right: false }
+  keys: { up: false, down: false, left: false, right: false },
+  bgImages: {},
+  avatarImage: new Image()
 };
 
 const el = (id) => document.getElementById(id);
 const canvas = el('gbcCanvas');
 const ctx = canvas.getContext('2d');
+
+/* Preload All 15 Room Assets & Haram Avatar */
+state.avatarImage.src = 'assets/game/haram_avatar.png';
+for (let i = 1; i <= 15; i++) {
+  const img = new Image();
+  img.src = `assets/game/room_${i}.png`;
+  state.bgImages[i] = img;
+}
 
 /* Input Handling */
 window.addEventListener('keydown', (e) => {
@@ -426,7 +421,7 @@ function loop() {
 }
 
 function update() {
-  if (el('quizModal').classList.contains('open') || el('apiModal').classList.contains('open')) return;
+  if (el('quizModal').classList.contains('open')) return;
 
   const speed = 2.5;
   let dx = 0, dy = 0;
@@ -442,9 +437,8 @@ function update() {
     state.player.x = Math.max(20, Math.min(300, state.player.x + dx));
     state.player.y = Math.max(90, Math.min(260, state.player.y + dy));
 
-    /* Follower smooth tracking behind Haram */
     const fDist = Math.hypot(state.player.x - state.follower.x, state.player.y - state.follower.y);
-    if (fDist > 20) {
+    if (fDist > 18) {
       state.follower.x += (prevX - state.follower.x) * 0.25;
       state.follower.y += (prevY - state.follower.y) * 0.25;
     }
@@ -453,15 +447,19 @@ function update() {
 
 function render() {
   const stage = STAGES[state.stageIdx];
+  const roomNum = stage.num;
 
-  /* 1. Draw 100% Pokémon Yellow GBC Tilemap Ground (Matching Screenshot!) */
-  drawGbcTilemap(stage.theme);
+  /* 1. Draw Pre-generated Room PNG Asset Background */
+  if (state.bgImages[roomNum] && state.bgImages[roomNum].complete && state.bgImages[roomNum].naturalWidth > 0) {
+    ctx.drawImage(state.bgImages[roomNum], 0, 0, canvas.width, canvas.height);
+  } else {
+    drawGbcTilemap(stage.theme);
+  }
 
-  /* 2. Props & Door */
+  /* 2. Props & Door Marker */
   let nearbyTarget = null;
 
   stage.props.forEach(p => {
-    /* Prop Marker */
     ctx.fillStyle = (p.type === 'door' && state.hasKey) ? 'rgba(74, 222, 128, 0.4)' : 'rgba(37, 99, 235, 0.4)';
     ctx.beginPath(); ctx.arc(p.x, p.y + 4, 14, 0, Math.PI * 2); ctx.fill();
 
@@ -489,11 +487,15 @@ function render() {
     if (dist < 32) nearbyTarget = { ...npc, type: 'npc', emoji: '💬' };
   }
 
-  /* 4. Render Pikachu/Jaripon Follower Sprite Behind Haram (Matching Screenshot!) */
+  /* 4. Render Pikachu Companion Behind Haram */
   drawPixelPikachu(state.follower.x, state.follower.y);
 
-  /* 5. Render 100% Pokémon GBC Red Protagonist Sprite (Haram) */
-  drawGbcRedSprite(state.player.x, state.player.y, state.player.facing);
+  /* 5. Render Haram Avatar Sprite */
+  if (state.avatarImage.complete && state.avatarImage.naturalWidth > 0) {
+    ctx.drawImage(state.avatarImage, state.player.x - 14, state.player.y - 18, 28, 28);
+  } else {
+    drawGbcRedSprite(state.player.x, state.player.y, state.player.facing);
+  }
 
   /* 6. Dialogue Window Text Update */
   if (nearbyTarget) {
@@ -514,94 +516,43 @@ function render() {
   }
 }
 
-/* 100% Faithful Pokémon Yellow GBC Tilemap Drawing (Matching Screenshot!) */
+/* Fallback Pokémon Yellow GBC Tilemap Drawing */
 function drawGbcTilemap(theme) {
   const ts = 16;
   const cols = Math.ceil(canvas.width / ts);
   const rows = Math.ceil(canvas.height / ts);
 
-  /* Ground Dither Base Pattern (Pinkish/White GBC dither matching screenshot) */
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const x = c * ts, y = r * ts;
       const alt = (c + r) % 2 === 0;
 
       if (theme === 'outdoor') {
-        /* Outdoor Pink/White Dither Path (User Screenshot) */
         ctx.fillStyle = alt ? '#fff1f2' : '#ffe4e6'; ctx.fillRect(x, y, ts, ts);
         ctx.fillStyle = '#fb7185'; ctx.fillRect(x + 4, y + 4, 2, 2);
       } else if (theme === 'classroom') {
         ctx.fillStyle = alt ? '#e0f2fe' : '#bae6fd'; ctx.fillRect(x, y, ts, ts);
-        ctx.fillStyle = '#0284c7'; ctx.fillRect(x + 6, y + 6, 1, 1);
       } else if (theme === 'bank' || theme === 'office') {
         ctx.fillStyle = alt ? '#e2e8f0' : '#cbd5e1'; ctx.fillRect(x, y, ts, ts);
-        ctx.strokeStyle = '#94a3b8'; ctx.strokeRect(x, y, ts, ts);
       } else {
-        /* Indoor Wood Planks */
         ctx.fillStyle = alt ? '#fde68a' : '#fef08a'; ctx.fillRect(x, y, ts, ts);
-        ctx.fillStyle = '#d97706'; ctx.fillRect(x, y + ts - 1, ts, 1);
       }
     }
   }
-
-  /* Draw Blue Round Topiary Trees at top and right (User Screenshot) */
-  if (theme === 'outdoor') {
-    /* Left Cliff */
-    ctx.fillStyle = '#991b1b'; ctx.fillRect(0, 160, 50, 128);
-    ctx.fillStyle = '#f87171'; ctx.fillRect(0, 160, 48, 6);
-
-    /* Blue Round Topiary Trees */
-    [0, 32, 64, 240, 272, 304].forEach(tx => drawBlueTree(tx, 0));
-    [60, 92, 124, 156, 188, 220].forEach(ty => drawBlueTree(288, ty));
-
-    /* Wooden Signpost */
-    drawSignpost(40, 100);
-  } else {
-    /* Indoor Wall Border */
-    ctx.fillStyle = '#334155'; ctx.fillRect(0, 0, canvas.width, 70);
-    ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 66, canvas.width, 4);
-
-    /* Indoor Counter/Desk Barrier */
-    if (theme === 'office' || theme === 'bank') {
-      ctx.fillStyle = '#78350f'; ctx.fillRect(60, 100, 160, 12);
-      ctx.fillStyle = '#b45309'; ctx.fillRect(60, 96, 160, 4);
-    }
-  }
 }
 
-/* Blue Round Topiary Tree (User Screenshot) */
-function drawBlueTree(x, y) {
-  ctx.fillStyle = '#1e40af'; ctx.beginPath(); ctx.arc(x + 16, y + 16, 14, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#3b82f6'; ctx.beginPath(); ctx.arc(x + 14, y + 14, 10, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#ffffff'; ctx.fillRect(x + 8, y + 8, 3, 3);
-}
-
-/* Wooden Signpost (User Screenshot) */
-function drawSignpost(x, y) {
-  ctx.fillStyle = '#78350f'; ctx.fillRect(x + 6, y + 12, 4, 10);
-  ctx.fillStyle = '#ffffff'; ctx.fillRect(x, y, 16, 12);
-  ctx.fillStyle = '#dc2626'; ctx.fillRect(x + 2, y + 2, 12, 4);
-}
-
-/* Pikachu Companion (User Screenshot) */
 function drawPixelPikachu(x, y) {
   ctx.fillStyle = '#facc15'; ctx.beginPath(); ctx.arc(x, y, 7, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = '#111'; ctx.fillRect(x - 6, y - 8, 3, 5); ctx.fillRect(x + 3, y - 8, 3, 5);
   ctx.fillStyle = '#dc2626'; ctx.fillRect(x - 5, y, 2, 2); ctx.fillRect(x + 3, y, 2, 2);
 }
 
-/* Pokémon Red / Haram GBC Protagonist Sprite */
 function drawGbcRedSprite(x, y, facing) {
   ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.arc(x, y + 6, 8, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = '#dc2626'; ctx.fillRect(x - 6, y - 6, 12, 12);
   ctx.fillStyle = '#ffffff'; ctx.fillRect(x - 5, y + 6, 10, 5);
   ctx.fillStyle = '#fed7aa'; ctx.fillRect(x - 5, y - 16, 10, 10);
   ctx.fillStyle = '#dc2626'; ctx.fillRect(x - 7, y - 20, 14, 6);
-
-  ctx.fillStyle = '#111';
-  if (facing === 'down') { ctx.fillRect(x - 3, y - 14, 2, 2); ctx.fillRect(x + 1, y - 14, 2, 2); }
-  else if (facing === 'left') { ctx.fillRect(x - 4, y - 14, 2, 2); }
-  else if (facing === 'right') { ctx.fillRect(x + 2, y - 14, 2, 2); }
 }
 
 function triggerAction() {
@@ -708,23 +659,6 @@ function onQuizWrong(msg) {
 }
 
 el('modalClose').onclick = () => el('quizModal').classList.remove('open');
-
-/* API Key Setting Modal Logic */
-el('btnApiKey').onclick = () => {
-  const savedKey = localStorage.getItem('nano_banana_api_key') || '';
-  el('apiKeyInput').value = savedKey;
-  el('apiStatus').textContent = savedKey ? '✅ API Key가 브라우저에 등록되어 있습니다.' : '';
-  el('apiModal').classList.add('open');
-};
-el('apiClose').onclick = () => el('apiModal').classList.remove('open');
-el('btnSaveApi').onclick = () => {
-  const k = el('apiKeyInput').value.trim();
-  if (k) {
-    localStorage.setItem('nano_banana_api_key', k);
-    el('apiStatus').textContent = '✅ API Key가 로컬에 안전하게 저장되었습니다!';
-    setTimeout(() => el('apiModal').classList.remove('open'), 1000);
-  }
-};
 
 function updateHud() {
   const stage = STAGES[state.stageIdx];
