@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>자립 방탈출 - 15개의 방을 탈출하라 | 자립해봄</title>
+<meta name="description" content="자립준비청년 지원 정책을 풀어가며 15개의 방을 탈출하는 온라인 방탈출 게임. 난이도 중상, 정책 지식과 추리로 자립의 문을 열어보세요.">
+<meta name="theme-color" content="#0a0e1a">
+<meta property="og:title" content="자립 방탈출 - 15개의 방을 탈출하라">
+<meta property="og:description" content="자립준비청년 정책 지식으로 15개의 방을 탈출하는 온라인 방탈출 게임 (난이도 중상)">
+<meta property="og:type" content="website">
+<style>
+:root{
+  --bg-0:#070b16;
+  --bg-1:#0b1020;
+  --bg-2:#111a30;
+  --panel: rgba(20,28,48,0.62);
+  --panel-solid:#141c30;
+  --stroke: rgba(140,170,255,0.14);
+  --stroke-strong: rgba(140,170,255,0.35);
+  --txt:#eaf0ff;
+  --txt-dim:#9fb0d6;
+  --txt-faint:#6b7ba3;
+  --accent:#5b8cff;
+  --accent-2:#31e0c8;
+  --accent-3:#b57bff;
+  --danger:#ff5f7a;
+  --ok:#3ee08a;
+  --gold:#ffce56;
+  --glow: 0 0 40px rgba(91,140,255,0.35);
+  --radius:20px;
+  --font: 'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'SFMono-Regular',ui-monospace,'DejaVu Sans Mono',monospace;
+}
+[data-theme="light"]{
+  --bg-0:#eef2fb;
+  --bg-1:#e6ecfa;
+  --bg-2:#dfe7f7;
+  --panel: rgba(255,255,255,0.72);
+  --panel-solid:#ffffff;
+  --stroke: rgba(40,70,150,0.12);
+  --stroke-strong: rgba(40,70,150,0.28);
+  --txt:#16213c;
+  --txt-dim:#4a5878;
+  --txt-faint:#7c89a8;
+  --glow: 0 0 40px rgba(91,140,255,0.22);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:var(--font);
+  color:var(--txt);
+  background:
+    radial-gradient(1100px 700px at 12% -8%, rgba(91,140,255,0.20), transparent 60%),
+    radial-gradient(900px 700px at 108% 12%, rgba(181,123,255,0.18), transparent 55%),
+    radial-gradient(1000px 800px at 50% 120%, rgba(49,224,200,0.12), transparent 60%),
+    linear-gradient(180deg,var(--bg-0),var(--bg-1) 55%,var(--bg-2));
+  background-attachment:fixed;
+  min-height:100dvh;
+  overflow-x:hidden;
+  -webkit-tap-highlight-color:transparent;
+}
+.wrap{max-width:760px;margin:0 auto;padding:clamp(14px,3vw,28px);padding-bottom:60px;min-height:100dvh;display:flex;flex-direction:column}
+a{color:inherit}
+button{font-family:inherit}
+
+/* ===== Top bar ===== */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;letter-spacing:-0.01em}
+.brand .dot{width:11px;height:11px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent-3));box-shadow:var(--glow)}
+.brand small{color:var(--txt-dim);font-weight:500}
+.tb-actions{display:flex;gap:8px}
+.icon-btn{
+  width:40px;height:40px;border-radius:13px;border:1px solid var(--stroke);
+  background:var(--panel);color:var(--txt);backdrop-filter:blur(10px);cursor:pointer;
+  font-size:17px;display:grid;place-items:center;transition:.2s;
+}
+.icon-btn:hover{border-color:var(--stroke-strong);transform:translateY(-1px)}
+
+/* ===== Panels ===== */
+.panel{
+  background:var(--panel);border:1px solid var(--stroke);border-radius:var(--radius);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  box-shadow:0 30px 60px -30px rgba(0,0,0,0.65);
+}
+.hidden{display:none!important}
+
+/* ===== Intro ===== */
+.intro{padding:clamp(24px,5vw,44px);text-align:center;position:relative;overflow:hidden;flex:1;display:flex;flex-direction:column;justify-content:center}
+.intro::before{content:"";position:absolute;inset:0;background:conic-gradient(from 180deg at 50% 40%, rgba(91,140,255,0.10),transparent 30%, rgba(181,123,255,0.10) 60%, transparent 80%);animation:spin 18s linear infinite;pointer-events:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.badge{display:inline-flex;align-items:center;gap:7px;padding:7px 15px;border-radius:999px;border:1px solid var(--stroke-strong);background:rgba(91,140,255,0.10);color:var(--accent-2);font-size:.8rem;font-weight:600;letter-spacing:.02em;position:relative}
+.lock-hero{font-size:clamp(56px,15vw,92px);line-height:1;margin:18px 0 6px;filter:drop-shadow(0 10px 30px rgba(91,140,255,0.5));animation:float 4s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-10px)}}
+.intro h1{font-size:clamp(1.7rem,6vw,2.7rem);font-weight:800;letter-spacing:-0.03em;line-height:1.12;position:relative}
+.intro h1 .grad{background:linear-gradient(120deg,var(--accent),var(--accent-3) 60%,var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.intro .lead{color:var(--txt-dim);margin:14px auto 0;max-width:46ch;line-height:1.75;font-size:1rem;position:relative}
+.meta-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:22px 0 4px;position:relative}
+.chip{padding:9px 15px;border-radius:14px;border:1px solid var(--stroke);background:var(--panel);font-size:.82rem;color:var(--txt-dim);font-weight:600}
+.chip b{color:var(--txt)}
+.story{margin:22px auto 0;max-width:52ch;text-align:left;color:var(--txt-dim);font-size:.92rem;line-height:1.85;border-left:2px solid var(--stroke-strong);padding:4px 0 4px 16px;position:relative}
+.cta{margin-top:26px;position:relative}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:10px;padding:16px 34px;border:none;border-radius:16px;cursor:pointer;
+  font-size:1.05rem;font-weight:700;color:#fff;letter-spacing:-0.01em;
+  background:linear-gradient(120deg,var(--accent),var(--accent-3));
+  box-shadow:0 16px 40px -12px rgba(91,140,255,0.7);transition:.2s;
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 22px 50px -12px rgba(91,140,255,0.85)}
+.btn-primary:active{transform:translateY(0)}
+
+/* ===== HUD ===== */
+.hud{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.progress-shell{flex:1}
+.progress-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.progress-top .stage-idx{font-weight:800;font-size:.95rem;letter-spacing:-0.01em}
+.progress-top .stage-idx span{color:var(--txt-faint);font-weight:600}
+.progress-top .stage-name{color:var(--txt-dim);font-size:.82rem;font-weight:600}
+.progress-bar{height:9px;border-radius:999px;background:rgba(255,255,255,0.07);overflow:hidden;border:1px solid var(--stroke)}
+.progress-fill{height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .5s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 16px rgba(49,224,200,0.6)}
+.timer{
+  font-family:var(--mono);font-weight:700;font-size:1rem;padding:9px 13px;border-radius:13px;
+  border:1px solid var(--stroke);background:var(--panel);min-width:78px;text-align:center;letter-spacing:.5px;
+}
+
+/* ===== Stage card ===== */
+.stage{padding:clamp(20px,4vw,32px);position:relative;overflow:hidden;animation:cardIn .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes cardIn{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
+.stage-head{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.room-emoji{font-size:2.4rem;filter:drop-shadow(0 6px 14px rgba(0,0,0,0.4));flex:none}
+.stage-head .rh-txt{min-width:0}
+.stage-head .kicker{font-size:.74rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-2)}
+.stage-head h2{font-size:clamp(1.25rem,4vw,1.55rem);font-weight:800;letter-spacing:-0.02em;line-height:1.2}
+.difficulty{display:inline-flex;gap:3px;margin-left:auto;flex:none;align-self:flex-start}
+.difficulty i{width:7px;height:14px;border-radius:3px;background:rgba(255,255,255,0.12);display:inline-block}
+.difficulty i.on{background:linear-gradient(180deg,var(--gold),#ff9f43)}
+.scene{color:var(--txt-dim);line-height:1.8;font-size:.96rem;background:rgba(0,0,0,0.16);border:1px solid var(--stroke);border-radius:14px;padding:15px 17px;margin-bottom:18px}
+[data-theme="light"] .scene{background:rgba(40,70,150,0.05)}
+.puzzle-q{font-size:1.08rem;font-weight:700;line-height:1.6;margin-bottom:16px;letter-spacing:-0.01em}
+.puzzle-q .hi{color:var(--accent-2)}
+
+/* input */
+.answer-row{display:flex;gap:10px;flex-wrap:wrap}
+.answer-input{
+  flex:1;min-width:180px;padding:15px 18px;border-radius:14px;border:1px solid var(--stroke-strong);
+  background:rgba(0,0,0,0.25);color:var(--txt);font-size:1.1rem;font-weight:600;outline:none;transition:.2s;font-family:var(--font);
+}
+[data-theme="light"] .answer-input{background:rgba(255,255,255,0.7)}
+.answer-input::placeholder{color:var(--txt-faint);font-weight:500}
+.answer-input:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(91,140,255,0.18)}
+.answer-input.numlock{font-family:var(--mono);letter-spacing:.25em;text-align:center;font-size:1.4rem}
+.btn-check{
+  padding:15px 26px;border:none;border-radius:14px;cursor:pointer;font-size:1rem;font-weight:700;color:#fff;
+  background:linear-gradient(120deg,var(--accent),var(--accent-3));transition:.2s;white-space:nowrap;
+}
+.btn-check:hover{filter:brightness(1.08);transform:translateY(-1px)}
+
+/* choices */
+.choices{display:grid;gap:11px}
+.choice{
+  text-align:left;padding:15px 18px;border-radius:14px;border:1px solid var(--stroke);
+  background:rgba(0,0,0,0.2);color:var(--txt);cursor:pointer;font-size:1rem;font-weight:600;transition:.18s;
+  display:flex;align-items:center;gap:13px;line-height:1.45;
+}
+[data-theme="light"] .choice{background:rgba(255,255,255,0.6)}
+.choice .key{width:30px;height:30px;flex:none;border-radius:9px;display:grid;place-items:center;font-weight:800;font-size:.9rem;background:rgba(91,140,255,0.16);color:var(--accent-2);border:1px solid var(--stroke)}
+.choice:hover{border-color:var(--stroke-strong);transform:translateY(-1px);background:rgba(91,140,255,0.10)}
+.choice.correct{border-color:var(--ok);background:rgba(62,224,138,0.14)}
+.choice.wrong{border-color:var(--danger);background:rgba(255,95,122,0.12)}
+
+/* sequence */
+.seq-hint{font-size:.82rem;color:var(--txt-faint);margin-bottom:12px}
+.seq-list{display:grid;gap:10px}
+.seq-item{
+  text-align:left;padding:14px 16px;border-radius:13px;border:1px solid var(--stroke);
+  background:rgba(0,0,0,0.2);color:var(--txt);cursor:pointer;font-size:.97rem;font-weight:600;transition:.18s;
+  display:flex;align-items:center;gap:12px;
+}
+[data-theme="light"] .seq-item{background:rgba(255,255,255,0.6)}
+.seq-item:hover{border-color:var(--stroke-strong);transform:translateY(-1px)}
+.seq-item .order-num{width:28px;height:28px;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.85rem;background:rgba(255,255,255,0.08);color:var(--txt-faint);border:1px solid var(--stroke);transition:.2s}
+.seq-item.picked{border-color:var(--accent);background:rgba(91,140,255,0.14)}
+.seq-item.picked .order-num{background:linear-gradient(135deg,var(--accent),var(--accent-3));color:#fff;border-color:transparent}
+.seq-item.shake .order-num,.answer-input.err{border-color:var(--danger)}
+
+/* feedback */
+.feedback{margin-top:16px;min-height:24px;font-size:.92rem;font-weight:600;display:flex;align-items:center;gap:8px;line-height:1.55}
+.feedback.ok{color:var(--ok)}
+.feedback.no{color:var(--danger)}
+.shake{animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(4px)}}
+
+/* stage footer */
+.stage-foot{display:flex;align-items:center;gap:12px;margin-top:20px;padding-top:16px;border-top:1px solid var(--stroke);flex-wrap:wrap}
+.btn-ghost{
+  padding:11px 17px;border-radius:12px;border:1px solid var(--stroke);background:transparent;color:var(--txt-dim);
+  cursor:pointer;font-weight:600;font-size:.88rem;transition:.18s;display:inline-flex;align-items:center;gap:7px;
+}
+.btn-ghost:hover{border-color:var(--stroke-strong);color:var(--txt)}
+.attempts{margin-left:auto;font-size:.8rem;color:var(--txt-faint);font-weight:600}
+.hint-box{
+  margin-top:14px;padding:14px 16px;border-radius:13px;border:1px dashed var(--stroke-strong);
+  background:rgba(255,206,86,0.07);color:var(--txt-dim);font-size:.9rem;line-height:1.7;
+}
+.hint-box b{color:var(--gold)}
+
+/* transition overlay */
+.door-flash{position:fixed;inset:0;z-index:50;display:grid;place-items:center;pointer-events:none;opacity:0}
+.door-flash.show{animation:doorSeq 1.15s ease forwards}
+.door-flash .big{font-size:clamp(60px,18vw,120px);filter:drop-shadow(0 0 40px rgba(49,224,200,0.7))}
+@keyframes doorSeq{0%{opacity:0;transform:scale(.6)}25%{opacity:1;transform:scale(1)}70%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.25)}}
+.door-flash::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at center,rgba(49,224,200,0.22),rgba(7,11,22,0.9) 65%);backdrop-filter:blur(3px)}
+
+/* ===== Win screen ===== */
+.win{padding:clamp(26px,5vw,46px);text-align:center;position:relative;overflow:hidden;flex:1;display:flex;flex-direction:column;justify-content:center}
+.win .trophy{font-size:clamp(64px,16vw,104px);animation:float 4s ease-in-out infinite;filter:drop-shadow(0 12px 34px rgba(255,206,86,0.5))}
+.win h2{font-size:clamp(1.7rem,6vw,2.5rem);font-weight:800;letter-spacing:-0.02em;margin-top:6px}
+.win h2 .grad{background:linear-gradient(120deg,var(--gold),var(--accent-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.win .sub{color:var(--txt-dim);margin-top:12px;line-height:1.8;max-width:44ch;margin-inline:auto}
+.result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:26px 0}
+.result-cell{padding:18px 10px;border-radius:16px;border:1px solid var(--stroke);background:var(--panel)}
+.result-cell .rc-val{font-size:1.6rem;font-weight:800;font-family:var(--mono);letter-spacing:-0.01em}
+.result-cell .rc-lab{font-size:.76rem;color:var(--txt-faint);margin-top:5px;font-weight:600}
+.rank-line{font-size:1.05rem;font-weight:700;margin-bottom:6px}
+.card-theme-pick{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:2px 0 14px}
+.card-theme-pick .ctp-label{font-size:.82rem;color:var(--txt-faint);font-weight:600;margin-right:4px}
+.ctp-btn{padding:8px 15px;border-radius:12px;border:1px solid var(--stroke);background:var(--panel);color:var(--txt-dim);font-weight:700;font-size:.85rem;cursor:pointer;transition:.18s}
+.ctp-btn:hover{border-color:var(--stroke-strong)}
+.ctp-btn.active{border-color:var(--accent);color:var(--txt);background:rgba(91,140,255,0.16)}
+.speed-notice{display:flex;gap:14px;align-items:flex-start;text-align:left;margin:0 auto 22px;max-width:520px;padding:16px 18px;border-radius:16px;border:1px dashed rgba(255,206,86,0.55);background:rgba(255,206,86,0.10);animation:cardIn .5s cubic-bezier(.2,.8,.2,1)}
+.speed-notice .sn-emoji{font-size:2rem;flex:none;line-height:1.1}
+.speed-notice .sn-body{display:flex;flex-direction:column;gap:9px;min-width:0}
+.speed-notice .sn-body b{color:var(--gold)}
+.speed-notice .sn-body>b{font-size:1.02rem}
+.speed-notice .sn-body span{color:var(--txt-dim);font-size:.93rem;line-height:1.65}
+.sn-btn{align-self:flex-start;margin-top:2px;padding:10px 17px;border-radius:12px;border:1px solid rgba(255,206,86,0.5);background:rgba(255,206,86,0.15);color:var(--txt);font-weight:700;font-size:.87rem;cursor:pointer;transition:.18s}
+.sn-btn:hover{background:rgba(255,206,86,0.26)}
+.win-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.epilogue{margin-top:26px;text-align:left;background:rgba(0,0,0,0.16);border:1px solid var(--stroke);border-radius:16px;padding:18px 20px}
+[data-theme="light"] .epilogue{background:rgba(40,70,150,0.05)}
+.epilogue h3{font-size:.95rem;margin-bottom:10px;color:var(--accent-2)}
+.epilogue p{color:var(--txt-dim);line-height:1.85;font-size:.9rem}
+.epilogue .links{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.epilogue .links a{font-size:.82rem;padding:9px 14px;border-radius:11px;border:1px solid var(--stroke-strong);background:rgba(91,140,255,0.10);color:var(--accent-2);text-decoration:none;font-weight:700;transition:.18s}
+.epilogue .links a:hover{background:rgba(91,140,255,0.2)}
+
+/* confetti */
+.confetti{position:fixed;top:-12px;width:9px;height:15px;z-index:40;pointer-events:none;border-radius:2px;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:.9}}
+
+.footer-note{text-align:center;color:var(--txt-faint);font-size:.78rem;margin-top:20px;line-height:1.7}
+.footer-note a{color:var(--txt-dim);text-decoration:none;border-bottom:1px solid var(--stroke-strong)}
+
+@media (max-width:520px){
+  .result-grid{grid-template-columns:repeat(3,1fr);gap:8px}
+  .result-cell{padding:14px 6px}
+  .result-cell .rc-val{font-size:1.25rem}
+  .timer{min-width:70px;font-size:.9rem}
+  .btn-check{padding:15px 20px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span>자립 방탈출 <small>· 자립해봄</small></div>
+    <div class="tb-actions">
+      <button class="icon-btn" id="themeBtn" title="테마 변경" aria-label="테마 변경">🌙</button>
+      <a class="icon-btn" href="/game.html" title="게임 모드 선택" aria-label="게임 모드 선택">🎮</a>
+      <a class="icon-btn" href="/" title="대시보드로" aria-label="대시보드로">🏠</a>
+    </div>
+  </div>
+
+  <!-- ===================== INTRO ===================== -->
+  <section id="introScreen" class="panel intro">
+    <span class="badge">🔓 스토리 방탈출 · 난이도 중상</span>
+    <div class="lock-hero">🔐</div>
+    <h1>열여덟 번째 생일에서<br><span class="grad">자립의 문</span>까지</h1>
+    <p class="lead">만 열여덟, 8년을 보낸 서울의 공동생활가정을 떠나야 하는 청년 <b>‘하람’</b>. 막막한 새벽에서 시작해, 사람들과 제도의 손을 딛고 <b>진짜 자립</b>에 이르기까지 — 15개의 방에 실제 자립준비청년 지원 제도가 열쇠로 숨어 있습니다.</p>
+
+    <div class="meta-row">
+      <span class="chip"><b>15</b>개의 방</span>
+      <span class="chip">난이도 <b>중상</b></span>
+      <span class="chip">1인칭 <b>스토리</b></span>
+      <span class="chip">플레이 <b>약 12~18분</b></span>
+    </div>
+
+    <div class="story">
+      🕯️ <b>오늘부터 당신은 ‘하람’입니다.</b><br>
+      열여덟 번째 생일 아침, 8년을 보낸 공동생활가정에 케이크가 놓입니다. 모두가 축하해 주지만, 마음 한켠엔 ‘이제 이곳을 나가야 한다’는 압박이 조용히 차오릅니다. 그래도 — 원장님도, 담당 선생님도, 낯선 이름의 제도들도 아직 내 편입니다.<br>
+      각 방의 문은 <b>실제로 존재하는 지원 제도</b>를 알아야 열립니다. 앞 방에서 얻은 <b>숫자 단서를 기억</b>해 두세요.
+    </div>
+
+    <div class="cta">
+      <button class="btn-primary" id="startBtn">🚪 탈출 시작하기</button>
+    </div>
+  </section>
+
+  <!-- ===================== GAME ===================== -->
+  <section id="gameScreen" class="hidden">
+    <div class="hud">
+      <div class="progress-shell">
+        <div class="progress-top">
+          <div class="stage-idx">ROOM <span id="stageNum">01</span> <span>/ 15</span></div>
+          <div class="stage-name" id="stageMiniName"></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+      <div class="timer" id="timer">00:00</div>
+    </div>
+
+    <div class="panel stage" id="stageCard"><!-- injected --></div>
+  </section>
+
+  <!-- ===================== WIN ===================== -->
+  <section id="winScreen" class="panel win hidden">
+    <div id="speedNotice" class="speed-notice hidden">
+      <span class="sn-emoji">🌱</span>
+      <div class="sn-body">
+        <b>앗, 벌써 탈출하셨네요!</b>
+        <span>정답은 완벽했어요 👏 혹시 이야기는 살짝 건너뛰셨을까요? 이 게임의 진짜 마음은 각 방의 이야기에 담겨 있어요. 시간 될 때 <b>천천히 한 방씩</b> 하람이의 여정을 만나보시면 좋겠어요 🌱</span>
+        <button id="rereadBtn" class="sn-btn" type="button">🐢 천천히 다시 읽기</button>
+      </div>
+    </div>
+    <div class="trophy">🏡</div>
+    <h2><span class="grad">자립의 문, 열렸다!</span></h2>
+    <p class="sub">진짜 혼자 해냈다고 생각했던 하람. 하지만 수많은 사람과 사회, 그리고 정부가 보이지 않는 순간에도 처음부터 곁에 있었습니다. 이 여정에서 만난 제도들은 실제로 당신 곁의 자립준비청년에게 열쇠가 됩니다.</p>
+
+    <div class="result-grid">
+      <div class="result-cell"><div class="rc-val" id="rTime">00:00</div><div class="rc-lab">탈출 시간</div></div>
+      <div class="result-cell"><div class="rc-val" id="rHints">0</div><div class="rc-lab">사용 힌트</div></div>
+      <div class="result-cell"><div class="rc-val" id="rMiss">0</div><div class="rc-lab">오답 횟수</div></div>
+    </div>
+
+    <div class="rank-line" id="rankLine"></div>
+
+    <div class="card-theme-pick" role="group" aria-label="공유 카드 테마 선택">
+      <span class="ctp-label">공유 카드</span>
+      <button class="ctp-btn active" data-cardtheme="dark" type="button">🌙 다크</button>
+      <button class="ctp-btn" data-cardtheme="light" type="button">☀️ 라이트</button>
+    </div>
+
+    <div class="win-actions">
+      <button class="btn-primary" id="replayBtn">🔄 다시 도전</button>
+      <button class="btn-ghost" id="shareBtn">📸 이미지로 공유하기</button>
+      <a class="btn-ghost" href="/">🏠 대시보드로</a>
+    </div>
+
+    <div class="epilogue">
+      <h3>🌱 하람이 딛고 선 제도는 모두 ‘진짜’입니다</h3>
+      <p>서울 자립정착금 2,000만원 · 자립수당 월 50만원 · 대중교통비 월 6만원 · 배움마켓 · 디딤씨앗통장 1:2 매칭 · LH 전세임대(보증금 100만원) · 서울시 아동공동생활가정 지원센터 <b>집중사례관리</b> · 희망디딤돌 · 자립준비청년 의료비 지원(본인부담 약 14%) · 전국 17개 자립지원전담기관 — 게임 속 손길은 모두 실제 제도입니다. <span style="color:var(--txt-faint)">(수치는 2026년 기준이며 연도·지자체별로 달라질 수 있어요.)</span></p>
+      <div class="links">
+        <a href="/">🌸 자립해봄 대시보드</a>
+        <a href="https://jaripon.ncrc.or.kr" target="_blank" rel="noopener">자립정보ON</a>
+        <a href="https://seoulcenter.org" target="_blank" rel="noopener">서울시 아동공동생활가정 지원센터</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer-note">
+    🌸 <a href="/">자립해봄</a> · 자립준비청년 지원 정보 공유 대시보드<br>
+    ※ 게임 속 수치는 학습용이며 실제 지원 기준은 연도·지자체별로 달라질 수 있어요.
+  </div>
+
+</div>
+
+<div class="door-flash" id="doorFlash"><div class="big" id="doorEmoji">🔓</div></div>
+
+<script>
+/* ============================================================
+   자립 방탈출 엔진 — 15 stages
+   type: 'input' | 'choice' | 'sequence'
+   ============================================================ */
+"use strict";
+
+const STAGES = [
+  {
+    emoji:"🎂", kicker:"CHAPTER 01 · 열여덟 번째 생일", name:"열여덟, 새 출발", diff:1, type:"input",
+    scene:"열여덟 번째 생일 아침. 8년을 보낸 서울의 공동생활가정에 작은 케이크가 놓이고, 원장님과 동생들이 서툰 노래로 축하해 준다. “생일 축하해, 하람아!” 촛불을 끄며 웃는다. 설렘도, 약간의 긴장도 함께다. 책상 위엔 서류 한 장, ‘보호종료’. 이제 이곳을 나와 내 삶을 시작할 때다. 문득 ‘그냥 내보내지는 건가’ 싶어 마음이 흔들렸는데, 어젯밤 원장님은 어깨를 다독이며 말했다. “나간다고 우리 사이가 끝나는 게 아니야. 언제든 연락하고, 종종 얼굴 보고, 밥도 같이 먹자. 넌 혼자 나가는 게 아니란다.” 그 말에 마음이 조금 놓였다.",
+    q:"2021년, ‘보호종료아동’이라는 말을 대신하게 된 <span class='hi'>여섯 글자</span>를 입력해줘. (스스로 설 것을 ‘준비’하는 청년이라는 뜻)",
+    placeholder:"○○○○○○",
+    accept:["자립준비청년","자립준비 청년"],
+    hints:["‘보호가 끝난 아이’가 아니라, 스스로 설 것을 ‘준비’하는 사람이라는 뜻이야.","‘자립’으로 시작하는 여섯 글자 — 자립준비청년."]
+  },
+  {
+    emoji:"🔀", kicker:"CHAPTER 02 · 선택", name:"떠남과 머묾 사이", diff:2, type:"input", numlock:true,
+    scene:"짐을 싸야 하나 — 막막함에 방문을 여니 원장님이 국을 데우고 있다. “꼭 지금 나가지 않아도 돼. 네가 원하면 더 있을 수 있는 제도가 생겼단다.” 예전엔 만 열여덟이면 무조건 시설을 떠나야 했지만, 지금은 본인이 원하면 보호를 연장할 수 있다. 고마운 선택지였다. 나는 마음먹었다. ‘준비가 되면, 내 힘으로 한번 서 보자.’",
+    q:"내가 원하면 <span class='hi'>만 몇 세까지 보호를 연장</span>할 수 있을까? 숫자를 눌러줘.",
+    placeholder:"나이(숫자)",
+    accept:["24","만24세","24세"],
+    hints:["열여덟에 갑자기 세상으로 떠밀리지 않도록, 준비할 몇 해를 더 주는 제도야.","만 24세까지 연장할 수 있어."],
+    clueLabel:"보호연장 최대 나이", clueValue:24
+  },
+  {
+    emoji:"🛒", kicker:"CHAPTER 03 · 배움", name:"살아가는 법을 배우는 곳", diff:2, type:"input",
+    scene:"‘나가면 뭐부터 하지?’ 통장 만드는 법도, 월세 계약도, 아플 때 병원 가는 법도 아직 낯설다. 막막하지만, 모르면 배우면 된다. 담당 선생님이 노트북을 켜 보여준다. “서울시가 전국 최초로 만든 자립역량교육이야. 금융·주거·노동·법률·인문학까지, 진짜 살아가는 법을 배우는 곳이지.” 나 같은 청년을 위해, 누군가 이런 배움터를 통째로 마련해 두었다.",
+    q:"서울시가 전국 최초로 만든 이 자립역량교육의 이름은? (‘<span class='hi'>○○마켓</span>’ — 빈칸 두 글자, 또는 전체 이름)",
+    placeholder:"빈칸 두 글자 또는 전체 이름",
+    accept:["배움","배움마켓","배움 마켓"],
+    hints:["‘무언가를 배우는 시장(market)’이라는 뜻의 이름이야.","‘배움’ + ‘마켓’."]
+  },
+  {
+    emoji:"💰", kicker:"CHAPTER 04 · 목돈", name:"첫 자립의 종잣돈", diff:2, type:"input", numlock:true,
+    scene:"배움마켓을 수료하던 날, 선생님이 서류를 내밀며 웃는다. “이 교육을 들은 청년에게 서울시가 목돈을 지원해. 전국에서 가장 높은 금액이야.” 서울시 자립정착금은 1,500만원에서 크게 올라, 2026년 기준 전국 최고 수준이다. 처음엔 ‘돈으로 등 떠미는 건가’ 싶었지만 — 이건 나를 세상 밖으로 미는 게 아니라, 첫발을 떼라고 손에 쥐여 주는 종잣돈이었다.",
+    q:"서울시 <span class='hi'>자립정착금은 ○○○○만원</span> (2026년 기준). 숫자만 입력해줘.",
+    placeholder:"만원 단위 숫자",
+    accept:["2000","2000만원","이천","이천만원","2천","2천만원","2,000"],
+    hints:["1,500만원에서 500만원이 더 올랐어.","2,000만원이야 — 전국에서 가장 높은 수준."],
+    clueLabel:"서울 자립정착금(만원)", clueValue:2000
+  },
+  {
+    emoji:"🗓️", kicker:"CHAPTER 05 · 매달", name:"스무날의 안심", diff:3, type:"input", numlock:true,
+    scene:"혼자 살 집을 알아보며 매달의 생활비가 겁났다. 그때 알게 된 자립수당 — 보호가 끝난 뒤에도 국가가 매달 내 계좌에 돈을 넣어준다. 서울시는 대중교통비까지 매월 6만원씩 5년간 얹어준다. 매월 20일, 통장에 찍히는 숫자를 보며 생각했다. ‘이 돈을 보내는 사람은 나를 알지도 못할 텐데.’ 얼굴 없는 그 마음이, 그래도 매달 꼬박꼬박 나를 버티게 했다.",
+    q:"2026년 기준 <span class='hi'>자립수당은 월 ○○만원</span> (매월 20일, 최대 60회 지급). 숫자를 입력해줘.",
+    placeholder:"만원 단위 숫자",
+    accept:["50","50만원","오십"],
+    hints:["2024년에 40만원에서 올라, 지금까지 쭉 이어지는 금액이야.","월 50만원(2024년~), 매월 20일·최대 60회(=5년)까지 받아."],
+    clueLabel:"자립수당(월,만원)", clueValue:50
+  },
+  {
+    emoji:"🌱", kicker:"CHAPTER 06 · 씨앗", name:"나도 모르던 손길", diff:3, type:"choice",
+    scene:"선생님이 오래된 통장 하나를 챙겨준다. “시설에 있을 때부터 만들어둔 디딤씨앗통장이야. 네가 저축하면 정부가 그 위에 두 배를 얹어줬어.” 페이지를 넘기다 멈칫했다. 내가 까맣게 잊고 지낸 그 오랜 시간에도, 누군가 조용히 내 몫에 돈을 얹고 있었다. 나도 모르는 사이에. 작게 심어진 씨앗이 어느새 목돈이 되어 있었다.",
+    q:"디딤씨앗통장에 내가 <span class='hi'>매달 5만원을 저축</span>하면, 정부의 1:2 매칭까지 더해 통장엔 매달 얼마가 쌓일까?",
+    choices:[
+      "5만원 그대로 (매칭 없음)",
+      "10만원",
+      "15만원",
+      "0원 (자립준비청년은 대상 아님)"
+    ],
+    answer:2,
+    hints:["정부가 내 저축액의 2배(1:2)를 매칭해줘.","내 5만원 + 정부 10만원 = 월 15만원이 쌓여."]
+  },
+  {
+    emoji:"🔑", kicker:"CHAPTER 07 · 내 공간", name:"첫 밤의 다짐", diff:3, type:"input", numlock:true,
+    scene:"드디어 내 이름으로 계약하는 첫 집. LH 전세임대주택은 보증금이 놀랄 만큼 적었다 — 전세금 대부분은 LH가 대주고, 수도권 최대 1억 2천만원까지 지원한다. 최초 2년 계약에 2년마다 재계약해 기본 10년까지, 요건을 더 충족하면 최장 30년까지도 살 수 있다. 짐을 내려놓은 첫날 밤, 낯선 천장을 보며 다짐했다. ‘이제부턴 뭐든 내 힘으로 해내야지.’ 설렘 반, 긴장 반. 그때의 나는, 이 다짐이 절반은 착각이라는 걸 아직 몰랐다.",
+    q:"LH 자립준비청년 전세임대주택의 <span class='hi'>임대보증금은 단 ○○○만원</span>? 숫자를 입력해줘.",
+    placeholder:"만원 단위 숫자",
+    accept:["100","100만원","백만원"],
+    hints:["세 자리, ‘백’ 단위야. 전세금 대부분은 LH가 지원해주고 내가 내는 보증금은 아주 적어.","임대보증금은 단 100만원이야."]
+  },
+  {
+    emoji:"🍱", kicker:"CHAPTER 08 · 온기", name:"다시 찾아온 손길", diff:3, type:"choice",
+    scene:"새 집에서 혼자 지낸 지 얼마 안 된 어느 저녁, 초인종이 울렸다. 원장님이 반찬통을 한가득 들고 서 있다. “밥은 챙겨 먹고 다니니.” 나는 ‘이번 한 번이겠지’ 생각했지만, 원장님도 담당 선생님도 자꾸만 다시 찾아왔다. 공동생활가정을 나왔다고 인연이 끊기는 게 아니었다 — 만기퇴소 6개월 전부터 이어진 그 손길이, 지금도 끊기지 않고 곁에 있다.",
+    q:"그룹홈 청년 한 사람을 <span class='hi'>1:1로 꾸준히 돕는</span> 서울시 아동공동생활가정 지원센터의 사업 이름은?",
+    choices:[
+      "집중사례관리",
+      "일회성 후원금 지급 후 종료",
+      "퇴소와 동시에 연락 종료",
+      "지원 사업 없음"
+    ],
+    answer:0,
+    hints:["퇴소 6개월 전부터 자립 이후까지, 한 명을 전담해 챙겨주는 사업이야.","‘집중’해서 ‘사례’를 ‘관리’해준다는 이름 — 집중사례관리."]
+  },
+  {
+    emoji:"🫂", kicker:"CHAPTER 09 · 마음", name:"혼자 견디지 마", diff:3, type:"choice",
+    scene:"모든 게 준비된 것 같은데도, 불 꺼진 방에 혼자 있으면 이유 없이 마음이 무너졌다. 괜찮은 척이 버겁던 밤, 처음으로 담당 선생님에게 솔직히 털어놨다. “가끔… 너무 혼자인 것 같아요.” 선생님이 조용히 답했다. “마음이 힘든 건 약한 게 아니야. 혼자 견디지 마. 그걸 돌보는 것도 네 당연한 권리야.” 그 말에, 꼭 닫아뒀던 마음이 조금 열렸다.",
+    q:"자립준비청년의 <span class='hi'>정서·심리 회복</span>을 위해 실제로 제공되는 지원은?",
+    choices:[
+      "전문 심리상담·정서지원 서비스",
+      "‘혼자 이겨내라’는 말뿐",
+      "제도적 지원 없음",
+      "상담 비용 전액 본인 부담"
+    ],
+    answer:0,
+    hints:["방 이름이 곧 힌트야 — 마음을 돌보는 지원.","전문 심리상담·정서지원을 받을 수 있어 — 혼자 견딜 필요 없어."]
+  },
+  {
+    emoji:"🏢", kicker:"CHAPTER 10 · 일", name:"얼굴 모르는 응원", diff:4, type:"choice",
+    scene:"취업을 준비하며 여러 자원을 찾아보다, 한 사회공헌 프로그램을 알게 됐다. 2013년, 나를 만난 적도 없는 사람들이 십시일반 낸 기부금으로 시작돼, 10년 넘게 5만 명이 넘는 자립준비청년에게 살 곳과 직무교육을 이어 온 사업. 얼굴도 모르는 이들이 이렇게 오래 우리 곁에 있었다는 게 새삼 든든했다.",
+    q:"자립준비청년에게 <span class='hi'>주거와 취업 직무교육을 함께</span> 지원해 온 대표적 사회공헌 사업의 이름은?",
+    choices:[
+      "희망디딤돌",
+      "무이자 소액대출 상품",
+      "단순 상품권 증정 이벤트",
+      "해당하는 사업 없음"
+    ],
+    answer:0,
+    hints:["‘희망’을 향해 밟고 오르는 ‘디딤돌’이라는 이름이야.","희망디딤돌 — 주거와 취업교육을 원스톱으로 지원해."]
+  },
+  {
+    emoji:"🩺", kicker:"CHAPTER 11 · 연대", name:"아파도 혼자가 아니야", diff:4, type:"choice",
+    scene:"자취를 시작하고 몸살로 크게 앓은 날. 혼자 사는 만큼 병원비가 은근히 신경 쓰였다. 그런데 알고 보니, 보호가 끝난 뒤에도 나라가 내 진료비의 대부분을 함께 부담하고 있었다. 건강보험으로 병원·약국을 이용하면 아주 일부만 내면 됐다. 아플 때조차, 곁을 지켜 주는 제도가 있었다.",
+    q:"자립준비청년 의료비 지원을 받으면, 병원·약국 이용 시 진료비(요양급여비용)의 <span class='hi'>몇 %만</span> 본인이 부담할까? (의료급여 2종 수준)",
+    choices:[
+      "약 14%만 부담 (나머지는 국가가 지원)",
+      "전액(100%) 본인 부담",
+      "약 70% 부담",
+      "지원 제도 자체가 없음"
+    ],
+    answer:0,
+    hints:["의료급여 2종과 비슷한 수준이라, 본인 부담이 확 낮아져.","진료비의 약 14%만 내면 돼 — 보호종료 후 5년(60개월)까지 지원돼."]
+  },
+  {
+    emoji:"📍", kicker:"CHAPTER 12 · 곁", name:"보이지 않던 그물", diff:4, type:"input", numlock:true,
+    scene:"막힐 때마다 물어볼 곳이 있다는 건 큰 힘이었다. 전국 모든 시·도마다 자립준비청년만을 전담해 돕는 기관이 있고, 서울엔 ‘서울자립지원전담기관’이 있다. 알고 보니, 나 같은 청년을 받치기 위한 손길이 이 나라 곳곳에 그물처럼 펼쳐져 있었다. 나만 그 그물을 몰랐을 뿐이다. 서류 한 장이 막힐 때마다, 나는 이제 망설임 없이 그곳에 전화를 건다.",
+    q:"전국 시·도에 있는 <span class='hi'>자립지원전담기관은 총 ○○개</span>? (광역 시·도 수와 같아) 숫자를 입력해줘.",
+    placeholder:"기관 수(숫자)",
+    accept:["17","17개"],
+    hints:["서울·부산·대구·인천·광주·대전·울산·세종 + 9개 도.","전국 17개야."],
+    clueLabel:"자립지원전담기관 수", clueValue:17
+  },
+  {
+    emoji:"🧮", kicker:"CHAPTER 13 · 헤아림", name:"지지의 무게", diff:5, type:"input", numlock:true,
+    scene:"내 집에서의 삶이 조금씩 익숙해지던 어느 밤, 가계부를 펼쳐 지금까지 받은 지지를 헤아려 봤다. 한 번의 목돈(서울 자립정착금)과, 5년간 매달 이어질 자립수당(월 50만원 × 60개월). 숫자를 적을수록, 이건 그냥 돈이 아니었다. 한 줄 한 줄이 누군가의 손이었다. 얼굴 없는 나라, 이름 모를 시민, 원장님, 선생님… 이 숫자만큼의 손이 나를 받치고 있었다.",
+    q:"서울 자립정착금 + 5년치 자립수당 총액 = <span class='hi'>○○○○만원</span>. (2000 + 50×60) 숫자만 입력해줘.",
+    placeholder:"만원 단위 숫자",
+    accept:["5000","5000만원","오천","오천만원","5천","5천만원","5,000"],
+    hints:["먼저 자립수당 5년 총액: 50 × 60 = 3,000만원.","2,000(정착금) + 3,000(수당) = 5,000만원."]
+  },
+  {
+    emoji:"🧭", kicker:"CHAPTER 14 · 여정", name:"내가 걸어온 길", diff:5, type:"sequence",
+    scene:"익숙해진 내 방에 앉아 지난 몇 해를 가만히 되짚어 본다. 걸어온 길이 발밑의 디딤돌처럼 이어져 있다. 이제야 보인다 — 그 디딤돌 하나하나 아래에, 나를 받치던 수많은 손이 있었다는 걸. 그 길을 처음부터 순서대로 밟아 보자.",
+    q:"내가 걸어온 자립의 여정을 <span class='hi'>시간 순서대로</span> 눌러줘. (처음 → 마지막)",
+    items:[
+      "공동생활가정에서 보호받으며 자람",
+      "만 18세, 보호종료(또는 보호연장)를 결정",
+      "배움마켓 수료 · 자립정착금·자립수당으로 준비",
+      "LH 전세임대로 나의 첫 집을 마련",
+      "사람·사회·정부의 지지 속에 홀로서기"
+    ],
+    order:[0,1,2,3,4],
+    hints:["‘보호받던 시절’이 가장 먼저, ‘홀로서기’가 가장 나중이야.","자람 → 보호종료 → 배움·목돈 → 내 집 → 자립 순서."]
+  },
+  {
+    emoji:"🎉", kicker:"FINAL · 첫 집들이", name:"혼자가 아니었다", diff:5, type:"input",
+    scene:"내 집에서 여는 첫 집들이 날. 초인종이 울려 현관문을 여는 순간 — 숨이 멎었다. 반찬통을 든 원장님, 서류를 챙겨온 담당 선생님, 함께 자란 친구들이 웃으며 서 있다. 그리고 그 뒤로, 눈에 보이지 않던 이들의 얼굴이 겹쳐 떠올랐다. 오래전 기부로 희망디딤돌을 만든 이름 모를 사람들, 다달이 후원해 온 시민들, 매달 수당을 보내온 나라, 정착금을 올려준 도시…. 진짜 나 혼자 해냈다고 생각했는데 — 이 수많은 사람과 사회와 나라가, 내가 몰랐던 순간에도 처음부터 나와 함께 있었구나. 자립은 ‘혼자 뚝 떨어지는 것’이 아니라, 이 수많은 손을 딛고 ‘내 힘으로 서는 것’이었다. 마지막 문에, 이 여정의 이름이 새겨져 있다.",
+    q:"혼자가 아니라, 이 많은 손을 딛고 서는 것. 그 여정의 이름 <span class='hi'>두 글자</span>를 입력하면 문이 열려.",
+    placeholder:"○○",
+    accept:["자립","自立"],
+    hints:["게임의 제목이자, 첫 방부터 품어온 마음이야.","정답은 ‘자립’이야."]
+  }
+];
+
+/* ---------- state ---------- */
+const S = {
+  idx:0, startTime:0, timerId:null,
+  hintsUsed:0, misses:0, hintLevel:0, attempts:0,
+  seqPick:[]
+};
+
+/* ---------- els ---------- */
+const el = (id)=>document.getElementById(id);
+const introScreen=el('introScreen'), gameScreen=el('gameScreen'), winScreen=el('winScreen');
+const stageCard=el('stageCard');
+
+/* ---------- theme ---------- */
+(function initTheme(){
+  const saved = localStorage.getItem('escape_theme');
+  const t = saved || 'dark';
+  if(t==='light') document.documentElement.setAttribute('data-theme','light');
+  syncThemeIcon();
+})();
+function syncThemeIcon(){
+  const light = document.documentElement.getAttribute('data-theme')==='light';
+  el('themeBtn').textContent = light ? '☀️' : '🌙';
+}
+el('themeBtn').addEventListener('click',()=>{
+  const light = document.documentElement.getAttribute('data-theme')==='light';
+  if(light){ document.documentElement.removeAttribute('data-theme'); localStorage.setItem('escape_theme','dark'); }
+  else { document.documentElement.setAttribute('data-theme','light'); localStorage.setItem('escape_theme','light'); }
+  syncThemeIcon();
+});
+
+/* ---------- helpers ---------- */
+function normalize(str){
+  return (str||"").toString().trim().toLowerCase()
+    .replace(/\s+/g,"")
+    .replace(/[,\.]/g,"")
+    .replace(/원$/,"").replace(/만원$/,"").replace(/만$/,"")
+    .replace(/세$/,"").replace(/개$/,"").replace(/년$/,"");
+}
+function fmt(sec){
+  const m=Math.floor(sec/60), s=sec%60;
+  return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+function elapsed(){ return Math.floor((Date.now()-S.startTime)/1000); }
+
+/* ---------- flow ---------- */
+el('startBtn').addEventListener('click', startGame);
+el('replayBtn').addEventListener('click', startGame);
+el('rereadBtn').addEventListener('click', startGame);
+
+function startGame(){
+  S.idx=0; S.hintsUsed=0; S.misses=0; S.startTime=Date.now();
+  introScreen.classList.add('hidden');
+  winScreen.classList.add('hidden');
+  gameScreen.classList.remove('hidden');
+  clearInterval(S.timerId);
+  S.timerId=setInterval(()=>{ el('timer').textContent=fmt(elapsed()); },1000);
+  el('timer').textContent='00:00';
+  renderStage();
+  window.scrollTo(0,0);
+}
+
+function renderStage(){
+  const st = STAGES[S.idx];
+  S.hintLevel=0; S.attempts=0; S.seqPick=[];
+
+  el('stageNum').textContent=String(S.idx+1).padStart(2,'0');
+  el('stageMiniName').textContent=st.name;
+  el('progressFill').style.width = ((S.idx)/STAGES.length*100)+'%';
+
+  const diffDots = Array.from({length:5},(_,i)=>'<i class="'+(i<st.diff?'on':'')+'"></i>').join('');
+
+  let body='';
+  if(st.type==='input'){
+    body = `
+      <div class="answer-row">
+        <input class="answer-input ${st.numlock?'numlock':''}" id="ansInput" type="text"
+               inputmode="${st.numlock?'numeric':'text'}" autocomplete="off" spellcheck="false"
+               placeholder="${st.placeholder||'정답 입력'}" aria-label="정답 입력">
+        <button class="btn-check" id="checkBtn">확인</button>
+      </div>`;
+  } else if(st.type==='choice'){
+    body = '<div class="choices" id="choiceWrap">' + st.choices.map((c,i)=>
+      `<button class="choice" data-i="${i}"><span class="key">${String.fromCharCode(65+i)}</span><span>${c}</span></button>`
+    ).join('') + '</div>';
+  } else if(st.type==='sequence'){
+    const shuffled = st.items.map((t,i)=>({t,i})).sort(()=>Math.random()-0.5);
+    body = '<div class="seq-hint">↕️ 올바른 순서대로 하나씩 눌러 번호를 매기세요. 잘못 누르면 초기화됩니다.</div>' +
+      '<div class="seq-list" id="seqWrap">' + shuffled.map(o=>
+      `<button class="seq-item" data-i="${o.i}"><span class="order-num">·</span><span>${o.t}</span></button>`
+    ).join('') + '</div>';
+  }
+
+  stageCard.innerHTML = `
+    <div class="stage-head">
+      <div class="room-emoji">${st.emoji}</div>
+      <div class="rh-txt">
+        <div class="kicker">${st.kicker}</div>
+        <h2>${st.name}</h2>
+      </div>
+      <div class="difficulty" title="난이도">${diffDots}</div>
+    </div>
+    <div class="scene">${st.scene}</div>
+    <div class="puzzle-q">${st.q}</div>
+    ${body}
+    <div class="feedback" id="feedback"></div>
+    <div id="hintArea"></div>
+    <div class="stage-foot">
+      <button class="btn-ghost" id="hintBtn">💡 힌트 보기</button>
+      <span class="attempts" id="attemptsLbl"></span>
+    </div>
+  `;
+
+  bindStage(st);
+}
+
+function bindStage(st){
+  el('hintBtn').addEventListener('click',()=>showHint(st));
+
+  if(st.type==='input'){
+    const inp=el('ansInput');
+    inp.focus();
+    el('checkBtn').addEventListener('click',()=>checkInput(st));
+    inp.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ e.preventDefault(); checkInput(st); }});
+  } else if(st.type==='choice'){
+    el('choiceWrap').querySelectorAll('.choice').forEach(btn=>{
+      btn.addEventListener('click',()=>checkChoice(st,btn));
+    });
+  } else if(st.type==='sequence'){
+    el('seqWrap').querySelectorAll('.seq-item').forEach(btn=>{
+      btn.addEventListener('click',()=>pickSeq(st,btn));
+    });
+  }
+}
+
+/* ---------- input check ---------- */
+function checkInput(st){
+  const inp=el('ansInput');
+  const val=normalize(inp.value);
+  if(!val){ inp.classList.add('shake'); setTimeout(()=>inp.classList.remove('shake'),400); return; }
+  const ok = st.accept.some(a=>normalize(a)===val);
+  if(ok){ onCorrect(st); }
+  else { onWrong(); inp.classList.add('shake'); setTimeout(()=>inp.classList.remove('shake'),400); inp.select(); }
+}
+
+/* ---------- choice check ---------- */
+function checkChoice(st,btn){
+  const i=parseInt(btn.dataset.i,10);
+  if(i===st.answer){
+    btn.classList.add('correct');
+    el('choiceWrap').querySelectorAll('.choice').forEach(b=>b.disabled=true);
+    onCorrect(st);
+  } else {
+    btn.classList.add('wrong');
+    onWrong();
+    setTimeout(()=>btn.classList.remove('wrong'),700);
+  }
+}
+
+/* ---------- sequence ---------- */
+function pickSeq(st,btn){
+  if(btn.classList.contains('picked')) return;
+  const i=parseInt(btn.dataset.i,10);
+  const expected = st.order[S.seqPick.length];
+  if(i===expected){
+    S.seqPick.push(i);
+    btn.classList.add('picked');
+    btn.querySelector('.order-num').textContent=S.seqPick.length;
+    if(S.seqPick.length===st.order.length){ onCorrect(st); }
+  } else {
+    onWrong();
+    const wrap=el('seqWrap');
+    wrap.classList.add('shake'); setTimeout(()=>wrap.classList.remove('shake'),400);
+    S.seqPick=[];
+    wrap.querySelectorAll('.seq-item').forEach(b=>{ b.classList.remove('picked'); b.querySelector('.order-num').textContent='·'; });
+  }
+}
+
+/* ---------- outcomes ---------- */
+function onWrong(){
+  S.misses++; S.attempts++;
+  const fb=el('feedback');
+  const msgs=['🔒 아직 문이 열리지 않아요. 다시 생각해 보세요.','❌ 열쇠가 맞지 않습니다. 힌트를 써보는 건 어때요?','🌀 아니에요. 단서를 다시 살펴보세요.'];
+  fb.className='feedback no';
+  fb.textContent=msgs[Math.min(S.attempts-1,msgs.length-1)];
+  el('attemptsLbl').textContent='시도 '+S.attempts+'회';
+}
+
+function onCorrect(st){
+  const fb=el('feedback');
+  fb.className='feedback ok';
+  fb.textContent='🔓 철컥 — 문이 열립니다!';
+  const clue = st.clueValue!==undefined ? ` &nbsp;<span style="color:var(--txt-faint)">(단서 기록: ${st.clueLabel}=${st.clueValue})</span>` : '';
+  if(clue) fb.innerHTML='🔓 철컥 — 문이 열립니다!'+clue;
+
+  el('progressFill').style.width = ((S.idx+1)/STAGES.length*100)+'%';
+  doorFlash(S.idx===STAGES.length-1?'🎉':'🔓');
+
+  setTimeout(()=>{
+    if(S.idx<STAGES.length-1){ S.idx++; renderStage(); window.scrollTo({top:0,behavior:'smooth'}); }
+    else { finish(); }
+  }, 1050);
+}
+
+/* ---------- hints ---------- */
+function showHint(st){
+  if(S.hintLevel>=st.hints.length){
+    return;
+  }
+  S.hintsUsed++;
+  const area=el('hintArea');
+  const h=document.createElement('div');
+  h.className='hint-box';
+  h.innerHTML='<b>💡 힌트 '+(S.hintLevel+1)+'.</b> '+st.hints[S.hintLevel];
+  area.appendChild(h);
+  S.hintLevel++;
+  if(S.hintLevel>=st.hints.length){
+    el('hintBtn').disabled=true;
+    el('hintBtn').style.opacity='0.5';
+    el('hintBtn').textContent='💡 힌트 모두 사용';
+  }
+}
+
+/* ---------- door flash ---------- */
+function doorFlash(emoji){
+  const d=el('doorFlash');
+  el('doorEmoji').textContent=emoji;
+  d.classList.remove('show'); void d.offsetWidth; d.classList.add('show');
+}
+
+/* ---------- finish ---------- */
+function finish(){
+  clearInterval(S.timerId);
+  const total=elapsed();
+  const tStr=fmt(total);
+  gameScreen.classList.add('hidden');
+  winScreen.classList.remove('hidden');
+
+  el('rTime').textContent=tStr;
+  el('rHints').textContent=S.hintsUsed;
+  el('rMiss').textContent=S.misses;
+
+  // 스토리 스킵 감지 — 20초 이내 탈출 시 유쾌하게 안내
+  el('speedNotice').classList.toggle('hidden', !(total<20));
+
+  // rank
+  let rank, emoji;
+  const score = S.hintsUsed*2 + S.misses;
+  if(score===0){ rank='완벽한 탈출 마스터'; emoji='🥇'; }
+  else if(score<=4){ rank='노련한 탈출러'; emoji='🥈'; }
+  else if(score<=9){ rank='성실한 탈출 도전자'; emoji='🥉'; }
+  else { rank='끝까지 해낸 탈출자'; emoji='🎖️'; }
+  S.rank=rank; S.rankEmoji=emoji;
+  el('rankLine').innerHTML=emoji+' 당신의 등급 : <span style="color:var(--accent-2)">'+rank+'</span>';
+
+  launchConfetti();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ---------- share (결과 이미지 카드 생성) ---------- */
+const KOFONT = "'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif";
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+function buildResultCanvas(theme){
+  const dark = theme!=='light';
+  const P = dark ? {
+    bg0:'#0a0f1f', bg1:'#141c34', bg2:'#0c2330',
+    g1:'rgba(91,140,255,0.32)', g2:'rgba(181,123,255,0.28)', g3:'rgba(49,224,200,0.20)',
+    border:'rgba(140,170,255,0.25)',
+    brand:'rgba(159,176,214,0.95)',
+    badgeBg:'rgba(91,140,255,0.16)', badgeTx:'#31e0c8',
+    hlA:'#ffce56', hlB:'#31e0c8',
+    sub:'rgba(210,220,245,0.92)',
+    tileBg:'rgba(255,255,255,0.05)', tileBorder:'rgba(140,170,255,0.18)', tileVal:'#eaf0ff', tileLab:'rgba(150,165,200,0.95)',
+    pillBg:'rgba(181,123,255,0.16)', pillBorder:'rgba(181,123,255,0.45)', pillTx:'#eaf0ff',
+    quote:'rgba(190,202,230,0.92)', cta:'#7fa6ff', tag:'rgba(140,155,190,0.9)'
+  } : {
+    bg0:'#eef2fc', bg1:'#f6f8ff', bg2:'#e7f8f3',
+    g1:'rgba(91,140,255,0.20)', g2:'rgba(181,123,255,0.16)', g3:'rgba(13,148,136,0.12)',
+    border:'rgba(40,70,150,0.16)',
+    brand:'rgba(90,104,130,0.95)',
+    badgeBg:'rgba(91,140,255,0.14)', badgeTx:'#0d9488',
+    hlA:'#7c3aed', hlB:'#0d9488',
+    sub:'rgba(40,54,84,0.92)',
+    tileBg:'rgba(20,28,48,0.045)', tileBorder:'rgba(40,70,150,0.16)', tileVal:'#16213c', tileLab:'rgba(90,104,130,0.95)',
+    pillBg:'rgba(124,58,237,0.10)', pillBorder:'rgba(124,58,237,0.40)', pillTx:'#1e1b3a',
+    quote:'rgba(55,68,96,0.92)', cta:'#4f46e5', tag:'rgba(120,132,160,0.95)'
+  };
+
+  const W=1080, H=1350;
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const x=c.getContext('2d');
+  const cx=W/2;
+
+  // 배경 그라디언트
+  const bg=x.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,P.bg0); bg.addColorStop(0.55,P.bg1); bg.addColorStop(1,P.bg2);
+  x.fillStyle=bg; x.fillRect(0,0,W,H);
+  // 은은한 글로우
+  function glow(gx,gy,gr,col){ const g=x.createRadialGradient(gx,gy,0,gx,gy,gr); g.addColorStop(0,col); g.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=g; x.fillRect(0,0,W,H); }
+  glow(150,120,520,P.g1);
+  glow(980,180,520,P.g2);
+  glow(cx,1320,640,P.g3);
+  // 외곽 테두리
+  x.strokeStyle=P.border; x.lineWidth=3;
+  roundRect(x,20,20,W-40,H-40,40); x.stroke();
+
+  x.textAlign='center'; x.textBaseline='alphabetic';
+
+  // 상단 브랜드
+  x.fillStyle=P.brand;
+  x.font="600 34px "+KOFONT;
+  x.fillText('🌸 자립해봄  ·  자립 방탈출', cx, 110);
+
+  // 배지
+  x.font="700 26px "+KOFONT;
+  const badge='온라인 스토리 방탈출';
+  const bw=x.measureText(badge).width+56;
+  x.fillStyle=P.badgeBg;
+  roundRect(x,cx-bw/2,140,bw,50,25); x.fill();
+  x.fillStyle=P.badgeTx; x.fillText(badge, cx, 174);
+
+  // 큰 이모지
+  x.font="130px "+KOFONT;
+  x.fillText('🎉', cx, 330);
+
+  // 헤드라인 (그라디언트)
+  x.font="800 96px "+KOFONT;
+  const hl='탈출 성공!';
+  const hw=x.measureText(hl).width;
+  const hg=x.createLinearGradient(cx-hw/2,0,cx+hw/2,0);
+  hg.addColorStop(0,P.hlA); hg.addColorStop(1,P.hlB);
+  x.fillStyle=hg; x.fillText(hl, cx, 450);
+
+  // 서브 문구
+  x.fillStyle=P.sub;
+  x.font="600 37px "+KOFONT;
+  x.fillText('열여덟 하람이의 자립 여정,', cx, 528);
+  x.fillText('15개의 방을 모두 열었다.', cx, 578);
+
+  // 스탯 타일 3개
+  const tiles=[
+    {v:el('rTime').textContent, l:'탈출 시간'},
+    {v:String(S.hintsUsed), l:'사용 힌트'},
+    {v:String(S.misses), l:'오답 횟수'}
+  ];
+  const pad=70, gap=26, tw=(W-pad*2-gap*2)/3, ty=640, th=190;
+  tiles.forEach((t,i)=>{
+    const tx=pad+i*(tw+gap);
+    x.fillStyle=P.tileBg;
+    roundRect(x,tx,ty,tw,th,26); x.fill();
+    x.strokeStyle=P.tileBorder; x.lineWidth=2;
+    roundRect(x,tx,ty,tw,th,26); x.stroke();
+    x.fillStyle=P.tileVal;
+    x.font="800 70px "+KOFONT;
+    x.fillText(t.v, tx+tw/2, ty+96);
+    x.fillStyle=P.tileLab;
+    x.font="600 30px "+KOFONT;
+    x.fillText(t.l, tx+tw/2, ty+150);
+  });
+
+  // 등급 pill — 이모지+텍스트를 따로 그려 기기별 measureText 편차로 인한 정렬 틀어짐 방지
+  const rEmoji=(S.rankEmoji||'🏅'), rLabel=(S.rank||'탈출자');
+  x.font="800 44px "+KOFONT;
+  const eSlot=66;                                   // 이모지 고정 슬롯
+  const lblW=x.measureText(rLabel).width;
+  const contentW=eSlot+lblW;
+  const rw=contentW+70, ry=900, sx=cx-contentW/2;   // 이모지+텍스트 블록을 중앙정렬
+  x.fillStyle=P.pillBg;
+  roundRect(x,cx-rw/2,ry,rw,80,40); x.fill();
+  x.strokeStyle=P.pillBorder; x.lineWidth=2;
+  roundRect(x,cx-rw/2,ry,rw,80,40); x.stroke();
+  x.fillStyle=P.pillTx;
+  x.textAlign='left';
+  x.fillText(rEmoji, sx, ry+55);
+  x.fillText(rLabel, sx+eSlot, ry+55);
+  x.textAlign='center';
+
+  // 감성 문구
+  x.fillStyle=P.quote;
+  x.font="500 34px "+KOFONT;
+  x.fillText('“진짜 혼자인 줄 알았지만,', cx, 1075);
+  x.fillText('수많은 사람과 사회, 정부가 함께였다.”', cx, 1120);
+
+  // CTA
+  x.fillStyle=P.cta;
+  x.font="700 36px "+KOFONT;
+  x.fillText('▶ 나도 도전하기 :  jarip.vercel.app', cx, 1198);
+
+  // 해시태그 (2줄)
+  x.fillStyle=P.tag;
+  x.font="600 30px "+KOFONT;
+  x.fillText('#자립준비청년  #자립방탈출  #자립해봄', cx, 1252);
+  x.fillText('#서울시아동공동생활가정지원센터', cx, 1296);
+
+  return c;
+}
+
+function canvasToBlob(c){
+  return new Promise(res=>{ if(c.toBlob) c.toBlob(res,'image/png'); else res(dataURLtoBlob(c.toDataURL('image/png'))); });
+}
+function dataURLtoBlob(d){ const a=d.split(','),m=a[0].match(/:(.*?);/)[1],b=atob(a[1]),n=b.length,u=new Uint8Array(n); for(let i=0;i<n;i++)u[i]=b.charCodeAt(i); return new Blob([u],{type:m}); }
+
+// 공유 카드 테마 선택 (다크/라이트)
+let cardTheme='dark';
+document.querySelectorAll('.ctp-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    cardTheme=b.dataset.cardtheme;
+    document.querySelectorAll('.ctp-btn').forEach(o=>o.classList.toggle('active',o===b));
+  });
+});
+
+el('shareBtn').addEventListener('click', async ()=>{
+  const btn=el('shareBtn'); const orig='📸 이미지로 공유하기';
+  btn.disabled=true; btn.textContent='🎨 이미지 만드는 중…';
+  try{
+    const canvas=buildResultCanvas(cardTheme);
+    const blob=await canvasToBlob(canvas);
+    const file=new File([blob],'자립방탈출_결과.png',{type:'image/png'});
+    const shareText='🔓 자립 방탈출 클리어! ⏱️'+el('rTime').textContent+' · '+(S.rankEmoji||'')+(S.rank||'')+'\n자립준비청년 정책으로 15개의 방을 탈출하는 스토리 게임 → jarip.vercel.app';
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:'자립 방탈출', text:shareText});
+      btn.textContent='✅ 공유 완료';
+    } else {
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; a.download='자립방탈출_결과.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),4000);
+      btn.textContent='✅ 이미지 저장됨';
+    }
+  }catch(e){
+    btn.textContent='⚠️ 다시 시도';
+  }
+  setTimeout(()=>{ btn.disabled=false; btn.textContent=orig; },2000);
+});
+
+/* ---------- confetti ---------- */
+function launchConfetti(){
+  const colors=['#5b8cff','#31e0c8','#b57bff','#ffce56','#3ee08a','#ff5f7a'];
+  for(let i=0;i<90;i++){
+    const c=document.createElement('div');
+    c.className='confetti';
+    c.style.left=Math.random()*100+'vw';
+    c.style.background=colors[i%colors.length];
+    c.style.animationDuration=(2.5+Math.random()*2)+'s';
+    c.style.animationDelay=(Math.random()*0.6)+'s';
+    c.style.transform='rotate('+(Math.random()*360)+'deg)';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),5200);
+  }
+}
+</script>
+</body>
+</html>

@@ -24,3 +24,16 @@ GEMINI.ENV
 # Capacitor build outputs
 www/
 
+# OS and Mac Temp
+__MACOSX/
+
+# Temporary / Preview Image Assets
+_pv_top.png
+_pv_shelf.png
+_pv_banner.png
+assets/game/room_5_clean.png
+assets/game/room_5_clean2.png
+assets/game/room_5_orig_backup.png
+assets/game/room_12_test.png
+
+
