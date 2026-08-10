@@ -290,19 +290,55 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // 기관/출처 우선순위 가중치 헬퍼 (1위: 자립정보온, 2위: 서울, 3위: 경기, 4위: 부산, 5위: 기타)
+  function getSourcePriorityRank(p) {
+    const src = (p.source || '').toLowerCase();
+    const prov = (p.provider || '').toLowerCase();
+    const reg = (p.region || '').toLowerCase();
+    const combined = `${src} ${prov} ${reg} ${(p.title || '').toLowerCase()}`;
+
+    if (src.includes('자립정보on') || src.includes('자립정보온') || combined.includes('자립정보on') || combined.includes('아동권리보장원')) {
+      return 1;
+    }
+    if (combined.includes('서울') && (combined.includes('전담기관') || combined.includes('지원센터') || combined.includes('광역청년센터') || src.includes('서울'))) {
+      return 2;
+    }
+    if (combined.includes('경기') && (combined.includes('전담기관') || combined.includes('지원센터') || src.includes('경기'))) {
+      return 3;
+    }
+    if (combined.includes('부산') && (combined.includes('전담기관') || combined.includes('지원센터') || src.includes('부산'))) {
+      return 4;
+    }
+
+    return 10;
+  }
+
   // 6. 필터 채우기 (데이터에 기반한 유동적 지역 목록)
   function populateRegionFilters() {
-    const regions = new Set(["전국"]);
+    const regionsSet = new Set(["전국"]);
     policies.forEach(p => {
       if (p.region && p.region !== "전국") {
-        regions.add(p.region);
+        regionsSet.add(p.region);
       }
     });
 
-    // 기존의 첫 번째 옵션('전체 지역') 제외하고 초기화
+    const regionPriority = (r) => {
+      if (r === "전국") return 0;
+      if (r.includes("서울")) return 1;
+      if (r.includes("경기")) return 2;
+      if (r.includes("부산")) return 3;
+      return 10;
+    };
+
+    const sortedRegions = Array.from(regionsSet).sort((a, b) => {
+      const pA = regionPriority(a);
+      const pB = regionPriority(b);
+      if (pA !== pB) return pA - pB;
+      return a.localeCompare(b, 'ko');
+    });
+
     regionFilter.innerHTML = '<option value="all">📍 전체 지역</option>';
-    
-    regions.forEach(r => {
+    sortedRegions.forEach(r => {
       const option = document.createElement("option");
       option.value = r;
       option.textContent = r;
@@ -311,15 +347,29 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function populateSourceFilters() {
-    const sources = new Set();
+    const sourcesSet = new Set();
     policies.forEach(p => {
-      if (p.source) {
-        sources.add(p.source);
-      }
+      if (p.source) sourcesSet.add(p.source);
+    });
+
+    const sourcePriority = (s) => {
+      const sLower = s.toLowerCase();
+      if (sLower.includes("자립정보on") || sLower.includes("자립정보온") || sLower.includes("아동권리보장원")) return 1;
+      if (sLower.includes("서울")) return 2;
+      if (sLower.includes("경기")) return 3;
+      if (sLower.includes("부산")) return 4;
+      return 10;
+    };
+
+    const sortedSources = Array.from(sourcesSet).sort((a, b) => {
+      const pA = sourcePriority(a);
+      const pB = sourcePriority(b);
+      if (pA !== pB) return pA - pB;
+      return a.localeCompare(b, 'ko');
     });
 
     sourceFilter.innerHTML = '<option value="all">🔍 전체 출처</option>';
-    sources.forEach(s => {
+    sortedSources.forEach(s => {
       const option = document.createElement("option");
       option.value = s;
       option.textContent = s;
@@ -425,11 +475,15 @@ document.addEventListener("DOMContentLoaded", () => {
       return matchCategory && matchRegion && matchSearch && matchType && matchSource && matchBookmark;
     });
 
-    // 정렬 로직
+    // 정렬 로직 (기관 우선순위: 자립정보온 -> 서울 -> 경기 -> 부산 -> 기타 적용 후 정렬)
     filtered.sort((a, b) => {
+      const rankA = getSourcePriorityRank(a);
+      const rankB = getSourcePriorityRank(b);
+      if (rankA !== rankB) return rankA - rankB;
+
       if (currentSort === "newest") {
         if (typeof a.id === 'number' && typeof b.id === 'number') {
-          return b.id - a.id; // ID가 클수록 나중에 추가된 최신 데이터
+          return b.id - a.id;
         }
         return String(b.id).localeCompare(String(a.id));
       } else if (currentSort === "closing_soon") {
