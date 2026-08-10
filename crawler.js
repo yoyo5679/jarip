@@ -535,13 +535,13 @@ async function crawlSmyc() {
 // 5. 수집 데이터를 data.js에 업데이트하는 메인 함수
 async function main() {
   try {
-    // 다섯 사이트 데이터 수집
-    const ggData = await crawlGyeonggi();
-    const seoulData = await crawlSeoul();
-    const jariponData = await crawlJaripon();
-    const busanData = await crawlBusan();
-    const smycData = await crawlSmyc();
-    const scraped = [...ggData, ...seoulData, ...jariponData, ...busanData, ...smycData];
+      // 크롤링 사이트 통합 수집 (최신 정렬 시 높은 ID가 위로 오게 하기 위해 우선순위 역순으로 추가: 스마일센터 -> 부산 -> 경기 -> 서울 -> 자립정보ON)
+      const jariponData = await crawlJaripon();
+      const seoulData = await crawlSeoul();
+      const ggData = await crawlGyeonggi();
+      const busanData = await crawlBusan();
+      const smycData = await crawlSmyc();
+      const scraped = [...smycData, ...busanData, ...ggData, ...seoulData, ...jariponData];
 
     if (scraped.length === 0) {
       console.log('수집된 신규 정책이 없습니다.');
@@ -706,8 +706,41 @@ async function main() {
       return;
     }
 
-    // 정렬 (ID 오름차순 또는 원하는 대로)
-    existingPolicies.sort((a, b) => a.id - b.id);
+    // 기관/출처 우선순위 가중치 산출 함수
+    const getSourcePriorityRank = (p) => {
+      const src = (p.source || '').toLowerCase();
+      const prov = (p.provider || '').toLowerCase();
+      const reg = (p.region || '').toLowerCase();
+      const combined = `${src} ${prov} ${reg} ${(p.title || '').toLowerCase()}`;
+
+      // 1순위: 자립정보온 (자립정보ON / 아동권리보장원)
+      if (src.includes('자립정보on') || src.includes('자립정보온') || combined.includes('자립정보on') || combined.includes('아동권리보장원')) {
+        return 1;
+      }
+      // 2순위: 서울 전담기관 (서울자립지원전담기관 / 서울광역청년센터 / 서울)
+      if (combined.includes('서울') && (combined.includes('전담기관') || combined.includes('지원센터') || combined.includes('광역청년센터') || src.includes('서울'))) {
+        return 2;
+      }
+      // 3순위: 경기 전담기관 (경기도자립지원전담기관 / 경기)
+      if (combined.includes('경기') && (combined.includes('전담기관') || combined.includes('지원센터') || src.includes('경기'))) {
+        return 3;
+      }
+      // 4순위: 부산 전담기관 (부산광역시자립지원전담기관 / 부산)
+      if (combined.includes('부산') && (combined.includes('전담기관') || combined.includes('지원센터') || src.includes('부산'))) {
+        return 4;
+      }
+
+      // 5순위: 기타 기관
+      return 10;
+    };
+
+    // 정렬 (1. 기관 우선순위: 자립정보온 -> 서울 -> 경기 -> 부산 -> 기타, 2. ID 순)
+    existingPolicies.sort((a, b) => {
+      const rankA = getSourcePriorityRank(a);
+      const rankB = getSourcePriorityRank(b);
+      if (rankA !== rankB) return rankA - rankB;
+      return (a.id || 0) - (b.id || 0);
+    });
 
     // data.js 버전 번호 올리기 (캐시 무효화)
     const verRegex = /window\.initialDataVersion\s*=\s*["'](v\d{4}\.\d{2}\.\d{2}_v)(\d+)["']/m;

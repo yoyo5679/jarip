@@ -303,10 +303,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (combined.includes('서울') && (combined.includes('전담기관') || combined.includes('지원센터') || combined.includes('광역청년센터') || src.includes('서울'))) {
       return 2;
     }
-    if (combined.includes('부산') && (combined.includes('전담기관') || combined.includes('지원센터') || src.includes('부산'))) {
+    if (combined.includes('경기') && (combined.includes('전담기관') || combined.includes('지원센터') || src.includes('경기'))) {
       return 3;
     }
-    if (combined.includes('경기') && (combined.includes('전담기관') || combined.includes('지원센터') || src.includes('경기'))) {
+    if (combined.includes('부산') && (combined.includes('전담기관') || combined.includes('지원센터') || src.includes('부산'))) {
       return 4;
     }
 
@@ -325,8 +325,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const regionPriority = (r) => {
       if (r === "전국") return 0;
       if (r.includes("서울")) return 1;
-      if (r.includes("부산")) return 2;
-      if (r.includes("경기")) return 3;
+      if (r.includes("경기")) return 2;
+      if (r.includes("부산")) return 3;
       return 10;
     };
 
