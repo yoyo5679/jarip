@@ -379,7 +379,45 @@
       position: relative;
       max-height: 90vh;
       overflow-y: auto;
-      color: #fff
+      color: #fff;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(129, 140, 248, 0.55) transparent;
+    }
+
+    /* ===== Pretty custom scrollbars (WebKit / Chrome / Safari) ===== */
+    .modal-box::-webkit-scrollbar,
+    .letter-collection::-webkit-scrollbar,
+    #letterList::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .modal-box::-webkit-scrollbar-track,
+    .letter-collection::-webkit-scrollbar-track,
+    #letterList::-webkit-scrollbar-track {
+      background: transparent;
+      margin: 6px 0;
+    }
+
+    .modal-box::-webkit-scrollbar-thumb,
+    .letter-collection::-webkit-scrollbar-thumb,
+    #letterList::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, rgba(129, 140, 248, 0.65), rgba(99, 102, 241, 0.45));
+      border-radius: 999px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+
+    .modal-box::-webkit-scrollbar-thumb:hover,
+    .letter-collection::-webkit-scrollbar-thumb:hover,
+    #letterList::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, rgba(165, 180, 252, 0.9), rgba(129, 140, 248, 0.7));
+      background-clip: padding-box;
+    }
+
+    .letter-collection,
+    #letterList {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(129, 140, 248, 0.55) transparent;
     }
 
     .modal-close {
@@ -1561,8 +1599,10 @@
     /* ---------- Monologue Scenes ---------- */
     const MONOLOGUES = [
       { emoji: '🌙', text: '막막함이 완전히 사라진 건 아니다. 하지만 이제 내 앞엔 선택지가 있다. 하고 싶은 걸 계획하고, 내 삶을 내 손으로 그려갈 수 있다는 것 — 그게 자립의 진짜 시작이었다.' },
-      { emoji: '⭐', text: '혼자라고 생각했는데, 뒤돌아보니 손을 내밀어 준 사람들이 이렇게 많았구나. 원장님, 선생님, 상담사, 동료들... 나는 언제나 누군가의 방 안에 있었다.' }
+      { emoji: '⭐', text: '혼자라고 생각했는데, 뒤돌아보니 손을 내밀어 준 사람들이 이렇게 많았구나. 원장님, 선생님, 상담사, 동료들... 나는 언제나 누군가의 방 안에 있었다.' },
+      { emoji: '🕯️', text: '오늘부터, 당신은 \'하람\'입니다. 열여덟 번째 생일 아침 — 8년을 보낸 이 방을 이제 떠나야 합니다. 두렵지만, 혼자가 아닙니다. 원장님도, 선생님도, 낯선 이름의 제도들도 아직 내 편이니까. 자, 첫 번째 문을 열어볼까요.' }
     ];
+    const OPENING_MONO = 2;
 
     /* ---------- NPC Before-Key Text ---------- */
     const NPC_BEFORE = {
@@ -2720,8 +2760,11 @@
       if (!el('introOverlay').classList.contains('open')) return;
       if (document.activeElement) document.activeElement.blur();
       el('introOverlay').classList.remove('open');
-      state.startTime = Date.now();
-      enterRoom();
+      // Opening monologue for immersion (esp. mobile, where the intro lore is hidden)
+      showMonologue(OPENING_MONO, () => {
+        state.startTime = Date.now();
+        enterRoom();
+      });
     };
 
     el('btnRestart').onclick = () => {
