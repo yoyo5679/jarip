@@ -679,6 +679,37 @@
       font-family: var(--font-game); margin-bottom: 2px;
     }
 
+    /* ===== Card Theme Picker ===== */
+    .card-theme-pick {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; margin: 14px 0 10px;
+    }
+    .ctp-label {
+      font-family: var(--font-game); font-size: 0.82rem;
+      color: var(--txt-dim);
+    }
+    .ctp-btn {
+      padding: 6px 16px; border-radius: 10px;
+      border: 1px solid var(--panel-border);
+      background: rgba(255,255,255,0.06);
+      color: var(--txt-dim); font-family: var(--font-game);
+      font-size: 0.82rem; cursor: pointer; transition: .2s;
+    }
+    .ctp-btn.active {
+      background: rgba(255,204,0,0.18);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .btn-share-img {
+      padding: 12px 16px; border-radius: 16px; border: none;
+      background: linear-gradient(120deg, #8b5cf6, #6366f1);
+      color: #fff; font-family: var(--font-game);
+      font-size: 1rem; cursor: pointer; flex: 1; min-width: 100%;
+      transition: .2s;
+    }
+    .btn-share-img:hover { filter: brightness(1.1); }
+    .btn-share-img:disabled { opacity: 0.6; cursor: wait; }
+
     /* ===== Achievement Badges ===== */
     .badge-collection {
       background: rgba(0, 0, 0, 0.3); border-radius: 16px;
@@ -934,8 +965,15 @@
           <div id="letterList"></div>
         </div>
 
-        <div style="display: flex; gap: 10px; justify-content: center;">
-          <button class="btn-restart" id="btnShare" style="background: linear-gradient(120deg, #6366f1, #3b82f6); flex: 1; font-size: 1rem; padding: 12px 16px;">📋 결과 공유</button>
+        <div class="card-theme-pick" role="group" aria-label="공유 카드 테마 선택">
+          <span class="ctp-label">공유 카드</span>
+          <button class="ctp-btn active" data-cardtheme="dark" type="button">🌙 다크</button>
+          <button class="ctp-btn" data-cardtheme="light" type="button">☀️ 라이트</button>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+          <button class="btn-share-img" id="btnShareImg">📸 이미지로 공유하기</button>
+          <button class="btn-restart" id="btnShare" style="background: linear-gradient(120deg, #6366f1, #3b82f6); flex: 1; font-size: 1rem; padding: 12px 16px;">📋 텍스트 공유</button>
           <button class="btn-restart" id="btnRestart" style="flex: 1; font-size: 1rem; padding: 12px 16px;">다시 시작</button>
         </div>
       </div>
@@ -2074,6 +2112,209 @@ el('btnShare').onclick = () => {
     }).catch(()=>{});
   }
 };
+
+/* ---------- share (result image card generation) ---------- */
+const KOFONT = "'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif";
+
+function roundRect2(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+function buildArcadeResultCanvas(theme){
+  const dark = theme !== 'light';
+  const P = dark ? {
+    bg0:'#070c18', bg1:'#0f1a2e', bg2:'#0a1e2d',
+    g1:'rgba(255,204,0,0.18)', g2:'rgba(59,130,246,0.22)', g3:'rgba(16,185,129,0.16)',
+    border:'rgba(140,170,255,0.25)',
+    brand:'rgba(200,210,240,0.95)',
+    badgeBg:'rgba(255,204,0,0.14)', badgeTx:'#ffcc00',
+    hlA:'#ffcc00', hlB:'#34d399',
+    sub:'rgba(210,220,245,0.92)',
+    tileBg:'rgba(255,255,255,0.05)', tileBorder:'rgba(140,170,255,0.18)', tileVal:'#eaf0ff', tileLab:'rgba(150,165,200,0.95)',
+    pillBg:'rgba(255,204,0,0.14)', pillBorder:'rgba(255,204,0,0.45)', pillTx:'#eaf0ff',
+    quote:'rgba(190,202,230,0.92)', cta:'#60a5fa', tag:'rgba(140,155,190,0.9)',
+    badgeEarnedBg:'rgba(255,204,0,0.12)', badgeEarnedBorder:'rgba(255,204,0,0.45)',
+    badgeLockedBg:'rgba(255,255,255,0.04)', badgeLockedBorder:'rgba(140,170,255,0.12)'
+  } : {
+    bg0:'#f0f4fc', bg1:'#f8faff', bg2:'#ecf9f4',
+    g1:'rgba(255,180,0,0.14)', g2:'rgba(59,130,246,0.14)', g3:'rgba(16,185,129,0.10)',
+    border:'rgba(40,70,150,0.16)',
+    brand:'rgba(90,104,130,0.95)',
+    badgeBg:'rgba(255,180,0,0.14)', badgeTx:'#b45309',
+    hlA:'#b45309', hlB:'#0d9488',
+    sub:'rgba(40,54,84,0.92)',
+    tileBg:'rgba(20,28,48,0.045)', tileBorder:'rgba(40,70,150,0.16)', tileVal:'#16213c', tileLab:'rgba(90,104,130,0.95)',
+    pillBg:'rgba(180,83,9,0.10)', pillBorder:'rgba(180,83,9,0.40)', pillTx:'#1e1b3a',
+    quote:'rgba(55,68,96,0.92)', cta:'#4f46e5', tag:'rgba(120,132,160,0.95)',
+    badgeEarnedBg:'rgba(255,180,0,0.12)', badgeEarnedBorder:'rgba(180,83,9,0.35)',
+    badgeLockedBg:'rgba(0,0,0,0.03)', badgeLockedBorder:'rgba(40,70,150,0.10)'
+  };
+
+  const W=1080, H=1350;
+  const c=document.createElement('canvas'); c.width=W; c.height=H;
+  const x=c.getContext('2d');
+  const cxc=W/2;
+
+  // bg gradient
+  const bg=x.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,P.bg0); bg.addColorStop(0.55,P.bg1); bg.addColorStop(1,P.bg2);
+  x.fillStyle=bg; x.fillRect(0,0,W,H);
+
+  // glows
+  function glow(gx,gy,gr,col){ const g=x.createRadialGradient(gx,gy,0,gx,gy,gr); g.addColorStop(0,col); g.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=g; x.fillRect(0,0,W,H); }
+  glow(150,120,520,P.g1);
+  glow(980,180,520,P.g2);
+  glow(cxc,1320,640,P.g3);
+
+  // border
+  x.strokeStyle=P.border; x.lineWidth=3;
+  roundRect2(x,20,20,W-40,H-40,40); x.stroke();
+
+  x.textAlign='center'; x.textBaseline='alphabetic';
+
+  // brand
+  x.fillStyle=P.brand;
+  x.font="600 34px "+KOFONT;
+  x.fillText('\uD83C\uDF38 \uC790\uB9BD\uD574\uBD04  \u00B7  \uC790\uB9BD \uBC29\uD0C8\uCD9C 2D', cxc, 100);
+
+  // mode badge
+  x.font="700 26px "+KOFONT;
+  const badgeText='\uD83C\uDFAE 2D \uC544\uCF00\uC774\uB4DC RPG \uBAA8\uB4DC';
+  const bw=x.measureText(badgeText).width+56;
+  x.fillStyle=P.badgeBg;
+  roundRect2(x,cxc-bw/2,125,bw,50,25); x.fill();
+  x.fillStyle=P.badgeTx; x.fillText(badgeText, cxc, 159);
+
+  // big emoji
+  x.font="120px "+KOFONT;
+  x.fillText('\uD83C\uDFE1\uD83C\uDF89', cxc, 310);
+
+  // headline gradient
+  x.font="800 88px "+KOFONT;
+  const hl='\uCD5C\uC885 \uD0C8\uCD9C \uC131\uACF5!';
+  const hw=x.measureText(hl).width;
+  const hg=x.createLinearGradient(cxc-hw/2,0,cxc+hw/2,0);
+  hg.addColorStop(0,P.hlA); hg.addColorStop(1,P.hlB);
+  x.fillStyle=hg; x.fillText(hl, cxc, 430);
+
+  // subtitle
+  x.fillStyle=P.sub;
+  x.font="600 36px "+KOFONT;
+  x.fillText('\uD558\uB78C\uC774\uAC00 15\uAC1C \uCC55\uD130\uB97C \uBAA8\uB450 \uD0C8\uCD9C\uD558\uACE0', cxc, 505);
+  x.fillText('\uB2F9\uB2F9\uD55C \uC790\uB9BD\uC758 \uBB38\uC744 \uC5F4\uC5C8\uC2B5\uB2C8\uB2E4!', cxc, 553);
+
+  // stat tiles 4
+  const tiles=[
+    {v: state.finalTimeStr || '00:00', l:'\uD0C8\uCD9C \uC2DC\uAC04'},
+    {v: String(state.misses), l:'\uC624\uB2F5 \uD69F\uC218'},
+    {v: state.collectedLetters.size+'/15', l:'\uD3B8\uC9C0 \uC218\uC9D1'},
+    {v: state.collectedPolicies.size+'/15', l:'\uC815\uCC45 \uD574\uAE08'}
+  ];
+  const tpad=60, tgap=20, tw2=(W-tpad*2-tgap*3)/4, ty=600, th=170;
+  tiles.forEach((t,i)=>{
+    const tx2=tpad+i*(tw2+tgap);
+    x.fillStyle=P.tileBg;
+    roundRect2(x,tx2,ty,tw2,th,22); x.fill();
+    x.strokeStyle=P.tileBorder; x.lineWidth=2;
+    roundRect2(x,tx2,ty,tw2,th,22); x.stroke();
+    x.fillStyle=P.tileVal;
+    x.font="800 56px "+KOFONT;
+    x.fillText(t.v, tx2+tw2/2, ty+86);
+    x.fillStyle=P.tileLab;
+    x.font="600 28px "+KOFONT;
+    x.fillText(t.l, tx2+tw2/2, ty+136);
+  });
+
+  // badges section
+  const result = { misses: state.misses, letters: state.collectedLetters.size, elapsedMs: Date.now() - state.startTime };
+  const badgeY = 820;
+  x.fillStyle=P.sub;
+  x.font="700 32px "+KOFONT;
+  x.fillText('\uD83C\uDFC5 \uD68D\uB4DD \uBC43\uC9C0', cxc, badgeY);
+
+  const bpad=80, bgap=16;
+  const bbw=(W-bpad*2-bgap*(BADGES.length-1))/BADGES.length;
+  BADGES.forEach((b,i)=>{
+    const bx=bpad+i*(bbw+bgap);
+    const earned = b.test(result);
+    x.fillStyle=earned ? P.badgeEarnedBg : P.badgeLockedBg;
+    roundRect2(x,bx,badgeY+18,bbw,110,16); x.fill();
+    x.strokeStyle=earned ? P.badgeEarnedBorder : P.badgeLockedBorder; x.lineWidth=2;
+    roundRect2(x,bx,badgeY+18,bbw,110,16); x.stroke();
+    x.font="42px "+KOFONT;
+    if(!earned) { x.globalAlpha=0.35; }
+    x.fillStyle=P.tileVal;
+    x.fillText(b.emoji, bx+bbw/2, badgeY+72);
+    x.globalAlpha=1;
+    x.font="600 22px "+KOFONT;
+    x.fillStyle= earned ? P.badgeTx : P.tileLab;
+    x.fillText(b.name, bx+bbw/2, badgeY+108);
+  });
+
+  // quote
+  x.fillStyle=P.quote;
+  x.font="500 33px "+KOFONT;
+  x.fillText('\u201C\uC9C4\uC9DC \uD63C\uC790\uC778 \uC904 \uC54C\uC558\uC9C0\uB9CC,', cxc, 1040);
+  x.fillText('\uC218\uB9CE\uC740 \uC0AC\uB78C\uACFC \uC0AC\uD68C, \uC815\uBD80\uAC00 \uD568\uAED8\uC600\uB2E4.\u201D', cxc, 1085);
+
+  // CTA
+  x.fillStyle=P.cta;
+  x.font="700 36px "+KOFONT;
+  x.fillText('\u25B6 \uB098\uB3C4 \uB3C4\uC804\uD558\uAE30 :  jarip.vercel.app', cxc, 1170);
+
+  // hashtags
+  x.fillStyle=P.tag;
+  x.font="600 30px "+KOFONT;
+  x.fillText('#\uC790\uB9BD\uC900\uBE44\uCCAD\uB144  #\uC790\uB9BD\uBC29\uD0C8\uCD9C  #\uC790\uB9BD\uD574\uBD04', cxc, 1234);
+  x.fillText('#\uC11C\uC6B8\uC2DC\uC544\uB3D9\uACF5\uB3D9\uC0DD\uD65C\uAC00\uC815\uC9C0\uC6D0\uC13C\uD130', cxc, 1278);
+
+  return c;
+}
+
+function canvasToBlob2(c){
+  return new Promise(res=>{ if(c.toBlob) c.toBlob(res,'image/png'); else res(dataURLtoBlob2(c.toDataURL('image/png'))); });
+}
+function dataURLtoBlob2(d){ const a=d.split(','),m=a[0].match(/:(.*?);/)[1],b=atob(a[1]),n=b.length,u=new Uint8Array(n); for(let i=0;i<n;i++)u[i]=b.charCodeAt(i); return new Blob([u],{type:m}); }
+
+// card theme picker
+let arcadeCardTheme='dark';
+document.querySelectorAll('.ctp-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    arcadeCardTheme=b.dataset.cardtheme;
+    document.querySelectorAll('.ctp-btn').forEach(o=>o.classList.toggle('active',o===b));
+  });
+});
+
+// image share button
+el('btnShareImg').addEventListener('click', async ()=>{
+  const btn=el('btnShareImg'); const orig='\uD83D\uDCF8 \uC774\uBBF8\uC9C0\uB85C \uACF5\uC720\uD558\uAE30';
+  btn.disabled=true; btn.textContent='\uD83C\uDFA8 \uC774\uBBF8\uC9C0 \uB9CC\uB4DC\uB294 \uC911\u2026';
+  try{
+    const cvs=buildArcadeResultCanvas(arcadeCardTheme);
+    const blob=await canvasToBlob2(cvs);
+    const file=new File([blob],'\uC790\uB9BD\uBC29\uD0C8\uCD9C2D_\uACB0\uACFC.png',{type:'image/png'});
+    const shareText='\uD83C\uDF31 \uC790\uB9BD \uBC29\uD0C8\uCD9C 2D \uD074\uB9AC\uC5B4! \u23F1\uFE0F '+state.finalTimeStr+' \u00B7 \u274C \uC624\uB2F5 '+state.misses+'\uD68C\n\uD558\uB78C\uC774\uC640 15\uAC1C \uCC55\uD130\uB97C \uBAA8\uB450 \uD0C8\uCD9C\uD588\uC2B5\uB2C8\uB2E4! \u2192 jarip.vercel.app';
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:'\uC790\uB9BD \uBC29\uD0C8\uCD9C 2D', text:shareText});
+      btn.textContent='\u2705 \uACF5\uC720 \uC644\uB8CC';
+    } else {
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; a.download='\uC790\uB9BD\uBC29\uD0C8\uCD9C2D_\uACB0\uACFC.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),4000);
+      btn.textContent='\u2705 \uC774\uBBF8\uC9C0 \uC800\uC7A5\uB428';
+    }
+  }catch(e){
+    btn.textContent='\u26A0\uFE0F \uB2E4\uC2DC \uC2DC\uB3C4';
+  }
+  setTimeout(()=>{ btn.disabled=false; btn.textContent=orig; },2000);
+});
 
 el('btnIntroStart').onclick = () => {
   if (!el('introOverlay').classList.contains('open')) return;
