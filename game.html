@@ -374,24 +374,6 @@
       box-shadow: 0 12px 28px rgba(245, 158, 11, 0.5);
     }
 
-    /* 준비 중(비활성) 상태 */
-    .mode-card.coming-soon { opacity: 0.66; }
-    .mode-card.coming-soon:hover { transform: none; box-shadow: 0 20px 40px rgba(0,0,0,0.5); border-color: var(--stroke); }
-    .mode-card.arcade.coming-soon .card-badge {
-      background: rgba(148, 163, 184, 0.18);
-      color: #cbd5e1;
-      border-color: rgba(148, 163, 184, 0.35);
-      font-family: var(--font-main);
-    }
-    .btn-play.btn-disabled {
-      cursor: not-allowed;
-      pointer-events: none;
-      filter: grayscale(0.5);
-      background: linear-gradient(135deg, #64748b, #94a3b8) !important;
-      color: #1e293b !important;
-      font-family: var(--font-main) !important;
-    }
-
     /* ===== Footer Info ===== */
     .footer-info {
       text-align: center;
@@ -487,12 +469,12 @@
       </article>
 
       <!-- 2. Arcade 2D Mode Card -->
-      <article class="mode-card arcade coming-soon">
-        <div class="card-badge">🚧 준비 중</div>
+      <article class="mode-card arcade">
+        <div class="card-badge">🕹️ 2D 픽셀 탐험 모드</div>
         <div class="card-icon">🕹️</div>
         <h2 class="card-title">아케이드 2D 방탈출</h2>
         <p class="card-desc">
-          방 안을 자유롭게 돌아다니며 가구와 소품을 조사하고, 열쇠와 편지를 모아 다음 방으로 이동하는 액션 아케이드 RPG 게임입니다. <b>(현재 준비 중이며 곧 오픈 예정이에요!)</b>
+          방 안을 자유롭게 돌아다니며 가구와 소품을 조사하고, 열쇠와 편지를 모아 다음 방으로 이동하는 액션 아케이드 RPG 게임입니다.
         </p>
 
         <div class="tags-row">
@@ -517,9 +499,9 @@
           </div>
         </div>
 
-        <span class="btn-play btn-disabled" aria-disabled="true" title="준비 중입니다">
-          <i class="fa-solid fa-hourglass-half"></i> 준비 중 · 곧 오픈
-        </span>
+        <a href="game_arcade.html" class="btn-play">
+          <i class="fa-solid fa-gamepad"></i> 아케이드 2D 시작하기
+        </a>
       </article>
 
     </main>
