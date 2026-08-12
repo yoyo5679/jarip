@@ -263,14 +263,16 @@
       display: grid;
       place-items: center;
       user-select: none;
-      touch-action: manipulation;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      touch-action: none;
       cursor: pointer;
       box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5)
     }
 
-    .btn-d:active {
-      background: #1f2937;
-      color: #fff
+    .btn-d:active, .btn-d.pressed {
+      background: #22d3ee;
+      color: #0b1220
     }
 
     .btn-d.blank {
@@ -309,7 +311,10 @@
       display: grid;
       place-items: center;
       cursor: pointer;
-      touch-action: manipulation;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
       box-shadow: 2px 4px 0 #991b1b, inset -2px -2px 8px rgba(0, 0, 0, 0.3);
       transform: rotate(-15deg);
       margin-right: 10px;
@@ -779,10 +784,21 @@
       .rpg-dialogue { min-height: 64px; padding: 10px 14px; font-size: 0.92rem; line-height: 1.45; }
       .rpg-dialogue .speaker { font-size: 0.82rem; }
 
-      /* Controls: slightly smaller D-pad */
-      .controls-pad { padding: 8px 18px; }
-      .dpad { grid-template-columns: repeat(3, 34px); grid-template-rows: repeat(3, 34px); }
-      .btn-d { width: 34px; height: 34px; font-size: 1rem; }
+      /* Controls: real game-pad — comfortable, reliably tappable */
+      .controls-pad { padding: 10px 22px; border-radius: 12px 12px 26px 26px; }
+      .dpad { grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(3, 44px); }
+      .btn-d { width: 44px; height: 44px; font-size: 1.15rem; }
+      .btn-a { width: 60px; height: 60px; font-size: 1.15rem; margin-right: 6px; }
+
+      /* Modals: top-align + clear the header so intro/quiz never overlap it */
+      .modal-mask { align-items: start; padding-top: 58px; padding-bottom: 18px; }
+      #introOverlay .modal-box { padding: 22px 18px !important; }
+      #introOverlay .modal-box h1 { font-size: 1.5rem !important; margin-bottom: 8px !important; }
+      #introOverlay .modal-box p { font-size: 0.9rem !important; line-height: 1.5 !important; margin-bottom: 16px !important; }
+
+      /* Quiz input: stack input + 확인 so both are fully visible */
+      .input-row { flex-direction: column; gap: 8px; }
+      .btn-submit { width: 100%; padding: 13px; }
     }
   </style>
 </head>
@@ -1099,8 +1115,8 @@
           "내 집 마련 → 보호받음 → 홀로서기",
           "순서 상관없음"
         ], answer: 0, type: "choice", hints: ["보호받음이 시작, 홀로서기가 완성."],
-        npc: { name: '자립 동료', x: 400, y: 180, color: '#eab308', afterText: "하람아, 이제 뒤돌아보지 마. 우리가 걸어온 이 길 위엔 이제 너와 나, 혼자가 아니니까 같이 앞만 보고 걷자!" },
         props: [
+          { id: 'topstone', name: '가장 높은 디딤돌', x: 548, y: 290, type: 'stone', emoji: '✨', hideEmoji: true, radius: 55, hint: '이 길의 끝, 가장 높은 디딤돌. [E]키를 눌러 걸어온 자립의 여정을 순서대로 되짚어보자.' },
           { id: 'door', name: '출구 문', x: 700, y: 160, type: 'door', emoji: '🚪' }
         ]
       },
@@ -1244,13 +1260,23 @@ window.addEventListener('keyup', (e) => {
 
 function bindCross(id, prop) {
   const btn = el(id); if (!btn) return;
-  btn.addEventListener('touchstart', (e) => { e.preventDefault(); state.keys[prop] = true; });
-  btn.addEventListener('touchend', (e) => { e.preventDefault(); state.keys[prop] = false; });
-  btn.addEventListener('mousedown', () => state.keys[prop] = true);
-  btn.addEventListener('mouseup', () => state.keys[prop] = false);
+  const press = (e) => { e.preventDefault(); state.keys[prop] = true; btn.classList.add('pressed'); };
+  const release = (e) => { if (e && e.cancelable) e.preventDefault(); state.keys[prop] = false; btn.classList.remove('pressed'); };
+  // Pointer Events = unified touch/mouse; touch pointers are implicitly captured,
+  // so pointerup reliably fires on the button even if the finger drifts.
+  btn.addEventListener('pointerdown', press);
+  btn.addEventListener('pointerup', release);
+  btn.addEventListener('pointercancel', release);
+  btn.addEventListener('pointerleave', release);
+  btn.addEventListener('contextmenu', (e) => e.preventDefault());
 }
 bindCross('btnUp','up'); bindCross('btnDown','down'); bindCross('btnLeft','left'); bindCross('btnRight','right');
-el('btnE').addEventListener('click', triggerAction);
+{
+  const eBtn = el('btnE');
+  const fireE = (e) => { e.preventDefault(); triggerAction(); };
+  eBtn.addEventListener('pointerdown', fireE);            // instant tap response
+  eBtn.addEventListener('contextmenu', (e) => e.preventDefault());
+}
 
 /* ---------- Particle System ---------- */
 function spawnParticles(cx, cy, count) {
@@ -1528,6 +1554,43 @@ function render() {
     ctx.stroke();
   });
 
+  /* 5e. EXIT door highlight — same spot every room, always eye-catching */
+  {
+    const doorP = stage.props.find(p => p.type === 'door');
+    if (doorP) {
+      const dx = doorP.x / 2, dy = doorP.y / 2;
+      const t = Date.now() / 350;
+      const pulse = Math.sin(t) * 0.3 + 0.7;
+      const accent = state.hasKey ? '#34d399' : '#fbbf24';
+      ctx.save();
+      // pulsing glow ring at the door base
+      ctx.globalAlpha = pulse * 0.8;
+      ctx.strokeStyle = accent; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(dx, dy + 18, 22, 8, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.globalAlpha = pulse * 0.3;
+      ctx.fillStyle = accent;
+      ctx.beginPath(); ctx.ellipse(dx, dy + 18, 22, 8, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+      // floating label above the door
+      const bob = Math.sin(t) * 1.5;
+      const label = state.hasKey ? 'EXIT > 나가기' : 'EXIT > 퀴즈';
+      ctx.font = 'bold 10px "DungGeunMo", monospace';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      const tw = ctx.measureText(label).width;
+      const ly = dy - 26 + bob;
+      ctx.fillStyle = 'rgba(15,23,42,0.92)';
+      ctx.fillRect(dx - tw / 2 - 6, ly - 8, tw + 12, 16);
+      ctx.strokeStyle = accent; ctx.lineWidth = 1;
+      ctx.strokeRect(dx - tw / 2 - 6, ly - 8, tw + 12, 16);
+      ctx.fillStyle = state.hasKey ? '#a7f3d0' : '#fde68a';
+      ctx.fillText(label, dx, ly);
+      ctx.fillStyle = 'rgba(15,23,42,0.92)';
+      ctx.beginPath(); ctx.moveTo(dx - 4, ly + 8); ctx.lineTo(dx + 4, ly + 8); ctx.lineTo(dx, ly + 12); ctx.closePath(); ctx.fill();
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      ctx.restore();
+    }
+  }
+
   /* 6. Interaction Dialogue */
   if (nearbyTarget) {
     let speaker = '', msg = '';
@@ -1551,7 +1614,7 @@ function render() {
     }
   } else {
     if (state.lastTargetName !== null) {
-      setDialogue('🌱 하람', '방향키(↑↓←→)로 돌아다니며 가구나 인물을 탐색하자.');
+      setDialogue('🌱 하람', state.hasKey ? '🔑 열쇠 획득! 반짝이는 EXIT로 가서 [E]로 나가자.' : '방향키(↑↓←→)로 이동 · 반짝이는 EXIT로 가서 [E]로 퀴즈를 풀자!');
       state.lastTargetName = null;
     }
   }
@@ -1765,11 +1828,12 @@ function openQuizModal(stage, target) {
   if (stage.type === 'input') {
     const row = document.createElement('div'); row.className = 'input-row';
     row.innerHTML = `
-      <input type="text" id="qInput" class="quiz-input" placeholder="정답 입력" autofocus>
+      <input type="text" id="qInput" class="quiz-input" placeholder="정답 입력" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
       <button class="btn-submit" id="qSubmit">확인</button>
     `;
     content.appendChild(row);
-    setTimeout(() => { const inp = el('qInput'); if (inp) inp.focus(); }, 100);
+    el('qInput').value = '';
+    setTimeout(() => { const inp = el('qInput'); if (inp) { inp.value = ''; inp.focus(); } }, 100);
     el('qSubmit').onclick = checkAnswer;
     el('qInput').onkeydown = (e) => { if (e.key === 'Enter') checkAnswer(); };
   } else if (stage.type === 'choice') {

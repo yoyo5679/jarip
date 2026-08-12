@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jariphaebom-cache-v9';
+const CACHE_NAME = 'jariphaebom-cache-v11';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
