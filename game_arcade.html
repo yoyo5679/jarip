@@ -246,6 +246,28 @@
       box-shadow: inset 0 -5px 15px rgba(0, 0, 0, 0.1)
     }
 
+    /* ===== Virtual Joystick (replaces the D-pad) ===== */
+    .joystick {
+      position: relative;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 38%, #4b5563, #374151 68%, #1f2937);
+      border: 2px solid #9ca3af;
+      box-shadow: inset 0 3px 12px rgba(0, 0, 0, 0.45);
+      display: grid; place-items: center;
+      touch-action: none;                 /* prevent page scroll/zoom while dragging */
+      user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+    }
+    .joy-knob {
+      width: 54px; height: 54px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 34%, #f3f4f6, #9ca3af 72%, #6b7280);
+      border: 2px solid #e5e7eb;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      pointer-events: none;               /* the base element handles all pointer events */
+      will-change: transform;
+    }
+
     .dpad {
       display: grid;
       grid-template-columns: repeat(3, 40px);
@@ -270,7 +292,8 @@
       box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5)
     }
 
-    .btn-d:active, .btn-d.pressed {
+    .btn-d:active,
+    .btn-d.pressed {
       background: #22d3ee;
       color: #0b1220
     }
@@ -567,6 +590,7 @@
       align-items: center;
       justify-content: center;
     }
+
     #introOverlay .modal-box {
       background: transparent;
       border: none;
@@ -579,7 +603,10 @@
     }
 
     /* ===== Monologue Overlay ===== */
-    #monologueOverlay { z-index: 300; }
+    #monologueOverlay {
+      z-index: 300;
+    }
+
     #monologueOverlay .modal-box {
       background: rgba(5, 10, 25, 0.97);
       border: 1px solid rgba(100, 140, 255, 0.3);
@@ -590,254 +617,550 @@
       position: relative;
       overflow: hidden;
     }
+
     .monologue-stars {
-      position: absolute; inset: 0;
-      overflow: hidden; border-radius: 24px; pointer-events: none;
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      border-radius: 24px;
+      pointer-events: none;
     }
+
     .monologue-stars span {
-      position: absolute; width: 2px; height: 2px;
-      background: #fff; border-radius: 50%;
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #fff;
+      border-radius: 50%;
       animation: starTwinkle 2s infinite;
     }
+
     @keyframes starTwinkle {
-      0%, 100% { opacity: 0.2; } 50% { opacity: 1; }
+
+      0%,
+      100% {
+        opacity: 0.2;
+      }
+
+      50% {
+        opacity: 1;
+      }
     }
-    .monologue-emoji { font-size: 3rem; margin-bottom: 16px; position: relative; }
+
+    .monologue-emoji {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
     .monologue-text {
-      font-size: 1.08rem; line-height: 2; color: #c8d6f0;
-      font-style: italic; position: relative;
-      min-height: 60px; margin-bottom: 20px;
+      font-size: 1.08rem;
+      line-height: 2;
+      color: #c8d6f0;
+      font-style: italic;
+      position: relative;
+      min-height: 60px;
+      margin-bottom: 20px;
     }
+
     .monologue-dismiss {
-      padding: 14px 32px; border-radius: 12px;
+      padding: 14px 32px;
+      border-radius: 12px;
       border: 1px solid rgba(100, 140, 255, 0.3);
       background: rgba(100, 140, 255, 0.15);
-      color: #a5b4fc; font-family: var(--font-game);
-      font-size: 1rem; cursor: pointer; position: relative;
+      color: #a5b4fc;
+      font-family: var(--font-game);
+      font-size: 1rem;
+      cursor: pointer;
+      position: relative;
       transition: .2s;
     }
-    .monologue-dismiss:hover { background: rgba(100, 140, 255, 0.3); }
+
+    .monologue-dismiss:hover {
+      background: rgba(100, 140, 255, 0.3);
+    }
 
     /* ===== Letter Collection in Win Modal ===== */
     .letter-collection {
-      background: rgba(0, 0, 0, 0.3); border-radius: 16px;
-      padding: 20px; margin: 20px 0;
-      max-height: 300px; overflow-y: auto; text-align: left;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 16px;
+      padding: 20px;
+      margin: 20px 0;
+      max-height: 300px;
+      overflow-y: auto;
+      text-align: left;
     }
+
     .letter-collection h3 {
-      font-family: var(--font-game); color: var(--accent);
-      margin-bottom: 12px; text-align: center;
+      font-family: var(--font-game);
+      color: var(--accent);
+      margin-bottom: 12px;
+      text-align: center;
     }
+
     .letter-item {
       background: rgba(255, 204, 0, 0.08);
       border: 1px solid rgba(255, 204, 0, 0.2);
-      border-radius: 10px; padding: 12px 14px;
-      margin-bottom: 8px; font-size: 0.88rem;
-      line-height: 1.7; color: #e2e8f0;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: #e2e8f0;
     }
+
     .letter-item .letter-from {
-      color: var(--accent); font-weight: 700;
-      font-size: 0.8rem; margin-bottom: 4px;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.8rem;
+      margin-bottom: 4px;
     }
+
     .letter-count-badge {
-      display: inline-block; background: rgba(255, 204, 0, 0.2);
-      color: var(--accent); padding: 4px 12px;
-      border-radius: 20px; font-size: 0.85rem;
-      font-weight: 700; margin-bottom: 12px;
+      display: inline-block;
+      background: rgba(255, 204, 0, 0.2);
+      color: var(--accent);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 12px;
     }
 
     /* ===== Policy Codex ===== */
     .codex-progress {
-      text-align: center; color: var(--txt-dim);
-      font-size: 0.9rem; margin-bottom: 16px;
+      text-align: center;
+      color: var(--txt-dim);
+      font-size: 0.9rem;
+      margin-bottom: 16px;
     }
-    .codex-progress b { color: var(--accent); font-size: 1.05rem; }
-    .codex-grid { display: grid; gap: 10px; }
+
+    .codex-progress b {
+      color: var(--accent);
+      font-size: 1.05rem;
+    }
+
+    .codex-grid {
+      display: grid;
+      gap: 10px;
+    }
+
     .codex-card {
-      display: flex; gap: 12px; align-items: flex-start;
-      padding: 12px 14px; border-radius: 12px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px 14px;
+      border-radius: 12px;
       border: 1px solid var(--panel-border);
       background: rgba(255, 255, 255, 0.04);
     }
-    .codex-card.locked { opacity: 0.5; }
+
+    .codex-card.locked {
+      opacity: 0.5;
+    }
+
     .codex-card.unlocked {
       border-color: rgba(52, 211, 153, 0.5);
       background: rgba(52, 211, 153, 0.08);
     }
+
     .codex-icon {
-      font-size: 1.5rem; flex-shrink: 0; width: 30px; text-align: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      width: 30px;
+      text-align: center;
     }
-    .codex-body { flex: 1; }
+
+    .codex-body {
+      flex: 1;
+    }
+
     .codex-name {
-      font-family: var(--font-game); color: #fff;
-      font-size: 0.95rem; margin-bottom: 3px;
+      font-family: var(--font-game);
+      color: #fff;
+      font-size: 0.95rem;
+      margin-bottom: 3px;
     }
-    .codex-card.unlocked .codex-name { color: var(--brand-green); }
-    .codex-desc { font-size: 0.82rem; color: var(--txt-dim); line-height: 1.55; }
+
+    .codex-card.unlocked .codex-name {
+      color: var(--brand-green);
+    }
+
+    .codex-desc {
+      font-size: 0.82rem;
+      color: var(--txt-dim);
+      line-height: 1.55;
+    }
+
     .codex-room {
-      font-size: 0.7rem; color: var(--txt-dim);
-      font-family: var(--font-game); margin-bottom: 2px;
+      font-size: 0.7rem;
+      color: var(--txt-dim);
+      font-family: var(--font-game);
+      margin-bottom: 2px;
     }
 
     /* ===== Card Theme Picker ===== */
     .card-theme-pick {
-      display: flex; align-items: center; justify-content: center;
-      gap: 8px; margin: 14px 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: 14px 0 10px;
     }
+
     .ctp-label {
-      font-family: var(--font-game); font-size: 0.82rem;
+      font-family: var(--font-game);
+      font-size: 0.82rem;
       color: var(--txt-dim);
     }
+
     .ctp-btn {
-      padding: 6px 16px; border-radius: 10px;
+      padding: 6px 16px;
+      border-radius: 10px;
       border: 1px solid var(--panel-border);
-      background: rgba(255,255,255,0.06);
-      color: var(--txt-dim); font-family: var(--font-game);
-      font-size: 0.82rem; cursor: pointer; transition: .2s;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--txt-dim);
+      font-family: var(--font-game);
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: .2s;
     }
+
     .ctp-btn.active {
-      background: rgba(255,204,0,0.18);
+      background: rgba(255, 204, 0, 0.18);
       border-color: var(--accent);
       color: var(--accent);
     }
+
     .btn-share-img {
-      padding: 12px 16px; border-radius: 16px; border: none;
+      padding: 12px 16px;
+      border-radius: 16px;
+      border: none;
       background: linear-gradient(120deg, #8b5cf6, #6366f1);
-      color: #fff; font-family: var(--font-game);
-      font-size: 1rem; cursor: pointer; flex: 1; min-width: 100%;
+      color: #fff;
+      font-family: var(--font-game);
+      font-size: 1rem;
+      cursor: pointer;
+      flex: 1;
+      min-width: 100%;
       transition: .2s;
     }
-    .btn-share-img:hover { filter: brightness(1.1); }
-    .btn-share-img:disabled { opacity: 0.6; cursor: wait; }
+
+    .btn-share-img:hover {
+      filter: brightness(1.1);
+    }
+
+    .btn-share-img:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
 
     /* ===== Achievement Badges ===== */
     .badge-collection {
-      background: rgba(0, 0, 0, 0.3); border-radius: 16px;
-      padding: 18px; margin: 18px 0;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 16px;
+      padding: 18px;
+      margin: 18px 0;
     }
+
     .badge-collection h3 {
-      font-family: var(--font-game); color: var(--accent);
-      margin-bottom: 14px; text-align: center; font-size: 1rem;
+      font-family: var(--font-game);
+      color: var(--accent);
+      margin-bottom: 14px;
+      text-align: center;
+      font-size: 1rem;
     }
+
     .badge-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
       gap: 10px;
     }
+
     .badge {
-      text-align: center; padding: 12px 6px; border-radius: 12px;
+      text-align: center;
+      padding: 12px 6px;
+      border-radius: 12px;
       border: 1px solid var(--panel-border);
       background: rgba(255, 255, 255, 0.04);
     }
+
     .badge.earned {
       border-color: var(--accent);
       background: rgba(255, 204, 0, 0.12);
       box-shadow: 0 0 14px rgba(255, 204, 0, 0.25);
     }
-    .badge.earned.fresh { animation: pulseKey 1.2s infinite; }
-    .badge-emoji { font-size: 1.7rem; margin-bottom: 5px; filter: grayscale(1) opacity(0.4); }
-    .badge.earned .badge-emoji { filter: none; }
-    .badge-name { font-size: 0.72rem; font-weight: 700; color: var(--txt-dim); line-height: 1.35; }
-    .badge.earned .badge-name { color: var(--accent); }
+
+    .badge.earned.fresh {
+      animation: pulseKey 1.2s infinite;
+    }
+
+    .badge-emoji {
+      font-size: 1.7rem;
+      margin-bottom: 5px;
+      filter: grayscale(1) opacity(0.4);
+    }
+
+    .badge.earned .badge-emoji {
+      filter: none;
+    }
+
+    .badge-name {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--txt-dim);
+      line-height: 1.35;
+    }
+
+    .badge.earned .badge-name {
+      color: var(--accent);
+    }
 
     /* ===== Letter (stationery) Modal ===== */
     #letterModal .modal-box {
-      background: transparent; border: none; box-shadow: none;
-      padding: 0; max-width: 460px;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 0;
+      max-width: 460px;
     }
+
     .letter-paper {
       position: relative;
       background:
-        repeating-linear-gradient(transparent, transparent 27px, rgba(120,140,180,0.18) 28px),
+        repeating-linear-gradient(transparent, transparent 27px, rgba(120, 140, 180, 0.18) 28px),
         linear-gradient(180deg, #fffdf5 0%, #fef7e6 100%);
       border-radius: 14px;
       padding: 30px 30px 26px;
-      box-shadow: 0 24px 60px rgba(0,0,0,0.55);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
       color: #3a2f22;
       border: 1px solid #e6d9b8;
     }
+
     .letter-paper::before {
-      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
       background: linear-gradient(180deg, #ef4444, #f59e0b);
       border-radius: 14px 0 0 14px;
     }
+
     .letter-close {
-      position: absolute; top: 12px; right: 12px;
-      width: 30px; height: 30px; border-radius: 50%;
-      border: 1px solid #d8c9a4; background: rgba(0,0,0,0.05);
-      color: #6b5a3e; cursor: pointer; font-size: 0.9rem;
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 1px solid #d8c9a4;
+      background: rgba(0, 0, 0, 0.05);
+      color: #6b5a3e;
+      cursor: pointer;
+      font-size: 0.9rem;
     }
+
     .letter-head {
-      font-family: var(--font-game); color: #b45309;
-      font-size: 1.05rem; margin-bottom: 4px; padding-right: 34px;
+      font-family: var(--font-game);
+      color: #b45309;
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+      padding-right: 34px;
     }
+
     .letter-room {
-      font-size: 0.72rem; color: #a08a63; font-family: var(--font-game);
+      font-size: 0.72rem;
+      color: #a08a63;
+      font-family: var(--font-game);
       margin-bottom: 16px;
     }
+
     .letter-body {
-      font-size: 1.02rem; line-height: 2; white-space: pre-line;
-      min-height: 60px; letter-spacing: .2px;
+      font-size: 1.02rem;
+      line-height: 2;
+      white-space: pre-line;
+      min-height: 60px;
+      letter-spacing: .2px;
     }
+
     .letter-foot {
-      margin-top: 18px; text-align: right;
-      font-size: 0.82rem; color: #a08a63;
+      margin-top: 18px;
+      text-align: right;
+      font-size: 0.82rem;
+      color: #a08a63;
     }
+
     .letter-hint {
-      margin-top: 14px; text-align: center; font-size: 0.8rem;
-      color: #b0996e; font-style: italic;
+      margin-top: 14px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #b0996e;
+      font-style: italic;
     }
 
     /* keycap chips for the controls guide */
     .kcap {
-      display: inline-block; min-width: 16px; padding: 1px 6px; margin: 0 1px;
-      background: #1f2937; border: 1px solid #4b5563; border-bottom-width: 2px;
-      border-radius: 5px; font-family: monospace; font-size: 0.82rem; color: #fff;
+      display: inline-block;
+      min-width: 16px;
+      padding: 1px 6px;
+      margin: 0 1px;
+      background: #1f2937;
+      border: 1px solid #4b5563;
+      border-bottom-width: 2px;
+      border-radius: 5px;
+      font-family: monospace;
+      font-size: 0.82rem;
+      color: #fff;
       line-height: 1.4;
     }
 
     /* ===== Mobile: fit whole game on one screen ===== */
     @media (max-width: 640px) {
-      .wrap { padding: 8px; min-height: 100dvh; }
+      .wrap {
+        padding: 8px;
+        min-height: 100dvh;
+      }
 
       /* Header: compact single row, no vertical text */
-      .topbar { padding: 8px 12px; margin-bottom: 8px; border-radius: 12px; }
-      .brand { font-size: 0.95rem; gap: 6px; }
-      .brand span { display: none; }              /* hide subtitle on mobile */
-      .tb-actions { gap: 6px; }
-      .btn-icon { padding: 7px 10px; font-size: 0.9rem; white-space: nowrap; gap: 0; }
-      .btn-icon .lbl { display: none; }            /* icon-only nav on mobile */
+      .topbar {
+        padding: 8px 12px;
+        margin-bottom: 8px;
+        border-radius: 12px;
+      }
+
+      .brand {
+        font-size: 0.95rem;
+        gap: 6px;
+      }
+
+      .brand span {
+        display: none;
+      }
+
+      /* hide subtitle on mobile */
+      .tb-actions {
+        gap: 6px;
+      }
+
+      .btn-icon {
+        padding: 7px 10px;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        gap: 0;
+      }
+
+      .btn-icon .lbl {
+        display: none;
+      }
+
+      /* icon-only nav on mobile */
 
       /* Game frame: tighter spacing */
-      .game-frame { padding: 10px; gap: 8px; border-radius: 18px; }
+      .game-frame {
+        padding: 10px;
+        gap: 8px;
+        border-radius: 18px;
+      }
 
       /* HUD: allow graceful wrap, smaller text */
-      .hud-bar { flex-wrap: wrap; gap: 6px 8px; padding: 8px 12px; justify-content: center; }
-      .stage-badge { font-size: 0.85rem; }
-      .stage-title { font-size: 0.82rem; flex: 1 1 100%; text-align: center; order: 3; }
-      .key-badge { font-size: 0.72rem; padding: 4px 9px; }
+      .hud-bar {
+        flex-wrap: wrap;
+        gap: 6px 8px;
+        padding: 8px 12px;
+        justify-content: center;
+      }
+
+      .stage-badge {
+        font-size: 0.85rem;
+      }
+
+      .stage-title {
+        font-size: 0.82rem;
+        flex: 1 1 100%;
+        text-align: center;
+        order: 3;
+      }
+
+      .key-badge {
+        font-size: 0.72rem;
+        padding: 4px 9px;
+      }
 
       /* Canvas: cap height so everything fits above the fold */
-      .viewport-wrap { max-height: 42vh; }
+      .viewport-wrap {
+        max-height: 42vh;
+      }
 
       /* Dialogue: leaner */
-      .rpg-dialogue { min-height: 64px; padding: 10px 14px; font-size: 0.92rem; line-height: 1.45; }
-      .rpg-dialogue .speaker { font-size: 0.82rem; }
+      .rpg-dialogue {
+        min-height: 64px;
+        padding: 10px 14px;
+        font-size: 0.92rem;
+        line-height: 1.45;
+      }
+
+      .rpg-dialogue .speaker {
+        font-size: 0.82rem;
+      }
 
       /* Controls: real game-pad — comfortable, reliably tappable */
-      .controls-pad { padding: 10px 22px; border-radius: 12px 12px 26px 26px; }
-      .dpad { grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(3, 44px); }
-      .btn-d { width: 44px; height: 44px; font-size: 1.15rem; }
-      .btn-a { width: 60px; height: 60px; font-size: 1.15rem; margin-right: 6px; }
+      .controls-pad {
+        padding: 10px 22px;
+        border-radius: 12px 12px 26px 26px;
+      }
+
+      .dpad {
+        grid-template-columns: repeat(3, 44px);
+        grid-template-rows: repeat(3, 44px);
+      }
+
+      .btn-d {
+        width: 44px;
+        height: 44px;
+        font-size: 1.15rem;
+      }
+
+      .btn-a {
+        width: 60px;
+        height: 60px;
+        font-size: 1.15rem;
+        margin-right: 6px;
+      }
 
       /* Modals: top-align + clear the header so intro/quiz never overlap it */
-      .modal-mask { align-items: start; padding-top: 58px; padding-bottom: 18px; }
-      #introOverlay .modal-box { padding: 22px 18px !important; }
-      #introOverlay .modal-box h1 { font-size: 1.5rem !important; margin-bottom: 8px !important; }
-      #introOverlay .modal-box p { font-size: 0.9rem !important; line-height: 1.5 !important; margin-bottom: 16px !important; }
+      .modal-mask {
+        align-items: start;
+        padding-top: 58px;
+        padding-bottom: 18px;
+      }
+
+      #introOverlay .modal-box {
+        padding: 22px 18px !important;
+      }
+
+      #introOverlay .modal-box h1 {
+        font-size: 1.5rem !important;
+        margin-bottom: 8px !important;
+      }
+
+      #introOverlay .modal-box p {
+        font-size: 0.9rem !important;
+        line-height: 1.5 !important;
+        margin-bottom: 16px !important;
+      }
 
       /* Quiz input: stack input + 확인 so both are fully visible */
-      .input-row { flex-direction: column; gap: 8px; }
-      .btn-submit { width: 100%; padding: 13px; }
+      .input-row {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .btn-submit {
+        width: 100%;
+        padding: 13px;
+      }
     }
   </style>
 </head>
@@ -883,43 +1206,54 @@
         <div class="modal-box" style="text-align: center; max-width: 500px; padding: 40px 30px;">
           <div style="font-size: 0.9rem; color: #9ca3af; margin-bottom: 15px;">🕹️ 2D 픽셀 방탐험 · 난이도 상</div>
           <div style="font-size: 4rem; margin-bottom: 10px;">🎮</div>
-          <h1 style="color: #fff; margin-bottom: 10px; font-size: 2.2rem; line-height: 1.3;">아케이드 방탈출<br><span style="color: #6366f1;">하람이의 자립 여정</span></h1>
+          <h1 style="color: #fff; margin-bottom: 10px; font-size: 2.2rem; line-height: 1.3;">아케이드 방탈출<br><span
+              style="color: #6366f1;">하람이의 자립 여정</span></h1>
           <p style="color: #d1d5db; line-height: 1.6; margin-bottom: 25px; font-size: 1.05rem;">
-            만 열여덟, 8년을 보낸 서울의 공동생활가정을 떠나야 하는 청년 '하람'. 방 안을 이리저리 돌아다니며 가구와 소품을 조사해 <strong style="color: #fff;">숨겨진 정책 편지</strong>를 찾아내세요! 액션과 탐험이 곁들여진 2D 아케이드 방탈출입니다.
+            만 열여덟, 8년을 보낸 서울의 공동생활가정을 떠나야 하는 청년 '하람'. 방 안을 이리저리 돌아다니며 가구와 소품을 조사해 <strong style="color: #fff;">숨겨진 정책
+              편지</strong>를 찾아내세요! 액션과 탐험이 곁들여진 2D 아케이드 방탈출입니다.
           </p>
           <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap;">
-            <span style="background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; border: 1px solid #4b5563;">2D 픽셀 탐험</span>
-            <span style="background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; border: 1px solid #4b5563;">난이도 상</span>
-            <span style="background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; border: 1px solid #4b5563;">키보드 조작</span>
-            <span style="background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; border: 1px solid #4b5563;">플레이 약 10~15분</span>
+            <span
+              style="background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; border: 1px solid #4b5563;">2D
+              픽셀 탐험</span>
+            <span
+              style="background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; border: 1px solid #4b5563;">난이도
+              상</span>
+            <span
+              style="background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; border: 1px solid #4b5563;">키보드
+              조작</span>
+            <span
+              style="background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; border: 1px solid #4b5563;">플레이
+              약 10~15분</span>
           </div>
-          <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border-left: 4px solid #f59e0b; text-align: left; margin-bottom: 30px; font-size: 0.95rem; color: #d1d5db; line-height: 1.7;">
+          <div
+            style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border-left: 4px solid #f59e0b; text-align: left; margin-bottom: 30px; font-size: 0.95rem; color: #d1d5db; line-height: 1.7;">
             <strong style="color: #fff;">🕯️ 오늘부터 당신은 '하람'입니다.</strong><br>
-            열여덟 번째 생일 아침, 8년을 보낸 공동생활가정에 케이크가 놓입니다. 모두가 축하해 주지만, 마음 한켠엔 '이제 이곳을 나가야 한다'는 압박이 조용히 차오릅니다. 그래도 — 원장님도, 담당 선생님도, 낯선 이름의 제도들도 아직 내 편입니다.<br>
+            열여덟 번째 생일 아침, 8년을 보낸 공동생활가정에 케이크가 놓입니다. 모두가 축하해 주지만, 마음 한켠엔 '이제 이곳을 나가야 한다'는 압박이 조용히 차오릅니다. 그래도 — 원장님도, 담당
+            선생님도, 낯선 이름의 제도들도 아직 내 편입니다.<br>
             각 방의 문은 <strong>실제로 존재하는 지원 제도</strong>를 알아야 열립니다. 앞 방에서 얻은 숫자를 기억해 두세요.
           </div>
-          <div style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.4); padding: 16px; border-radius: 12px; margin-bottom: 22px; text-align: left; font-size: 0.92rem; color: #d1d5db; line-height: 1.7;">
+          <div
+            style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.4); padding: 16px; border-radius: 12px; margin-bottom: 22px; text-align: left; font-size: 0.92rem; color: #d1d5db; line-height: 1.7;">
             <strong style="color:#fff; display:block; margin-bottom:10px;">🎮 조작법</strong>
-            <div style="margin-bottom:6px;">💻 <b style="color:#fff;">PC 키보드</b> — <span class="kcap">↑</span><span class="kcap">↓</span><span class="kcap">←</span><span class="kcap">→</span> 또는 <span class="kcap">W</span><span class="kcap">A</span><span class="kcap">S</span><span class="kcap">D</span> 이동 · <span class="kcap">E</span>/<span class="kcap">Space</span> 조사·퀴즈 · <span class="kcap">Enter</span> 정답 제출</div>
-            <div style="margin-bottom:6px;">📱 <b style="color:#fff;">모바일</b> — 화면 아래 <b>방향 패드</b>로 이동, 빨간 <b style="color:#ef4444;">E</b> 버튼으로 조사</div>
+            <div style="margin-bottom:6px;">💻 <b style="color:#fff;">PC 키보드</b> — <span class="kcap">↑</span><span
+                class="kcap">↓</span><span class="kcap">←</span><span class="kcap">→</span> 또는 <span
+                class="kcap">W</span><span class="kcap">A</span><span class="kcap">S</span><span class="kcap">D</span>
+              이동 · <span class="kcap">E</span>/<span class="kcap">Space</span> 조사·퀴즈 · <span class="kcap">Enter</span>
+              정답 제출</div>
+            <div style="margin-bottom:6px;">📱 <b style="color:#fff;">모바일</b> — 화면 아래 <b>방향 패드</b>로 이동, 빨간 <b
+                style="color:#ef4444;">E</b> 버튼으로 조사</div>
             <div>🎯 반짝이는 <b style="color:#fbbf24;">EXIT</b>로 가서 조사하면 퀴즈가 열려요!</div>
           </div>
-          <button class="btn-submit" id="btnIntroStart" style="width: 100%; font-size: 1.2rem; padding: 18px;">🚪 탈출 시작하기</button>
+          <button class="btn-submit" id="btnIntroStart" style="width: 100%; font-size: 1.2rem; padding: 18px;">🚪 탈출
+            시작하기</button>
         </div>
       </div>
 
       <!-- Mobile Controls Pad -->
       <div class="controls-pad">
-        <div class="dpad">
-          <button class="btn-d blank"></button>
-          <button class="btn-d" id="btnUp">▲</button>
-          <button class="btn-d blank"></button>
-          <button class="btn-d" id="btnLeft">◀</button>
-          <button class="btn-d blank"></button>
-          <button class="btn-d" id="btnRight">▶</button>
-          <button class="btn-d blank"></button>
-          <button class="btn-d" id="btnDown">▼</button>
-          <button class="btn-d blank"></button>
+        <div class="joystick" id="joyBase" role="button" aria-label="이동 조이스틱">
+          <div class="joy-knob" id="joyKnob"></div>
         </div>
         <button class="btn-a" id="btnE">E</button>
       </div>
@@ -948,8 +1282,9 @@
         <div class="win-h2">15개 챕터 최종 탈출 성공!</div>
         <p class="win-p">진짜 혼자 해냈다고 생각했던 하람. 하지만 수많은 사람과 사회, 그리고 정부가 보이지 않는 순간에도 처음부터 곁에 있었습니다.<br><br>당당한 자립의 문을 연 하람이의
           아름다운 새 출발을 진심으로 축하해 주세요!</p>
-        
-        <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: left; font-size: 0.95rem;">
+
+        <div
+          style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-bottom: 20px; text-align: left; font-size: 0.95rem;">
           <div style="margin-bottom: 5px;" id="currentRecord">⏱️ 소요시간: 00:00 · ❌ 오답: 0회</div>
           <div style="color: var(--brand-green); font-weight: bold;" id="bestRecord">🏅 최고 기록: 없음</div>
         </div>
@@ -973,8 +1308,11 @@
 
         <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
           <button class="btn-share-img" id="btnShareImg">📸 이미지로 공유하기</button>
-          <button class="btn-restart" id="btnShare" style="background: linear-gradient(120deg, #6366f1, #3b82f6); flex: 1; font-size: 1rem; padding: 12px 16px;">📋 텍스트 공유</button>
-          <button class="btn-restart" id="btnRestart" style="flex: 1; font-size: 1rem; padding: 12px 16px;">다시 시작</button>
+          <button class="btn-restart" id="btnShare"
+            style="background: linear-gradient(120deg, #6366f1, #3b82f6); flex: 1; font-size: 1rem; padding: 12px 16px;">📋
+            텍스트 공유</button>
+          <button class="btn-restart" id="btnRestart" style="flex: 1; font-size: 1rem; padding: 12px 16px;">다시
+            시작</button>
         </div>
       </div>
     </div>
@@ -1159,7 +1497,7 @@
       },
       {
         num: 14, name: "내가 걸어온 길", kicker: "CHAPTER 14 · 자립 여정의 다리",
-        scene: "야외 언덕 이정표 앞. 지난 시간들을 되돌아보며 보호받던 시절부터 당당한 홀로서기까지의 순서를 정리하자.",
+        scene: "어둠이 포근하게 창을 덮는 차분한 저녁, 지난 시간들을 되돌아보며 보호받던 시절부터 당당한 홀로서기까지의 순서를 정리하자.",
         q: "걸어온 자립의 여정을 <span class='hi'>시간 순서대로</span> 선택해 줘.",
         choices: [
           "보호받음 → 보호종료 결정 → 배움·정착금 준비 → 내 집 마련 → 홀로서기",
@@ -1249,1098 +1587,1158 @@
 
     /* ---------- Achievement Badges ---------- */
     const BADGES = [
-      { id: 'clear',   emoji: '🏆', name: '자립 성공',    test: (s) => true },
-      { id: 'noMiss',  emoji: '✨', name: '완벽한 기억',  test: (s) => s.misses === 0 },
-      { id: 'letters', emoji: '📮', name: '편지 수집가',  test: (s) => s.letters >= 15 },
-      { id: 'speed',   emoji: '⚡', name: '스피드 자립',  test: (s) => s.elapsedMs <= 10 * 60000 },
-      { id: 'perfect', emoji: '👑', name: '진정한 자립',  test: (s) => s.misses === 0 && s.letters >= 15 && s.elapsedMs <= 10 * 60000 }
+      { id: 'clear', emoji: '🏆', name: '자립 성공', test: (s) => true },
+      { id: 'noMiss', emoji: '✨', name: '완벽한 기억', test: (s) => s.misses === 0 },
+      { id: 'letters', emoji: '📮', name: '편지 수집가', test: (s) => s.letters >= 15 },
+      { id: 'speed', emoji: '⚡', name: '스피드 자립', test: (s) => s.elapsedMs <= 10 * 60000 },
+      { id: 'perfect', emoji: '👑', name: '진정한 자립', test: (s) => s.misses === 0 && s.letters >= 15 && s.elapsedMs <= 10 * 60000 }
     ];
 
-/* ---------- Game Engine State & Preloaded Assets ---------- */
-const state = {
-  stageIdx: 0,
-  hasKey: false,
-  player: { x: 100, y: 220, facing: 'down' },
-  keys: { up: false, down: false, left: false, right: false },
-  bgImages: {},
-  animFrame: 0,
-  animTimer: 0,
-  lastTargetName: null,
-  isStoryPlaying: false,
-  startTime: 0,
-  misses: 0,
-  finalTimeStr: '',
-  // Enhancement features
-  collectedLetters: new Set(),
-  collectedPolicies: new Set(),
-  particles: [],
-  isMonologuePlaying: false
-};
+    /* ---------- Game Engine State & Preloaded Assets ---------- */
+    const state = {
+      stageIdx: 0,
+      hasKey: false,
+      player: { x: 100, y: 220, facing: 'down' },
+      keys: { up: false, down: false, left: false, right: false },
+      bgImages: {},
+      animFrame: 0,
+      animTimer: 0,
+      lastTargetName: null,
+      isStoryPlaying: false,
+      startTime: 0,
+      misses: 0,
+      finalTimeStr: '',
+      // Enhancement features
+      collectedLetters: new Set(),
+      collectedPolicies: new Set(),
+      particles: [],
+      isMonologuePlaying: false
+    };
 
-const el = (id) => document.getElementById(id);
-const canvas = el('gameCanvas');
-const ctx = canvas.getContext('2d');
+    const el = (id) => document.getElementById(id);
+    const canvas = el('gameCanvas');
+    const ctx = canvas.getContext('2d');
 
-/* Canvas Logical Resolution (HiDPI support) */
-canvas.width = 800;
-canvas.height = 480;
-ctx.scale(2, 2);
-ctx.imageSmoothingEnabled = false;
-
-/* Preload Assets */
-Sprites.init();
-for (let i = 1; i <= 15; i++) {
-  const img = new Image();
-  img.src = `assets/game/room_${i}.png`;
-  state.bgImages[i] = img;
-}
-
-/* Input Handling */
-window.addEventListener('keydown', (e) => {
-  if (['ArrowUp', 'KeyW'].includes(e.code)) state.keys.up = true;
-  if (['ArrowDown', 'KeyS'].includes(e.code)) state.keys.down = true;
-  if (['ArrowLeft', 'KeyA'].includes(e.code)) state.keys.left = true;
-  if (['ArrowRight', 'KeyD'].includes(e.code)) state.keys.right = true;
-  if (['KeyE', 'Space'].includes(e.code)) triggerAction();
-});
-window.addEventListener('keyup', (e) => {
-  if (['ArrowUp', 'KeyW'].includes(e.code)) state.keys.up = false;
-  if (['ArrowDown', 'KeyS'].includes(e.code)) state.keys.down = false;
-  if (['ArrowLeft', 'KeyA'].includes(e.code)) state.keys.left = false;
-  if (['ArrowRight', 'KeyD'].includes(e.code)) state.keys.right = false;
-});
-
-function bindCross(id, prop) {
-  const btn = el(id); if (!btn) return;
-  const press = (e) => { e.preventDefault(); state.keys[prop] = true; btn.classList.add('pressed'); };
-  const release = (e) => { if (e && e.cancelable) e.preventDefault(); state.keys[prop] = false; btn.classList.remove('pressed'); };
-  // Pointer Events = unified touch/mouse; touch pointers are implicitly captured,
-  // so pointerup reliably fires on the button even if the finger drifts.
-  btn.addEventListener('pointerdown', press);
-  btn.addEventListener('pointerup', release);
-  btn.addEventListener('pointercancel', release);
-  btn.addEventListener('pointerleave', release);
-  btn.addEventListener('contextmenu', (e) => e.preventDefault());
-}
-bindCross('btnUp','up'); bindCross('btnDown','down'); bindCross('btnLeft','left'); bindCross('btnRight','right');
-{
-  const eBtn = el('btnE');
-  const fireE = (e) => { e.preventDefault(); triggerAction(); };
-  eBtn.addEventListener('pointerdown', fireE);            // instant tap response
-  eBtn.addEventListener('contextmenu', (e) => e.preventDefault());
-}
-
-/* ---------- Particle System ---------- */
-function spawnParticles(cx, cy, count) {
-  for (let i = 0; i < count; i++) {
-    state.particles.push({
-      x: cx, y: cy,
-      vx: (Math.random() - 0.5) * 4,
-      vy: -Math.random() * 3 - 1,
-      life: 60 + Math.random() * 40,
-      maxLife: 60 + Math.random() * 40,
-      size: 2 + Math.random() * 3,
-      color: ['#ffcc00','#ffd700','#fff4b8','#ff9f43','#10b981'][Math.floor(Math.random() * 5)]
-    });
-  }
-}
-
-function updateParticles() {
-  for (let i = state.particles.length - 1; i >= 0; i--) {
-    const p = state.particles[i];
-    p.x += p.vx; p.y += p.vy;
-    p.vy += 0.03;
-    p.life--;
-    if (p.life <= 0) state.particles.splice(i, 1);
-  }
-}
-
-function renderParticles() {
-  state.particles.forEach(p => {
-    const alpha = p.life / p.maxLife;
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = p.color;
-    const cx = p.x, cy = p.y, s = p.size;
-    ctx.beginPath();
-    for (let j = 0; j < 5; j++) {
-      const angle = (j * 4 * Math.PI) / 5 - Math.PI / 2;
-      ctx[j === 0 ? 'moveTo' : 'lineTo'](cx + Math.cos(angle) * s, cy + Math.sin(angle) * s);
-      const a2 = angle + (2 * Math.PI) / 10;
-      ctx.lineTo(cx + Math.cos(a2) * (s * 0.4), cy + Math.sin(a2) * (s * 0.4));
-    }
-    ctx.closePath(); ctx.fill();
-    ctx.globalAlpha = 1;
-  });
-}
-
-/* ---------- Monologue System ---------- */
-let monoTypeInterval = null;
-function showMonologue(idx, callback) {
-  const mono = MONOLOGUES[idx];
-  if (!mono) { if (callback) callback(); return; }
-  state.isMonologuePlaying = true;
-  el('monologueOverlay').classList.add('open');
-  el('monoEmoji').textContent = mono.emoji;
-  el('monoText').textContent = '';
-  const starsEl = el('monoStars');
-  starsEl.innerHTML = '';
-  for (let i = 0; i < 30; i++) {
-    const star = document.createElement('span');
-    star.style.left = Math.random() * 100 + '%';
-    star.style.top = Math.random() * 100 + '%';
-    star.style.animationDelay = Math.random() * 2 + 's';
-    const sz = (1 + Math.random() * 2) + 'px';
-    star.style.width = sz; star.style.height = sz;
-    starsEl.appendChild(star);
-  }
-  let ci = 0;
-  clearInterval(monoTypeInterval);
-  monoTypeInterval = setInterval(() => {
-    el('monoText').textContent += mono.text.charAt(ci); ci++;
-    if (ci >= mono.text.length) clearInterval(monoTypeInterval);
-  }, 50);
-
-  const dismissFn = () => {
-    clearInterval(monoTypeInterval);
-    el('monologueOverlay').classList.remove('open');
-    state.isMonologuePlaying = false;
-    el('monoBtn').onclick = null;
-    if (callback) callback();
-  };
-  el('monoBtn').onclick = dismissFn;
-}
-
-/* ---------- Time Phase System ---------- */
-function getTimePhase(roomNum) {
-  if (roomNum <= 3) return { icon: '\ud83c\udf05', label: '\uc544\uce68', overlay: 'rgba(135,206,250,0.05)', border: 'rgba(135,206,250,0.3)' };
-  if (roomNum <= 7) return { icon: '\ud83c\udf1e', label: '\ub0ae', overlay: 'rgba(255,200,50,0.04)', border: 'rgba(255,200,50,0.25)' };
-  if (roomNum <= 11) return { icon: '\ud83c\udf07', label: '\uc800\ub141', overlay: 'rgba(255,140,50,0.07)', border: 'rgba(255,140,50,0.3)' };
-  if (roomNum <= 14) return { icon: '\ud83c\udf19', label: '\ubc24', overlay: 'rgba(80,40,160,0.1)', border: 'rgba(140,100,255,0.3)' };
-  return { icon: '\ud83c\udf05', label: '\uc0c8\ubcbd', overlay: 'rgba(255,180,200,0.06)', border: 'rgba(255,180,200,0.3)' };
-}
-
-/* Main Loop */
-function loop() {
-  update();
-  render();
-  requestAnimationFrame(loop);
-}
-
-function update() {
-  if (state.isStoryPlaying || state.isMonologuePlaying) return;
-  if (el('quizModal').classList.contains('open') || el('winModal').classList.contains('open')) return;
-  if (el('letterModal').classList.contains('open') || el('codexModal').classList.contains('open')) return;
-
-  updateParticles();
-
-  const speed = 4;
-  let dx = 0, dy = 0;
-  const prevX = state.player.x, prevY = state.player.y;
-
-  if (state.keys.up) { dy -= speed; state.player.facing = 'up'; }
-  if (state.keys.down) { dy += speed; state.player.facing = 'down'; }
-  if (state.keys.left) { dx -= speed; state.player.facing = 'left'; }
-  if (state.keys.right) { dx += speed; state.player.facing = 'right'; }
-
-  if (dx !== 0 || dy !== 0) {
-    state.animTimer++;
-    if (state.animTimer > 8) {
-      state.animFrame = (state.animFrame + 1) % 4; // 0,1,2,3
-      state.animTimer = 0;
-    }
-    state.player.x = Math.max(40, Math.min(360, state.player.x + dx));
-    state.player.y = Math.max(140, Math.min(225, state.player.y + dy));
-
-    // 열쇠를 획득한 상태에서 문에 닿으면 자동 이동
-    if (state.hasKey) {
-      const stage = STAGES[state.stageIdx];
-      const door = stage.props.find(p => p.type === 'door');
-      if (door) {
-        const doorX = door.x / 2;
-        const doorY = door.y / 2;
-        if (Math.hypot(state.player.x - doorX, state.player.y - doorY) <= 80) {
-          triggerPropAction(door);
-        }
-      }
-    }
-  } else {
-    state.animFrame = 1; // standing still
-  }
-}
-
-function render() {
-  const stage = STAGES[state.stageIdx];
-  const roomNum = stage.num;
-
-  /* 1. Background PNG Asset */
-  if (state.bgImages[roomNum] && state.bgImages[roomNum].complete && state.bgImages[roomNum].naturalWidth > 0) {
+    /* Canvas Logical Resolution (HiDPI support) */
+    canvas.width = 800;
+    canvas.height = 480;
+    ctx.scale(2, 2);
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(state.bgImages[roomNum], 0, 0, 400, 240);
-  } else {
-    /* Glassmorphism Dark Fallback */
-    const grad = ctx.createLinearGradient(0, 0, 400, 240);
-    grad.addColorStop(0, '#0c1427'); grad.addColorStop(1, '#16223d');
-    ctx.fillStyle = grad; ctx.fillRect(0, 0, 400, 240);
-  }
 
-  // Draw '행복부동산' over the English text in Room 7
-  if (roomNum === 7) {
-    ctx.fillStyle = '#b48154'; // sign background color
-    ctx.fillRect(52, 148, 102, 22); // cover HAPPY REAL ESTATE
-    ctx.font = 'bold 12px DungGeunMo';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#111'; // shadow
-    ctx.fillText('행복부동산', 104, 163);
-    ctx.fillStyle = '#fceabb'; // gold text
-    ctx.fillText('행복부동산', 103, 162);
-  }
-
-  // Draw '행정복지센터' on the cleaned banner in Room 5
-  if (roomNum === 5) {
-    ctx.font = 'bold 10px DungGeunMo';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = 'rgba(0,0,0,0.22)'; // shadow
-    ctx.fillText('행정복지센터', 119, 29.5);
-    ctx.fillStyle = '#1f3a5f'; // navy text
-    ctx.fillText('행정복지센터', 118, 28.5);
-    ctx.textAlign = 'left';
-  }
-
-  /* 2. Props & Door Marker */
-  let nearbyTarget = null;
-  const renderList = []; // y-sorting
-  stage.props.forEach(p => {
-    // scale down coords for 400x240
-    const px = p.x / 2;
-    const py = p.y / 2;
-    
-    // Check if player is near
-    const interactRadius = p.radius || (p.type === 'door' ? 80 : 35);
-    const dist = Math.hypot(state.player.x - px, state.player.y - py);
-    if (dist <= interactRadius) nearbyTarget = p;
-    
-    // Draw Prop Sprite
-    if (!p.hideEmoji) {
-      let propSprite = p.type === 'door' ? (state.hasKey ? Sprites.cache.door_unlocked : Sprites.cache.door_locked) : Sprites.getProp(p.emoji);
-      let scale = p.type === 'door' ? 2.5 : 1;
-      renderList.push({ img: propSprite, x: px - (propSprite.width*scale)/2, y: py - (propSprite.height*scale)/2, base: py, scale: scale });
+    /* Preload Assets */
+    Sprites.init();
+    for (let i = 1; i <= 15; i++) {
+      const img = new Image();
+      img.src = `assets/game/room_${i}.png`;
+      state.bgImages[i] = img;
     }
-  });
 
-  /* 2b. Letter proximity check (drawing happens after the time overlay so letters stay visible) */
-  LETTERS.forEach(l => {
-    if (l.room !== roomNum || state.collectedLetters.has(l.room)) return;
-    const lx = l.x / 2, ly = l.y / 2;
-    if (!nearbyTarget && Math.hypot(state.player.x - lx, state.player.y - ly) <= 35) {
-      nearbyTarget = { type: 'letter', name: '\uc228\uaca8\uc9c4 \ud3b8\uc9c0', room: l.room };
+    /* Input Handling */
+    window.addEventListener('keydown', (e) => {
+      if (['ArrowUp', 'KeyW'].includes(e.code)) state.keys.up = true;
+      if (['ArrowDown', 'KeyS'].includes(e.code)) state.keys.down = true;
+      if (['ArrowLeft', 'KeyA'].includes(e.code)) state.keys.left = true;
+      if (['ArrowRight', 'KeyD'].includes(e.code)) state.keys.right = true;
+      if (['KeyE', 'Space'].includes(e.code)) triggerAction();
+    });
+    window.addEventListener('keyup', (e) => {
+      if (['ArrowUp', 'KeyW'].includes(e.code)) state.keys.up = false;
+      if (['ArrowDown', 'KeyS'].includes(e.code)) state.keys.down = false;
+      if (['ArrowLeft', 'KeyA'].includes(e.code)) state.keys.left = false;
+      if (['ArrowRight', 'KeyD'].includes(e.code)) state.keys.right = false;
+    });
+
+    function bindCross(id, prop) {
+      const btn = el(id); if (!btn) return;
+      const press = (e) => { e.preventDefault(); state.keys[prop] = true; btn.classList.add('pressed'); };
+      const release = (e) => { if (e && e.cancelable) e.preventDefault(); state.keys[prop] = false; btn.classList.remove('pressed'); };
+      // Pointer Events = unified touch/mouse; touch pointers are implicitly captured,
+      // so pointerup reliably fires on the button even if the finger drifts.
+      btn.addEventListener('pointerdown', press);
+      btn.addEventListener('pointerup', release);
+      btn.addEventListener('pointercancel', release);
+      btn.addEventListener('pointerleave', release);
+      btn.addEventListener('contextmenu', (e) => e.preventDefault());
     }
-  });
+    /* ---------- Virtual Joystick — replaces the 4-way D-pad ----------
+       설계 원칙: 조이스틱은 기존 D-pad가 쓰던 것과 '똑같은' state.keys.{up,down,left,right}
+       불리언을 세팅한다. 덕분에 이동 루프(state.keys를 읽어 움직임)는 한 줄도 바꿀 필요가 없다.
+       아날로그 벡터는 state.joyVec = {x, y, mag(0~1)} 로도 노출한다(선택적 아날로그 속도용). */
+    function initJoystick() {
+      const base = el('joyBase'), knob = el('joyKnob');
+      if (!base || !knob) return;
+      const MAX_R = 33;       // 손잡이 최대 이동 반경(px). (배경 반지름 60 - 손잡이 반지름 27)이라 배경 밖으로 안 나감.
+      const DEADZONE = 0.28;  // 중앙 근처 미세 흔들림 무시(= MAX_R 대비 비율). 대각선 오작동 방지.
+      let pid = null;
+      state.joyVec = { x: 0, y: 0, mag: 0 };
 
-  /* 3. Render NPCs */
-  if (stage.npc && state.bgImages[roomNum] && state.bgImages[roomNum].complete) {
-    const npc = stage.npc;
-    const nx = npc.x / 2;
-    const ny = npc.y / 2;
-    const dist = Math.hypot(state.player.x - nx, state.player.y - ny);
-    if (dist <= 60) nearbyTarget = { ...npc, type: 'npc', emoji: '💬' };
-    
-    // Skip sprite rendering for Room 7 and 12 as they are drawn in bg
-    if (roomNum !== 7 && roomNum !== 12) {
-      let npcSprite = Sprites.cache.npc1;
-      if (npc.name.includes('원장님')) {
-        npcSprite = Sprites.cache.npc2;
-      } else if (roomNum % 2 === 0) {
-        npcSprite = Sprites.cache.npc3;
+      // 아날로그 벡터 -> 8방향 불리언 키 (대각선은 인접 두 방향 동시 ON)
+      function apply(nx, ny, mag) {
+        const k = state.keys;
+        if (mag < DEADZONE) { k.up = k.down = k.left = k.right = false; return; }
+        const a = (Math.atan2(-ny, nx) * 180 / Math.PI + 360) % 360; // 0=오른쪽, 90=위
+        const s = Math.round(a / 45) % 8;   // 0:E 1:NE 2:N 3:NW 4:W 5:SW 6:S 7:SE
+        k.right = (s === 0 || s === 1 || s === 7);
+        k.up    = (s === 1 || s === 2 || s === 3);
+        k.left  = (s === 3 || s === 4 || s === 5);
+        k.down  = (s === 5 || s === 6 || s === 7);
       }
-      
-      let npcImg = npcSprite['down'][1];
-      renderList.push({ img: npcImg, x: nx - (npcImg.width * 0.75) / 2, y: ny - (npcImg.height * 0.75) + 6, base: ny, scale: 0.75, isChar: true });
+      // 손잡이를 손가락 위치로 이동(최대 반경으로 clamp) + 벡터 계산
+      function moveTo(cx, cy) {
+        const r = base.getBoundingClientRect();
+        let dx = cx - (r.left + r.width / 2);
+        let dy = cy - (r.top + r.height / 2);
+        const dist = Math.hypot(dx, dy);
+        if (dist > MAX_R) { dx = dx / dist * MAX_R; dy = dy / dist * MAX_R; } // 반경 제한
+        knob.style.transition = 'none';                 // 드래그 중엔 즉시 반응(애니메이션 X)
+        knob.style.transform = `translate(${dx}px, ${dy}px)`;
+        const nx = dx / MAX_R, ny = dy / MAX_R, mag = Math.min(dist / MAX_R, 1);
+        state.joyVec = { x: nx, y: ny, mag };
+        apply(nx, ny, mag);
+      }
+      // 손 떼면 중앙으로 스냅백 + 모든 이동키 해제
+      function release() {
+        pid = null;
+        knob.style.transition = 'transform 0.12s ease-out'; // 복귀는 부드럽게
+        knob.style.transform = 'translate(0px, 0px)';
+        state.joyVec = { x: 0, y: 0, mag: 0 };
+        state.keys.up = state.keys.down = state.keys.left = state.keys.right = false;
+      }
+      // Pointer Events = 터치/마우스 통합. 손가락이 배경 밖으로 나가도 setPointerCapture로 계속 추적.
+      base.addEventListener('pointerdown', (e) => {
+        e.preventDefault(); pid = e.pointerId;
+        if (base.setPointerCapture) base.setPointerCapture(e.pointerId);
+        moveTo(e.clientX, e.clientY);
+      });
+      base.addEventListener('pointermove', (e) => {
+        if (e.pointerId !== pid) return;
+        e.preventDefault(); moveTo(e.clientX, e.clientY);
+      });
+      const end = (e) => { if (e.pointerId === pid) release(); };
+      base.addEventListener('pointerup', end);
+      base.addEventListener('pointercancel', end);
+      base.addEventListener('lostpointercapture', end);
+      base.addEventListener('contextmenu', (e) => e.preventDefault());
     }
-  }
-
-  /* 4. Render Characters */
-  const playerFrame = state.animFrame === 3 ? 1 : state.animFrame;
-  const playerImg = Sprites.cache.player[state.player.facing][playerFrame];
-  renderList.push({ img: playerImg, x: state.player.x - (playerImg.width * 0.75) / 2, y: state.player.y - (playerImg.height * 0.75) + 6, base: state.player.y, scale: 0.75, isChar: true });
-
-  // Y-sorting to draw correctly overlapping
-  renderList.sort((a, b) => a.base - b.base);
-  renderList.forEach(item => {
-    ctx.imageSmoothingEnabled = !!item.isChar; // High-res smooth AI sprites, sharp pixel props
-    if (item.scale && item.scale !== 1) {
-      ctx.drawImage(item.img, item.x, item.y, item.img.width * item.scale, item.img.height * item.scale);
-    } else {
-      ctx.drawImage(item.img, item.x, item.y);
+    initJoystick();
+    {
+      const eBtn = el('btnE');
+      const fireE = (e) => { e.preventDefault(); triggerAction(); };
+      eBtn.addEventListener('pointerdown', fireE);            // instant tap response
+      eBtn.addEventListener('contextmenu', (e) => e.preventDefault());
     }
-  });
 
-  /* 5b. Particles */
-  renderParticles();
-
-  /* 5c. Time Overlay */
-  const phase = getTimePhase(roomNum);
-  ctx.fillStyle = phase.overlay;
-  ctx.fillRect(0, 0, 400, 240);
-
-  /* 5d. Letters — drawn on top so they never hide behind furniture or the time tint */
-  LETTERS.forEach(l => {
-    if (l.room !== roomNum || state.collectedLetters.has(l.room)) return;
-    const lx = l.x / 2, ly = l.y / 2;
-    const t = Date.now() / 400;
-    const bob = Math.sin(t) * 2;
-    const pulse = Math.sin(t) * 0.25 + 0.75;
-    const cy = ly + bob;
-    // pulsing gold glow ring
-    ctx.globalAlpha = pulse;
-    ctx.fillStyle = 'rgba(255, 204, 0, 0.4)';
-    ctx.beginPath(); ctx.arc(lx, cy, 11, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#ffcc00'; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(lx, cy, 11, 0, Math.PI * 2); ctx.stroke();
-    ctx.globalAlpha = 1;
-    // vector envelope (no emoji dependency, always visible)
-    ctx.fillStyle = '#fff8e1'; ctx.strokeStyle = '#b8860b'; ctx.lineWidth = 1;
-    ctx.fillRect(lx - 7, cy - 5, 14, 10);
-    ctx.strokeRect(lx - 7, cy - 5, 14, 10);
-    ctx.beginPath();
-    ctx.moveTo(lx - 7, cy - 5); ctx.lineTo(lx, cy + 1); ctx.lineTo(lx + 7, cy - 5);
-    ctx.stroke();
-  });
-
-  /* 5e. EXIT door highlight — same spot every room, always eye-catching */
-  {
-    const doorP = stage.props.find(p => p.type === 'door');
-    if (doorP) {
-      const dx = doorP.x / 2, dy = doorP.y / 2;
-      const t = Date.now() / 350;
-      const pulse = Math.sin(t) * 0.3 + 0.7;
-      const accent = state.hasKey ? '#34d399' : '#fbbf24';
-      ctx.save();
-      // pulsing glow ring at the door base
-      ctx.globalAlpha = pulse * 0.8;
-      ctx.strokeStyle = accent; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.ellipse(dx, dy + 18, 22, 8, 0, 0, Math.PI * 2); ctx.stroke();
-      ctx.globalAlpha = pulse * 0.3;
-      ctx.fillStyle = accent;
-      ctx.beginPath(); ctx.ellipse(dx, dy + 18, 22, 8, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.globalAlpha = 1;
-      // floating label above the door
-      const bob = Math.sin(t) * 1.5;
-      const label = state.hasKey ? 'EXIT > 나가기' : 'EXIT > 퀴즈';
-      ctx.font = 'bold 10px "DungGeunMo", monospace';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      const tw = ctx.measureText(label).width;
-      const ly = dy - 26 + bob;
-      ctx.fillStyle = 'rgba(15,23,42,0.92)';
-      ctx.fillRect(dx - tw / 2 - 6, ly - 8, tw + 12, 16);
-      ctx.strokeStyle = accent; ctx.lineWidth = 1;
-      ctx.strokeRect(dx - tw / 2 - 6, ly - 8, tw + 12, 16);
-      ctx.fillStyle = state.hasKey ? '#a7f3d0' : '#fde68a';
-      ctx.fillText(label, dx, ly);
-      ctx.fillStyle = 'rgba(15,23,42,0.92)';
-      ctx.beginPath(); ctx.moveTo(dx - 4, ly + 8); ctx.lineTo(dx + 4, ly + 8); ctx.lineTo(dx, ly + 12); ctx.closePath(); ctx.fill();
-      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-      ctx.restore();
+    /* ---------- Particle System ---------- */
+    function spawnParticles(cx, cy, count) {
+      for (let i = 0; i < count; i++) {
+        state.particles.push({
+          x: cx, y: cy,
+          vx: (Math.random() - 0.5) * 4,
+          vy: -Math.random() * 3 - 1,
+          life: 60 + Math.random() * 40,
+          maxLife: 60 + Math.random() * 40,
+          size: 2 + Math.random() * 3,
+          color: ['#ffcc00', '#ffd700', '#fff4b8', '#ff9f43', '#10b981'][Math.floor(Math.random() * 5)]
+        });
+      }
     }
-  }
 
-  /* 6. Interaction Dialogue */
-  if (nearbyTarget) {
-    let speaker = '', msg = '';
-    if (nearbyTarget.type === 'door') {
-      speaker = '🚪 \ucd9c\uad6c \ubb38';
-      msg = state.hasKey ? '\ud83d\udd11 \uc5f4\uc1e0 \uad6c\uba4d\uc5d0 \uaf2d \ub9de\ub294\ub2e4! [E]\ud0a4\ub97c \ub20c\ub7ec \ub098\uac08 \uc218 \uc788\ub2e4.' : '\ud83d\udd12 \ubb38\uc774 \uad73\uac8c \uc7a0\uaca8 \uc788\ub2e4. [E]\ud0a4\ub97c \ub20c\ub7ec \ud034\uc988\ub97c \ud480\uace0 \uc5f4\uc1e0\ub97c \uc5bb\uc790!';
-    } else if (nearbyTarget.type === 'npc') {
-      speaker = `\ud83d\udde3\ufe0f ${nearbyTarget.name}`;
-      msg = `[E]\ud0a4\ub97c \ub20c\ub7ec ${nearbyTarget.name}\uc5d0\uac8c \ub9d0\uc744 \uac78\uc5b4\ubcf4\uc790.`;
-    } else if (nearbyTarget.type === 'letter') {
-      speaker = '\u2709\ufe0f \uc228\uaca8\uc9c4 \ud3b8\uc9c0';
-      msg = '\ubc18\uc9dd\uc774\ub294 \ud3b8\uc9c0\uac00 \ub193\uc5ec \uc788\ub2e4. [E]\ud0a4\ub97c \ub20c\ub7ec \uc77d\uc5b4\ubcf4\uc790!';
-    } else {
-      speaker = `\ud83d\udd0d ${nearbyTarget.name}`;
-      msg = nearbyTarget.hint || `[E]\ud0a4\ub97c \ub20c\ub7ec \uc790\uc138\ud788 \uc0b4\ud3b4\ubcf4\uc790.`;
+    function updateParticles() {
+      for (let i = state.particles.length - 1; i >= 0; i--) {
+        const p = state.particles[i];
+        p.x += p.vx; p.y += p.vy;
+        p.vy += 0.03;
+        p.life--;
+        if (p.life <= 0) state.particles.splice(i, 1);
+      }
     }
-    
-    if (state.lastTargetName !== nearbyTarget.name + state.hasKey) {
-      setDialogue(speaker, msg);
-      state.lastTargetName = nearbyTarget.name + state.hasKey;
-    }
-  } else {
-    if (state.lastTargetName !== null) {
-      setDialogue('🌱 하람', state.hasKey ? '🔑 열쇠 획득! 반짝이는 EXIT로 가서 [E]로 나가자.' : '방향키(↑↓←→)로 이동 · 반짝이는 EXIT로 가서 [E]로 퀴즈를 풀자!');
-      state.lastTargetName = null;
-    }
-  }
-}
 
-function triggerPropAction(nearbyProp) {
-  const stage = STAGES[state.stageIdx];
-  if (nearbyProp.type === 'door') {
-    if (state.hasKey) {
-      state.hasKey = false;
-      updateHud();
-      if (state.stageIdx + 1 < STAGES.length) {
-        const prevIdx = state.stageIdx;
-        state.stageIdx++;
-        state.player.x = 100; state.player.y = 220;
+    function renderParticles() {
+      state.particles.forEach(p => {
+        const alpha = p.life / p.maxLife;
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = p.color;
+        const cx = p.x, cy = p.y, s = p.size;
+        ctx.beginPath();
+        for (let j = 0; j < 5; j++) {
+          const angle = (j * 4 * Math.PI) / 5 - Math.PI / 2;
+          ctx[j === 0 ? 'moveTo' : 'lineTo'](cx + Math.cos(angle) * s, cy + Math.sin(angle) * s);
+          const a2 = angle + (2 * Math.PI) / 10;
+          ctx.lineTo(cx + Math.cos(a2) * (s * 0.4), cy + Math.sin(a2) * (s * 0.4));
+        }
+        ctx.closePath(); ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+    }
 
-        // Monologue trigger after rooms 5 and 10
-        if (prevIdx === 4) {
-          showMonologue(0, () => {
-            enterRoom();
-            setDialogue('🌟 하람의 독백', '하람이는 잠시 생각에 잠겼다...');
-          });
-        } else if (prevIdx === 9) {
-          showMonologue(1, () => {
-            enterRoom();
-            setDialogue('🌟 하람의 독백', '하람이는 잠시 생각에 잠겼다...');
-          });
-        } else {
-          enterRoom();
-          setDialogue('🎉 탈출 성공!', `🔑 열쇠로 문을 열고 ${STAGES[state.stageIdx].num}번 방으로 들어왔다!`);
+    /* ---------- Monologue System ---------- */
+    let monoTypeInterval = null;
+    function showMonologue(idx, callback) {
+      const mono = MONOLOGUES[idx];
+      if (!mono) { if (callback) callback(); return; }
+      state.isMonologuePlaying = true;
+      el('monologueOverlay').classList.add('open');
+      el('monoEmoji').textContent = mono.emoji;
+      el('monoText').textContent = '';
+      const starsEl = el('monoStars');
+      starsEl.innerHTML = '';
+      for (let i = 0; i < 30; i++) {
+        const star = document.createElement('span');
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.animationDelay = Math.random() * 2 + 's';
+        const sz = (1 + Math.random() * 2) + 'px';
+        star.style.width = sz; star.style.height = sz;
+        starsEl.appendChild(star);
+      }
+      let ci = 0;
+      clearInterval(monoTypeInterval);
+      monoTypeInterval = setInterval(() => {
+        el('monoText').textContent += mono.text.charAt(ci); ci++;
+        if (ci >= mono.text.length) clearInterval(monoTypeInterval);
+      }, 50);
+
+      const dismissFn = () => {
+        clearInterval(monoTypeInterval);
+        el('monologueOverlay').classList.remove('open');
+        state.isMonologuePlaying = false;
+        el('monoBtn').onclick = null;
+        if (callback) callback();
+      };
+      el('monoBtn').onclick = dismissFn;
+    }
+
+    /* ---------- Time Phase System ---------- */
+    function getTimePhase(roomNum) {
+      if (roomNum <= 3) return { icon: '\ud83c\udf05', label: '\uc544\uce68', overlay: 'rgba(135,206,250,0.05)', border: 'rgba(135,206,250,0.3)' };
+      if (roomNum <= 7) return { icon: '\ud83c\udf1e', label: '\ub0ae', overlay: 'rgba(255,200,50,0.04)', border: 'rgba(255,200,50,0.25)' };
+      if (roomNum <= 11) return { icon: '\ud83c\udf07', label: '\uc800\ub141', overlay: 'rgba(255,140,50,0.07)', border: 'rgba(255,140,50,0.3)' };
+      if (roomNum <= 14) return { icon: '\ud83c\udf19', label: '\ubc24', overlay: 'rgba(80,40,160,0.1)', border: 'rgba(140,100,255,0.3)' };
+      return { icon: '\ud83c\udf05', label: '\uc0c8\ubcbd', overlay: 'rgba(255,180,200,0.06)', border: 'rgba(255,180,200,0.3)' };
+    }
+
+    /* Main Loop */
+    function loop() {
+      update();
+      render();
+      requestAnimationFrame(loop);
+    }
+
+    function update() {
+      if (state.isStoryPlaying || state.isMonologuePlaying) return;
+      if (el('quizModal').classList.contains('open') || el('winModal').classList.contains('open')) return;
+      if (el('letterModal').classList.contains('open') || el('codexModal').classList.contains('open')) return;
+
+      updateParticles();
+
+      const speed = 4;
+      let dx = 0, dy = 0;
+      const prevX = state.player.x, prevY = state.player.y;
+
+      if (state.keys.up) { dy -= speed; state.player.facing = 'up'; }
+      if (state.keys.down) { dy += speed; state.player.facing = 'down'; }
+      if (state.keys.left) { dx -= speed; state.player.facing = 'left'; }
+      if (state.keys.right) { dx += speed; state.player.facing = 'right'; }
+
+      if (dx !== 0 || dy !== 0) {
+        state.animTimer++;
+        if (state.animTimer > 8) {
+          state.animFrame = (state.animFrame + 1) % 4; // 0,1,2,3
+          state.animTimer = 0;
+        }
+        state.player.x = Math.max(40, Math.min(360, state.player.x + dx));
+        state.player.y = Math.max(140, Math.min(225, state.player.y + dy));
+
+        // 열쇠를 획득한 상태에서 문에 닿으면 자동 이동
+        if (state.hasKey) {
+          const stage = STAGES[state.stageIdx];
+          const door = stage.props.find(p => p.type === 'door');
+          if (door) {
+            const doorX = door.x / 2;
+            const doorY = door.y / 2;
+            if (Math.hypot(state.player.x - doorX, state.player.y - doorY) <= 80) {
+              triggerPropAction(door);
+            }
+          }
         }
       } else {
-        showWin();
+        state.animFrame = 1; // standing still
       }
-    } else {
-      openQuizModal(stage, { name: '잠긴 문', emoji: '🚪' });
     }
-  } else {
-    if (nearbyProp.lore) {
-      setDialogue(`🔍 ${nearbyProp.name}`, nearbyProp.lore);
-    } else {
-      openQuizModal(stage, nearbyProp);
+
+    function render() {
+      const stage = STAGES[state.stageIdx];
+      const roomNum = stage.num;
+
+      /* 1. Background PNG Asset */
+      if (state.bgImages[roomNum] && state.bgImages[roomNum].complete && state.bgImages[roomNum].naturalWidth > 0) {
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(state.bgImages[roomNum], 0, 0, 400, 240);
+      } else {
+        /* Glassmorphism Dark Fallback */
+        const grad = ctx.createLinearGradient(0, 0, 400, 240);
+        grad.addColorStop(0, '#0c1427'); grad.addColorStop(1, '#16223d');
+        ctx.fillStyle = grad; ctx.fillRect(0, 0, 400, 240);
+      }
+
+      // Draw '행복부동산' over the English text in Room 7
+      if (roomNum === 7) {
+        ctx.fillStyle = '#b48154'; // sign background color
+        ctx.fillRect(52, 148, 102, 22); // cover HAPPY REAL ESTATE
+        ctx.font = 'bold 12px DungGeunMo';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#111'; // shadow
+        ctx.fillText('행복부동산', 104, 163);
+        ctx.fillStyle = '#fceabb'; // gold text
+        ctx.fillText('행복부동산', 103, 162);
+      }
+
+      // Draw '행정복지센터' on the cleaned banner in Room 5
+      if (roomNum === 5) {
+        ctx.font = 'bold 10px DungGeunMo';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(0,0,0,0.22)'; // shadow
+        ctx.fillText('행정복지센터', 119, 29.5);
+        ctx.fillStyle = '#1f3a5f'; // navy text
+        ctx.fillText('행정복지센터', 118, 28.5);
+        ctx.textAlign = 'left';
+      }
+
+      /* 2. Props & Door Marker */
+      let nearbyTarget = null;
+      const renderList = []; // y-sorting
+      stage.props.forEach(p => {
+        // scale down coords for 400x240
+        const px = p.x / 2;
+        const py = p.y / 2;
+
+        // Check if player is near
+        const interactRadius = p.radius || (p.type === 'door' ? 80 : 35);
+        const dist = Math.hypot(state.player.x - px, state.player.y - py);
+        if (dist <= interactRadius) nearbyTarget = p;
+
+        // Draw Prop Sprite
+        if (!p.hideEmoji) {
+          let propSprite = p.type === 'door' ? (state.hasKey ? Sprites.cache.door_unlocked : Sprites.cache.door_locked) : Sprites.getProp(p.emoji);
+          let scale = p.type === 'door' ? 2.5 : 1;
+          renderList.push({ img: propSprite, x: px - (propSprite.width * scale) / 2, y: py - (propSprite.height * scale) / 2, base: py, scale: scale });
+        }
+      });
+
+      /* 2b. Letter proximity check (drawing happens after the time overlay so letters stay visible) */
+      LETTERS.forEach(l => {
+        if (l.room !== roomNum || state.collectedLetters.has(l.room)) return;
+        const lx = l.x / 2, ly = l.y / 2;
+        if (!nearbyTarget && Math.hypot(state.player.x - lx, state.player.y - ly) <= 35) {
+          nearbyTarget = { type: 'letter', name: '\uc228\uaca8\uc9c4 \ud3b8\uc9c0', room: l.room };
+        }
+      });
+
+      /* 3. Render NPCs */
+      if (stage.npc && state.bgImages[roomNum] && state.bgImages[roomNum].complete) {
+        const npc = stage.npc;
+        const nx = npc.x / 2;
+        const ny = npc.y / 2;
+        const dist = Math.hypot(state.player.x - nx, state.player.y - ny);
+        if (dist <= 60) nearbyTarget = { ...npc, type: 'npc', emoji: '💬' };
+
+        // Skip sprite rendering for Room 7 and 12 as they are drawn in bg
+        if (roomNum !== 7 && roomNum !== 12) {
+          let npcSprite = Sprites.cache.npc1;
+          if (npc.name.includes('원장님')) {
+            npcSprite = Sprites.cache.npc2;
+          } else if (roomNum % 2 === 0) {
+            npcSprite = Sprites.cache.npc3;
+          }
+
+          let npcImg = npcSprite['down'][1];
+          renderList.push({ img: npcImg, x: nx - (npcImg.width * 0.75) / 2, y: ny - (npcImg.height * 0.75) + 6, base: ny, scale: 0.75, isChar: true });
+        }
+      }
+
+      /* 4. Render Characters */
+      const playerFrame = state.animFrame === 3 ? 1 : state.animFrame;
+      const playerImg = Sprites.cache.player[state.player.facing][playerFrame];
+      renderList.push({ img: playerImg, x: state.player.x - (playerImg.width * 0.75) / 2, y: state.player.y - (playerImg.height * 0.75) + 6, base: state.player.y, scale: 0.75, isChar: true });
+
+      // Y-sorting to draw correctly overlapping
+      renderList.sort((a, b) => a.base - b.base);
+      renderList.forEach(item => {
+        ctx.imageSmoothingEnabled = !!item.isChar; // High-res smooth AI sprites, sharp pixel props
+        if (item.scale && item.scale !== 1) {
+          ctx.drawImage(item.img, item.x, item.y, item.img.width * item.scale, item.img.height * item.scale);
+        } else {
+          ctx.drawImage(item.img, item.x, item.y);
+        }
+      });
+
+      /* 5b. Particles */
+      renderParticles();
+
+      /* 5c. Time Overlay */
+      const phase = getTimePhase(roomNum);
+      ctx.fillStyle = phase.overlay;
+      ctx.fillRect(0, 0, 400, 240);
+
+      /* 5d. Letters — drawn on top so they never hide behind furniture or the time tint */
+      LETTERS.forEach(l => {
+        if (l.room !== roomNum || state.collectedLetters.has(l.room)) return;
+        const lx = l.x / 2, ly = l.y / 2;
+        const t = Date.now() / 400;
+        const bob = Math.sin(t) * 2;
+        const pulse = Math.sin(t) * 0.25 + 0.75;
+        const cy = ly + bob;
+        // pulsing gold glow ring
+        ctx.globalAlpha = pulse;
+        ctx.fillStyle = 'rgba(255, 204, 0, 0.4)';
+        ctx.beginPath(); ctx.arc(lx, cy, 11, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#ffcc00'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(lx, cy, 11, 0, Math.PI * 2); ctx.stroke();
+        ctx.globalAlpha = 1;
+        // vector envelope (no emoji dependency, always visible)
+        ctx.fillStyle = '#fff8e1'; ctx.strokeStyle = '#b8860b'; ctx.lineWidth = 1;
+        ctx.fillRect(lx - 7, cy - 5, 14, 10);
+        ctx.strokeRect(lx - 7, cy - 5, 14, 10);
+        ctx.beginPath();
+        ctx.moveTo(lx - 7, cy - 5); ctx.lineTo(lx, cy + 1); ctx.lineTo(lx + 7, cy - 5);
+        ctx.stroke();
+      });
+
+      /* 5e. EXIT door highlight — same spot every room, always eye-catching */
+      {
+        const doorP = stage.props.find(p => p.type === 'door');
+        if (doorP) {
+          const dx = doorP.x / 2, dy = doorP.y / 2;
+          const t = Date.now() / 350;
+          const pulse = Math.sin(t) * 0.3 + 0.7;
+          const accent = state.hasKey ? '#34d399' : '#fbbf24';
+          ctx.save();
+          // pulsing glow ring at the door base
+          ctx.globalAlpha = pulse * 0.8;
+          ctx.strokeStyle = accent; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.ellipse(dx, dy + 18, 22, 8, 0, 0, Math.PI * 2); ctx.stroke();
+          ctx.globalAlpha = pulse * 0.3;
+          ctx.fillStyle = accent;
+          ctx.beginPath(); ctx.ellipse(dx, dy + 18, 22, 8, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 1;
+          // floating label above the door
+          const bob = Math.sin(t) * 1.5;
+          const label = state.hasKey ? 'EXIT > 나가기' : 'EXIT > 퀴즈';
+          ctx.font = 'bold 10px "DungGeunMo", monospace';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          const tw = ctx.measureText(label).width;
+          const ly = dy - 26 + bob;
+          ctx.fillStyle = 'rgba(15,23,42,0.92)';
+          ctx.fillRect(dx - tw / 2 - 6, ly - 8, tw + 12, 16);
+          ctx.strokeStyle = accent; ctx.lineWidth = 1;
+          ctx.strokeRect(dx - tw / 2 - 6, ly - 8, tw + 12, 16);
+          ctx.fillStyle = state.hasKey ? '#a7f3d0' : '#fde68a';
+          ctx.fillText(label, dx, ly);
+          ctx.fillStyle = 'rgba(15,23,42,0.92)';
+          ctx.beginPath(); ctx.moveTo(dx - 4, ly + 8); ctx.lineTo(dx + 4, ly + 8); ctx.lineTo(dx, ly + 12); ctx.closePath(); ctx.fill();
+          ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+          ctx.restore();
+        }
+      }
+
+      /* 6. Interaction Dialogue */
+      if (nearbyTarget) {
+        let speaker = '', msg = '';
+        if (nearbyTarget.type === 'door') {
+          speaker = '🚪 \ucd9c\uad6c \ubb38';
+          msg = state.hasKey ? '\ud83d\udd11 \uc5f4\uc1e0 \uad6c\uba4d\uc5d0 \uaf2d \ub9de\ub294\ub2e4! [E]\ud0a4\ub97c \ub20c\ub7ec \ub098\uac08 \uc218 \uc788\ub2e4.' : '\ud83d\udd12 \ubb38\uc774 \uad73\uac8c \uc7a0\uaca8 \uc788\ub2e4. [E]\ud0a4\ub97c \ub20c\ub7ec \ud034\uc988\ub97c \ud480\uace0 \uc5f4\uc1e0\ub97c \uc5bb\uc790!';
+        } else if (nearbyTarget.type === 'npc') {
+          speaker = `\ud83d\udde3\ufe0f ${nearbyTarget.name}`;
+          msg = `[E]\ud0a4\ub97c \ub20c\ub7ec ${nearbyTarget.name}\uc5d0\uac8c \ub9d0\uc744 \uac78\uc5b4\ubcf4\uc790.`;
+        } else if (nearbyTarget.type === 'letter') {
+          speaker = '\u2709\ufe0f \uc228\uaca8\uc9c4 \ud3b8\uc9c0';
+          msg = '\ubc18\uc9dd\uc774\ub294 \ud3b8\uc9c0\uac00 \ub193\uc5ec \uc788\ub2e4. [E]\ud0a4\ub97c \ub20c\ub7ec \uc77d\uc5b4\ubcf4\uc790!';
+        } else {
+          speaker = `\ud83d\udd0d ${nearbyTarget.name}`;
+          msg = nearbyTarget.hint || `[E]\ud0a4\ub97c \ub20c\ub7ec \uc790\uc138\ud788 \uc0b4\ud3b4\ubcf4\uc790.`;
+        }
+
+        if (state.lastTargetName !== nearbyTarget.name + state.hasKey) {
+          setDialogue(speaker, msg);
+          state.lastTargetName = nearbyTarget.name + state.hasKey;
+        }
+      } else {
+        if (state.lastTargetName !== null) {
+          setDialogue('🌱 하람', state.hasKey ? '🔑 열쇠 획득! 반짝이는 EXIT로 가서 [E]로 나가자.' : '방향키(↑↓←→)로 이동 · 반짝이는 EXIT로 가서 [E]로 퀴즈를 풀자!');
+          state.lastTargetName = null;
+        }
+      }
     }
-  }
-}
 
-function showWin() {
-  const endTime = Date.now();
-  const elapsedMs = endTime - state.startTime;
-  const mm = Math.floor(elapsedMs / 60000).toString().padStart(2, '0');
-  const ss = Math.floor((elapsedMs % 60000) / 1000).toString().padStart(2, '0');
-  const timeStr = `${mm}:${ss}`;
-  
-  el('currentRecord').textContent = `⏱️ 소요시간: ${timeStr} · ❌ 오답: ${state.misses}회 · ✉️ 편지: ${state.collectedLetters.size}/15`;
+    function triggerPropAction(nearbyProp) {
+      const stage = STAGES[state.stageIdx];
+      if (nearbyProp.type === 'door') {
+        if (state.hasKey) {
+          state.hasKey = false;
+          updateHud();
+          if (state.stageIdx + 1 < STAGES.length) {
+            const prevIdx = state.stageIdx;
+            state.stageIdx++;
+            state.player.x = 100; state.player.y = 220;
 
-  const score = state.misses * 10000000 + elapsedMs;
-  const prevBestKey = parseInt(localStorage.getItem('escape_rpg_best_key') || '999999999', 10);
-  let bestLabel = localStorage.getItem('escape_rpg_best_label') || '없음';
+            // Monologue trigger after rooms 5 and 10
+            if (prevIdx === 4) {
+              showMonologue(0, () => {
+                enterRoom();
+                setDialogue('🌟 하람의 독백', '하람이는 잠시 생각에 잠겼다...');
+              });
+            } else if (prevIdx === 9) {
+              showMonologue(1, () => {
+                enterRoom();
+                setDialogue('🌟 하람의 독백', '하람이는 잠시 생각에 잠겼다...');
+              });
+            } else {
+              enterRoom();
+              setDialogue('🎉 탈출 성공!', `🔑 열쇠로 문을 열고 ${STAGES[state.stageIdx].num}번 방으로 들어왔다!`);
+            }
+          } else {
+            showWin();
+          }
+        } else {
+          openQuizModal(stage, { name: '잠긴 문', emoji: '🚪' });
+        }
+      } else {
+        if (nearbyProp.lore) {
+          setDialogue(`🔍 ${nearbyProp.name}`, nearbyProp.lore);
+        } else {
+          openQuizModal(stage, nearbyProp);
+        }
+      }
+    }
 
-  if (score < prevBestKey) {
-    bestLabel = `${timeStr} (오답 ${state.misses}회)`;
-    localStorage.setItem('escape_rpg_best_key', score.toString());
-    localStorage.setItem('escape_rpg_best_label', bestLabel);
-  }
+    function showWin() {
+      const endTime = Date.now();
+      const elapsedMs = endTime - state.startTime;
+      const mm = Math.floor(elapsedMs / 60000).toString().padStart(2, '0');
+      const ss = Math.floor((elapsedMs % 60000) / 1000).toString().padStart(2, '0');
+      const timeStr = `${mm}:${ss}`;
 
-  el('bestRecord').textContent = `🏅 나의 최고 기록: ${bestLabel}`;
-  state.finalTimeStr = timeStr;
+      el('currentRecord').textContent = `⏱️ 소요시간: ${timeStr} · ❌ 오답: ${state.misses}회 · ✉️ 편지: ${state.collectedLetters.size}/15`;
 
-  // Letter collection display
-  if (state.collectedLetters.size > 0) {
-    const lc = state.collectedLetters.size;
-    el('letterCollection').classList.remove('hidden');
-    el('letterCountBadge').textContent = lc >= 15
-      ? `✉️ 15 / 15 편지 모두 수집!`
-      : `✉️ ${lc} / 15 수집 · 아직 ${15 - lc}개가 방에 남아있어요`;
-    const listEl = el('letterList');
-    listEl.innerHTML = '';
-    LETTERS.forEach(l => {
-      if (!state.collectedLetters.has(l.room)) return;
-      const item = document.createElement('div');
-      item.className = 'letter-item';
-      item.innerHTML = `<div class="letter-from">✉️ ROOM ${l.room} — ${l.from}</div><div>${l.text}</div>`;
-      listEl.appendChild(item);
+      const score = state.misses * 10000000 + elapsedMs;
+      const prevBestKey = parseInt(localStorage.getItem('escape_rpg_best_key') || '999999999', 10);
+      let bestLabel = localStorage.getItem('escape_rpg_best_label') || '없음';
+
+      if (score < prevBestKey) {
+        bestLabel = `${timeStr} (오답 ${state.misses}회)`;
+        localStorage.setItem('escape_rpg_best_key', score.toString());
+        localStorage.setItem('escape_rpg_best_label', bestLabel);
+      }
+
+      el('bestRecord').textContent = `🏅 나의 최고 기록: ${bestLabel}`;
+      state.finalTimeStr = timeStr;
+
+      // Letter collection display
+      if (state.collectedLetters.size > 0) {
+        const lc = state.collectedLetters.size;
+        el('letterCollection').classList.remove('hidden');
+        el('letterCountBadge').textContent = lc >= 15
+          ? `✉️ 15 / 15 편지 모두 수집!`
+          : `✉️ ${lc} / 15 수집 · 아직 ${15 - lc}개가 방에 남아있어요`;
+        const listEl = el('letterList');
+        listEl.innerHTML = '';
+        LETTERS.forEach(l => {
+          if (!state.collectedLetters.has(l.room)) return;
+          const item = document.createElement('div');
+          item.className = 'letter-item';
+          item.innerHTML = `<div class="letter-from">✉️ ROOM ${l.room} — ${l.from}</div><div>${l.text}</div>`;
+          listEl.appendChild(item);
+        });
+      } else {
+        el('letterCollection').classList.add('hidden');
+      }
+
+      // Achievement badges
+      const result = { misses: state.misses, letters: state.collectedLetters.size, elapsedMs };
+      const savedSet = new Set(JSON.parse(localStorage.getItem('escape_rpg_badges') || '[]'));
+      const freshIds = new Set();
+      BADGES.forEach(b => {
+        if (b.test(result)) {
+          if (!savedSet.has(b.id)) freshIds.add(b.id);
+          savedSet.add(b.id);
+        }
+      });
+      localStorage.setItem('escape_rpg_badges', JSON.stringify([...savedSet]));
+      const bg = el('badgeGrid');
+      bg.innerHTML = '';
+      BADGES.forEach(b => {
+        const earned = b.test(result);
+        const div = document.createElement('div');
+        div.className = 'badge' + (earned ? ' earned' : '') + (freshIds.has(b.id) ? ' fresh' : '');
+        div.innerHTML = `<div class="badge-emoji">${b.emoji}</div><div class="badge-name">${b.name}</div>`;
+        bg.appendChild(div);
+      });
+
+      // Big particle celebration
+      spawnParticles(200, 120, 50);
+
+      el('winModal').classList.add('open');
+      const lc2 = state.collectedLetters.size;
+      setDialogue('🏡 15개 챕터 탈출 성공!', `하람이의 당당한 자립을 축하합니다! (이번 여정에서 편지 ${lc2}/15 수집)`);
+    }
+
+    function triggerAction() {
+      if (el('letterModal').classList.contains('open') || el('codexModal').classList.contains('open')) return;
+      const stage = STAGES[state.stageIdx];
+
+      // Check letter proximity first
+      const letter = LETTERS.find(l => l.room === stage.num && !state.collectedLetters.has(l.room) &&
+        Math.hypot(state.player.x - (l.x / 2), state.player.y - (l.y / 2)) <= 40);
+      if (letter) {
+        openLetter(letter.room);
+        return;
+      }
+
+      const nearbyProp = stage.props.find(p => {
+        let interactRadius = p.type === 'door' ? 80 : (p.radius || 40);
+        return Math.hypot(state.player.x - (p.x / 2), state.player.y - (p.y / 2)) <= interactRadius;
+      });
+      const nearbyNpc = stage.npc && Math.hypot(state.player.x - (stage.npc.x / 2), state.player.y - (stage.npc.y / 2)) <= 75;
+
+      if (nearbyProp) {
+        triggerPropAction(nearbyProp);
+      } else if (nearbyNpc) {
+        if (state.hasKey && stage.npc.afterText) {
+          setDialogue(`🗣️ ${stage.npc.name}`, stage.npc.afterText);
+        } else if (!state.hasKey && NPC_BEFORE[stage.num]) {
+          setDialogue(`🗣️ ${stage.npc.name}`, NPC_BEFORE[stage.num]);
+        } else {
+          openQuizModal(stage, { name: stage.npc.name, emoji: '💬' });
+        }
+      }
+    }
+
+    canvas.addEventListener('click', (e) => {
+      if (state.isStoryPlaying) return;
+      if (el('quizModal').classList.contains('open') || el('winModal').classList.contains('open')) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const clickX = (e.clientX - rect.left) * scaleX;
+      const clickY = (e.clientY - rect.top) * scaleY;
+
+      const stage = STAGES[state.stageIdx];
+
+      // Tap on an uncollected letter (convert 800×480 canvas space → 400×240 draw space)
+      const drawX = clickX / 2, drawY = clickY / 2;
+      const tappedLetter = LETTERS.find(l => l.room === stage.num && !state.collectedLetters.has(l.room) &&
+        Math.hypot(drawX - (l.x / 2), drawY - (l.y / 2)) <= 28);
+      if (tappedLetter) { openLetter(tappedLetter.room); return; }
+
+      let clickedProp = null;
+      stage.props.forEach(p => {
+        if (p.type === 'door') return;
+        let px = p.x / 2;
+        let py = p.y / 2;
+        let clickRadius = p.clickRadius || p.radius || 35;
+        if (Math.hypot(clickX - px, clickY - py) <= clickRadius) {
+          clickedProp = p;
+        }
+      });
+
+      // Check right edge click for door if no other prop is clicked
+      if (!clickedProp && clickX > 330) {
+        clickedProp = stage.props.find(p => p.type === 'door');
+      }
+
+      if (clickedProp) {
+        triggerPropAction(clickedProp);
+      }
     });
-  } else {
-    el('letterCollection').classList.add('hidden');
-  }
-  
-  // Achievement badges
-  const result = { misses: state.misses, letters: state.collectedLetters.size, elapsedMs };
-  const savedSet = new Set(JSON.parse(localStorage.getItem('escape_rpg_badges') || '[]'));
-  const freshIds = new Set();
-  BADGES.forEach(b => {
-    if (b.test(result)) {
-      if (!savedSet.has(b.id)) freshIds.add(b.id);
-      savedSet.add(b.id);
+
+    let typeInterval = null;
+    function setDialogue(speaker, msg) {
+      el('rpgSpeaker').textContent = speaker;
+      clearInterval(typeInterval);
+      const textEl = el('rpgText');
+      textEl.textContent = '';
+      let i = 0;
+      typeInterval = setInterval(() => {
+        textEl.textContent += msg.charAt(i);
+        i++;
+        if (i >= msg.length) clearInterval(typeInterval);
+      }, 25); // typing speed
     }
-  });
-  localStorage.setItem('escape_rpg_badges', JSON.stringify([...savedSet]));
-  const bg = el('badgeGrid');
-  bg.innerHTML = '';
-  BADGES.forEach(b => {
-    const earned = b.test(result);
-    const div = document.createElement('div');
-    div.className = 'badge' + (earned ? ' earned' : '') + (freshIds.has(b.id) ? ' fresh' : '');
-    div.innerHTML = `<div class="badge-emoji">${b.emoji}</div><div class="badge-name">${b.name}</div>`;
-    bg.appendChild(div);
-  });
 
-  // Big particle celebration
-  spawnParticles(200, 120, 50);
+    function openQuizModal(stage, target) {
+      el('modalTitle').textContent = `🔑 ${target.name} - 열쇠 획득 퀴즈`;
+      el('modalSub').textContent = stage.scene;
+      el('modalQ').innerHTML = stage.q;
+      el('modalFeedback').textContent = '';
+      el('modalHint').classList.add('hidden');
 
-  el('winModal').classList.add('open');
-  const lc2 = state.collectedLetters.size;
-  setDialogue('🏡 15개 챕터 탈출 성공!', `하람이의 당당한 자립을 축하합니다! (이번 여정에서 편지 ${lc2}/15 수집)`);
-}
+      const content = el('modalContent'); content.innerHTML = '';
 
-function triggerAction() {
-  if (el('letterModal').classList.contains('open') || el('codexModal').classList.contains('open')) return;
-  const stage = STAGES[state.stageIdx];
-
-  // Check letter proximity first
-  const letter = LETTERS.find(l => l.room === stage.num && !state.collectedLetters.has(l.room) &&
-    Math.hypot(state.player.x - (l.x / 2), state.player.y - (l.y / 2)) <= 40);
-  if (letter) {
-    openLetter(letter.room);
-    return;
-  }
-
-  const nearbyProp = stage.props.find(p => {
-    let interactRadius = p.type === 'door' ? 80 : (p.radius || 40);
-    return Math.hypot(state.player.x - (p.x / 2), state.player.y - (p.y / 2)) <= interactRadius;
-  });
-  const nearbyNpc = stage.npc && Math.hypot(state.player.x - (stage.npc.x / 2), state.player.y - (stage.npc.y / 2)) <= 75;
-
-  if (nearbyProp) {
-    triggerPropAction(nearbyProp);
-  } else if (nearbyNpc) {
-    if (state.hasKey && stage.npc.afterText) {
-      setDialogue(`🗣️ ${stage.npc.name}`, stage.npc.afterText);
-    } else if (!state.hasKey && NPC_BEFORE[stage.num]) {
-      setDialogue(`🗣️ ${stage.npc.name}`, NPC_BEFORE[stage.num]);
-    } else {
-      openQuizModal(stage, { name: stage.npc.name, emoji: '💬' });
-    }
-  }
-}
-
-canvas.addEventListener('click', (e) => {
-  if (state.isStoryPlaying) return;
-  if (el('quizModal').classList.contains('open') || el('winModal').classList.contains('open')) return;
-
-  const rect = canvas.getBoundingClientRect();
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
-  const clickX = (e.clientX - rect.left) * scaleX;
-  const clickY = (e.clientY - rect.top) * scaleY;
-  
-  const stage = STAGES[state.stageIdx];
-
-  // Tap on an uncollected letter (convert 800×480 canvas space → 400×240 draw space)
-  const drawX = clickX / 2, drawY = clickY / 2;
-  const tappedLetter = LETTERS.find(l => l.room === stage.num && !state.collectedLetters.has(l.room) &&
-    Math.hypot(drawX - (l.x / 2), drawY - (l.y / 2)) <= 28);
-  if (tappedLetter) { openLetter(tappedLetter.room); return; }
-
-  let clickedProp = null;
-  stage.props.forEach(p => {
-    if (p.type === 'door') return;
-    let px = p.x / 2;
-    let py = p.y / 2;
-    let clickRadius = p.clickRadius || p.radius || 35;
-    if (Math.hypot(clickX - px, clickY - py) <= clickRadius) {
-      clickedProp = p;
-    }
-  });
-
-  // Check right edge click for door if no other prop is clicked
-  if (!clickedProp && clickX > 330) {
-    clickedProp = stage.props.find(p => p.type === 'door');
-  }
-
-  if (clickedProp) {
-    triggerPropAction(clickedProp);
-  }
-});
-
-let typeInterval = null;
-function setDialogue(speaker, msg) {
-  el('rpgSpeaker').textContent = speaker;
-  clearInterval(typeInterval);
-  const textEl = el('rpgText');
-  textEl.textContent = '';
-  let i = 0;
-  typeInterval = setInterval(() => {
-    textEl.textContent += msg.charAt(i);
-    i++;
-    if (i >= msg.length) clearInterval(typeInterval);
-  }, 25); // typing speed
-}
-
-function openQuizModal(stage, target) {
-  el('modalTitle').textContent = `🔑 ${target.name} - 열쇠 획득 퀴즈`;
-  el('modalSub').textContent = stage.scene;
-  el('modalQ').innerHTML = stage.q;
-  el('modalFeedback').textContent = '';
-  el('modalHint').classList.add('hidden');
-
-  const content = el('modalContent'); content.innerHTML = '';
-
-  if (stage.type === 'input') {
-    const row = document.createElement('div'); row.className = 'input-row';
-    row.innerHTML = `
+      if (stage.type === 'input') {
+        const row = document.createElement('div'); row.className = 'input-row';
+        row.innerHTML = `
       <input type="text" id="qInput" class="quiz-input" placeholder="정답 입력" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
       <button class="btn-submit" id="qSubmit">확인</button>
     `;
-    content.appendChild(row);
-    el('qInput').value = '';
-    setTimeout(() => { const inp = el('qInput'); if (inp) { inp.value = ''; inp.focus(); } }, 100);
-    el('qSubmit').onclick = checkAnswer;
-    el('qInput').onkeydown = (e) => { if (e.key === 'Enter') checkAnswer(); };
-  } else if (stage.type === 'choice') {
-    const choiceList = document.createElement('div'); choiceList.className = 'choice-list';
-    stage.choices.forEach((c, idx) => {
-      const btn = document.createElement('button'); btn.className = 'choice-btn';
-      btn.innerHTML = `<span>${idx + 1}.</span> <span>${c}</span>`;
-      btn.onclick = () => checkChoice(idx);
-      choiceList.appendChild(btn);
+        content.appendChild(row);
+        el('qInput').value = '';
+        setTimeout(() => { const inp = el('qInput'); if (inp) { inp.value = ''; inp.focus(); } }, 100);
+        el('qSubmit').onclick = checkAnswer;
+        el('qInput').onkeydown = (e) => { if (e.key === 'Enter') checkAnswer(); };
+      } else if (stage.type === 'choice') {
+        const choiceList = document.createElement('div'); choiceList.className = 'choice-list';
+        stage.choices.forEach((c, idx) => {
+          const btn = document.createElement('button'); btn.className = 'choice-btn';
+          btn.innerHTML = `<span>${idx + 1}.</span> <span>${c}</span>`;
+          btn.onclick = () => checkChoice(idx);
+          choiceList.appendChild(btn);
+        });
+        content.appendChild(choiceList);
+      }
+
+      el('quizModal').classList.add('open');
+    }
+
+    function checkAnswer() {
+      if (!el('quizModal').classList.contains('open')) return;
+      if (document.activeElement) document.activeElement.blur();
+      const stage = STAGES[state.stageIdx];
+      const val = (el('qInput').value || '').trim().toLowerCase();
+      if (stage.accept.some(a => a.toLowerCase() === val)) {
+        onQuizSuccess();
+      } else {
+        onQuizWrong('정답이 아닙니다. 다시 시도해 보세요!');
+      }
+    }
+
+    function checkChoice(idx) {
+      if (!el('quizModal').classList.contains('open')) return;
+      if (document.activeElement) document.activeElement.blur();
+      const stage = STAGES[state.stageIdx];
+      if (idx === stage.answer) {
+        onQuizSuccess();
+      } else {
+        onQuizWrong('오답입니다. 힌트를 참고하세요!');
+      }
+    }
+
+    function onQuizSuccess() {
+      state.hasKey = true;
+      state.collectedPolicies.add(STAGES[state.stageIdx].num);
+      updateHud();
+
+      // Particle effect
+      spawnParticles(state.player.x, state.player.y - 15, 25);
+
+      if (state.stageIdx + 1 === STAGES.length) {
+        el('modalFeedback').className = 'feedback-msg ok';
+        el('modalFeedback').textContent = '🎉 정답입니다! 🔑 [최종 자립 열쇠]를 획득했습니다! 오른쪽 탈출 문(🚪)을 선택하세요!';
+        setDialogue('🔑 최종 열쇠 획득!', '마지막 자립 열쇠를 획득했습니다! 오른쪽 최종 문(🚪)으로 가서 문을 열어 탈출을 완료하세요!');
+      } else {
+        el('modalFeedback').className = 'feedback-msg ok';
+        el('modalFeedback').textContent = '🎉 정답입니다! 🔑 [ROOM 열쇠]를 획득했습니다. 출구 문으로 가세요!';
+        setDialogue('🔑 열쇠 획득!', '열쇠를 획득했습니다! 오른쪽 출구 문(🚪)으로 이동해 문을 열고 탈출하세요!');
+      }
+
+      setTimeout(() => {
+        el('quizModal').classList.remove('open');
+      }, 1200);
+    }
+
+    function onQuizWrong(msg) {
+      state.misses++;
+      el('modalFeedback').className = 'feedback-msg no';
+      el('modalFeedback').textContent = `❌ ${msg}`;
+      const stage = STAGES[state.stageIdx];
+      el('modalHint').textContent = `💡 힌트: ${stage.hints.join(' ')}`;
+      el('modalHint').classList.remove('hidden');
+    }
+
+    el('modalClose').onclick = () => el('quizModal').classList.remove('open');
+    el('winClose').onclick = () => el('winModal').classList.remove('open');
+
+    /* ---------- Policy Codex ---------- */
+    function renderCodex() {
+      el('codexCount').textContent = state.collectedPolicies.size;
+      const grid = el('codexGrid');
+      grid.innerHTML = '';
+      POLICIES.forEach(p => {
+        const got = state.collectedPolicies.has(p.room);
+        const roomLabel = `ROOM ${String(p.room).padStart(2, '0')}`;
+        const card = document.createElement('div');
+        card.className = 'codex-card ' + (got ? 'unlocked' : 'locked');
+        if (got) {
+          card.innerHTML = `<div class="codex-icon">${p.icon}</div><div class="codex-body"><div class="codex-room">${roomLabel}</div><div class="codex-name">${p.name}</div><div class="codex-desc">${p.desc}</div></div>`;
+        } else {
+          card.innerHTML = `<div class="codex-icon">🔒</div><div class="codex-body"><div class="codex-room">${roomLabel}</div><div class="codex-name">??? 미해금 정책</div><div class="codex-desc">이 방의 퀴즈를 풀면 정책 정보가 도감에 공개됩니다.</div></div>`;
+        }
+        grid.appendChild(card);
+      });
+    }
+    el('btnCodex').onclick = () => { renderCodex(); el('codexModal').classList.add('open'); };
+    el('codexClose').onclick = () => el('codexModal').classList.remove('open');
+    el('codexModal').addEventListener('click', (e) => {
+      if (e.target === el('codexModal')) el('codexModal').classList.remove('open');
     });
-    content.appendChild(choiceList);
-  }
 
-  el('quizModal').classList.add('open');
-}
-
-function checkAnswer() {
-  if (!el('quizModal').classList.contains('open')) return;
-  if (document.activeElement) document.activeElement.blur();
-  const stage = STAGES[state.stageIdx];
-  const val = (el('qInput').value || '').trim().toLowerCase();
-  if (stage.accept.some(a => a.toLowerCase() === val)) {
-    onQuizSuccess();
-  } else {
-    onQuizWrong('정답이 아닙니다. 다시 시도해 보세요!');
-  }
-}
-
-function checkChoice(idx) {
-  if (!el('quizModal').classList.contains('open')) return;
-  if (document.activeElement) document.activeElement.blur();
-  const stage = STAGES[state.stageIdx];
-  if (idx === stage.answer) {
-    onQuizSuccess();
-  } else {
-    onQuizWrong('오답입니다. 힌트를 참고하세요!');
-  }
-}
-
-function onQuizSuccess() {
-  state.hasKey = true;
-  state.collectedPolicies.add(STAGES[state.stageIdx].num);
-  updateHud();
-
-  // Particle effect
-  spawnParticles(state.player.x, state.player.y - 15, 25);
-
-  if (state.stageIdx + 1 === STAGES.length) {
-    el('modalFeedback').className = 'feedback-msg ok';
-    el('modalFeedback').textContent = '🎉 정답입니다! 🔑 [최종 자립 열쇠]를 획득했습니다! 오른쪽 탈출 문(🚪)을 선택하세요!';
-    setDialogue('🔑 최종 열쇠 획득!', '마지막 자립 열쇠를 획득했습니다! 오른쪽 최종 문(🚪)으로 가서 문을 열어 탈출을 완료하세요!');
-  } else {
-    el('modalFeedback').className = 'feedback-msg ok';
-    el('modalFeedback').textContent = '🎉 정답입니다! 🔑 [ROOM 열쇠]를 획득했습니다. 출구 문으로 가세요!';
-    setDialogue('🔑 열쇠 획득!', '열쇠를 획득했습니다! 오른쪽 출구 문(🚪)으로 이동해 문을 열고 탈출하세요!');
-  }
-
-  setTimeout(() => {
-    el('quizModal').classList.remove('open');
-  }, 1200);
-}
-
-function onQuizWrong(msg) {
-  state.misses++;
-  el('modalFeedback').className = 'feedback-msg no';
-  el('modalFeedback').textContent = `❌ ${msg}`;
-  const stage = STAGES[state.stageIdx];
-  el('modalHint').textContent = `💡 힌트: ${stage.hints.join(' ')}`;
-  el('modalHint').classList.remove('hidden');
-}
-
-el('modalClose').onclick = () => el('quizModal').classList.remove('open');
-el('winClose').onclick = () => el('winModal').classList.remove('open');
-
-/* ---------- Policy Codex ---------- */
-function renderCodex() {
-  el('codexCount').textContent = state.collectedPolicies.size;
-  const grid = el('codexGrid');
-  grid.innerHTML = '';
-  POLICIES.forEach(p => {
-    const got = state.collectedPolicies.has(p.room);
-    const roomLabel = `ROOM ${String(p.room).padStart(2, '0')}`;
-    const card = document.createElement('div');
-    card.className = 'codex-card ' + (got ? 'unlocked' : 'locked');
-    if (got) {
-      card.innerHTML = `<div class="codex-icon">${p.icon}</div><div class="codex-body"><div class="codex-room">${roomLabel}</div><div class="codex-name">${p.name}</div><div class="codex-desc">${p.desc}</div></div>`;
-    } else {
-      card.innerHTML = `<div class="codex-icon">🔒</div><div class="codex-body"><div class="codex-room">${roomLabel}</div><div class="codex-name">??? 미해금 정책</div><div class="codex-desc">이 방의 퀴즈를 풀면 정책 정보가 도감에 공개됩니다.</div></div>`;
+    /* ---------- Letter (stationery) ---------- */
+    let letterGuard = false; // prevents the same keypress that opens a letter from also closing it
+    function openLetter(room) {
+      const l = LETTERS.find(x => x.room === room);
+      if (!l) return;
+      const isNew = !state.collectedLetters.has(room);
+      if (isNew) {
+        state.collectedLetters.add(room);
+        spawnParticles(state.player.x, state.player.y - 12, 12);
+        updateHud();
+      }
+      // strip a trailing "— 보낸이" from the body so it isn't shown twice
+      const body = l.text.replace(/\s*[—–-]\s*[^—–-]+$/, '').trim();
+      el('letterHead').textContent = `✉️ ${l.from}의 편지`;
+      el('letterRoom').textContent = `ROOM ${String(l.room).padStart(2, '0')} · ${isNew ? '새 편지를 발견했어요!' : '다시 읽기'}`;
+      el('letterBody').textContent = body;
+      el('letterFoot').textContent = `— ${l.from} 올림`;
+      const got = state.collectedLetters.size;
+      el('letterHint').textContent = got >= 15
+        ? '📮 15개의 편지를 모두 모았어요!'
+        : `📮 지금까지 ${got}/15 · 남은 편지는 다른 방에 숨어 있어요.`;
+      el('letterModal').classList.add('open');
+      letterGuard = true;
+      setTimeout(() => { letterGuard = false; }, 0); // release after this key event finishes
     }
-    grid.appendChild(card);
-  });
-}
-el('btnCodex').onclick = () => { renderCodex(); el('codexModal').classList.add('open'); };
-el('codexClose').onclick = () => el('codexModal').classList.remove('open');
-el('codexModal').addEventListener('click', (e) => {
-  if (e.target === el('codexModal')) el('codexModal').classList.remove('open');
-});
+    el('letterClose').onclick = () => el('letterModal').classList.remove('open');
+    el('letterModal').addEventListener('click', (e) => {
+      if (e.target === el('letterModal')) el('letterModal').classList.remove('open');
+    });
 
-/* ---------- Letter (stationery) ---------- */
-let letterGuard = false; // prevents the same keypress that opens a letter from also closing it
-function openLetter(room) {
-  const l = LETTERS.find(x => x.room === room);
-  if (!l) return;
-  const isNew = !state.collectedLetters.has(room);
-  if (isNew) {
-    state.collectedLetters.add(room);
-    spawnParticles(state.player.x, state.player.y - 12, 12);
-    updateHud();
-  }
-  // strip a trailing "— 보낸이" from the body so it isn't shown twice
-  const body = l.text.replace(/\s*[—–-]\s*[^—–-]+$/, '').trim();
-  el('letterHead').textContent = `✉️ ${l.from}의 편지`;
-  el('letterRoom').textContent = `ROOM ${String(l.room).padStart(2, '0')} · ${isNew ? '새 편지를 발견했어요!' : '다시 읽기'}`;
-  el('letterBody').textContent = body;
-  el('letterFoot').textContent = `— ${l.from} 올림`;
-  const got = state.collectedLetters.size;
-  el('letterHint').textContent = got >= 15
-    ? '📮 15개의 편지를 모두 모았어요!'
-    : `📮 지금까지 ${got}/15 · 남은 편지는 다른 방에 숨어 있어요.`;
-  el('letterModal').classList.add('open');
-  letterGuard = true;
-  setTimeout(() => { letterGuard = false; }, 0); // release after this key event finishes
-}
-el('letterClose').onclick = () => el('letterModal').classList.remove('open');
-el('letterModal').addEventListener('click', (e) => {
-  if (e.target === el('letterModal')) el('letterModal').classList.remove('open');
-});
+    function updateHud() {
+      const stage = STAGES[state.stageIdx];
+      el('hudStageNum').textContent = String(stage.num).padStart(2, '0');
+      el('hudStageTitle').textContent = stage.name;
+      el('hudLetters').textContent = `✉️ ${state.collectedLetters.size}/15`;
 
-function updateHud() {
-  const stage = STAGES[state.stageIdx];
-  el('hudStageNum').textContent = String(stage.num).padStart(2, '0');
-  el('hudStageTitle').textContent = stage.name;
-  el('hudLetters').textContent = `✉️ ${state.collectedLetters.size}/15`;
+      const keyBadge = el('hudKeyBadge');
+      if (state.hasKey) {
+        keyBadge.textContent = '🔑 열쇠 보유중';
+        keyBadge.className = 'key-badge has-key';
+      } else {
+        keyBadge.textContent = '🔒 열쇠 미보유';
+        keyBadge.className = 'key-badge';
+      }
+    }
 
-  const keyBadge = el('hudKeyBadge');
-  if (state.hasKey) {
-    keyBadge.textContent = '🔑 열쇠 보유중';
-    keyBadge.className = 'key-badge has-key';
-  } else {
-    keyBadge.textContent = '🔒 열쇠 미보유';
-    keyBadge.className = 'key-badge';
-  }
-}
+    let storyTypeInterval = null;
+    function enterRoom() {
+      updateHud();
+      const stage = STAGES[state.stageIdx];
+      state.isStoryPlaying = true;
+      el('storyModal').classList.add('open');
+      el('storyKicker').textContent = stage.kicker;
+      el('storyScene').textContent = '';
+      el('btnStoryStart').style.display = 'none';
 
-let storyTypeInterval = null;
-function enterRoom() {
-  updateHud();
-  const stage = STAGES[state.stageIdx];
-  state.isStoryPlaying = true;
-  el('storyModal').classList.add('open');
-  el('storyKicker').textContent = stage.kicker;
-  el('storyScene').textContent = '';
-  el('btnStoryStart').style.display = 'none';
+      // Time phase HUD border color
+      const phase = getTimePhase(stage.num);
+      document.querySelector('.hud-bar').style.borderColor = phase.border;
 
-  // Time phase HUD border color
-  const phase = getTimePhase(stage.num);
-  document.querySelector('.hud-bar').style.borderColor = phase.border;
-
-  let i = 0;
-  clearInterval(storyTypeInterval);
-  storyTypeInterval = setInterval(() => {
-    el('storyScene').textContent += stage.scene.charAt(i);
-    i++;
-    if (i >= stage.scene.length) {
+      let i = 0;
       clearInterval(storyTypeInterval);
-      el('btnStoryStart').style.display = 'block';
+      storyTypeInterval = setInterval(() => {
+        el('storyScene').textContent += stage.scene.charAt(i);
+        i++;
+        if (i >= stage.scene.length) {
+          clearInterval(storyTypeInterval);
+          el('btnStoryStart').style.display = 'block';
+        }
+      }, 40);
     }
-  }, 40);
-}
 
-el('storyModal').onclick = () => {
-  const stage = STAGES[state.stageIdx];
-  if (el('btnStoryStart').style.display === 'none') {
-    clearInterval(storyTypeInterval);
-    el('storyScene').textContent = stage.scene;
-    el('btnStoryStart').style.display = 'block';
-  }
-};
+    el('storyModal').onclick = () => {
+      const stage = STAGES[state.stageIdx];
+      if (el('btnStoryStart').style.display === 'none') {
+        clearInterval(storyTypeInterval);
+        el('storyScene').textContent = stage.scene;
+        el('btnStoryStart').style.display = 'block';
+      }
+    };
 
-el('btnStoryStart').onclick = (e) => {
-  e.stopPropagation();
-  if (!el('storyModal').classList.contains('open')) return;
-  if (document.activeElement) document.activeElement.blur();
-  el('storyModal').classList.remove('open');
-  state.isStoryPlaying = false;
-};
+    el('btnStoryStart').onclick = (e) => {
+      e.stopPropagation();
+      if (!el('storyModal').classList.contains('open')) return;
+      if (document.activeElement) document.activeElement.blur();
+      el('storyModal').classList.remove('open');
+      state.isStoryPlaying = false;
+    };
 
-window.addEventListener('keydown', (e) => {
-  if ((e.key === 'Enter' || e.code === 'Space') && el('storyModal').classList.contains('open')) {
-    if (el('btnStoryStart').style.display === 'block') {
-      el('btnStoryStart').click();
-    } else {
-      el('storyModal').click();
+    window.addEventListener('keydown', (e) => {
+      if ((e.key === 'Enter' || e.code === 'Space') && el('storyModal').classList.contains('open')) {
+        if (el('btnStoryStart').style.display === 'block') {
+          el('btnStoryStart').click();
+        } else {
+          el('storyModal').click();
+        }
+      }
+      // Monologue keyboard dismiss
+      if ((e.key === 'Enter' || e.code === 'Space') && el('monologueOverlay').classList.contains('open')) {
+        el('monoBtn').click();
+      }
+      // Letter modal dismiss (Enter / Space / E / Esc) — but not on the same press that opened it
+      if (!letterGuard && ['Enter', ' ', 'Escape', 'e', 'E'].includes(e.key) && el('letterModal').classList.contains('open')) {
+        el('letterModal').classList.remove('open');
+      }
+      // Codex dismiss (Esc)
+      if (e.key === 'Escape' && el('codexModal').classList.contains('open')) {
+        el('codexModal').classList.remove('open');
+      }
+    });
+
+    el('btnShare').onclick = () => {
+      const txt = `🌱 자립 방탈출 2D 클리어!\n⏱️ 소요시간: ${state.finalTimeStr} · ❌ 오답: ${state.misses}회\n15개 챕터의 자립 정책을 모두 완벽하게 해냈습니다!\n👉 https://jarip.vercel.app`;
+
+      if (navigator.share) {
+        navigator.share({
+          title: '자립 방탈출 2D',
+          text: txt,
+          url: 'https://jarip.vercel.app',
+        }).catch(console.error);
+      } else {
+        navigator.clipboard.writeText(txt).then(() => {
+          const btn = el('btnShare');
+          const orig = btn.innerHTML;
+          btn.innerHTML = '✅ 복사 완료!';
+          setTimeout(() => btn.innerHTML = orig, 2000);
+        }).catch(() => { });
+      }
+    };
+
+    /* ---------- share (result image card generation) ---------- */
+    const KOFONT = "'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif";
+
+    function roundRect2(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
     }
-  }
-  // Monologue keyboard dismiss
-  if ((e.key === 'Enter' || e.code === 'Space') && el('monologueOverlay').classList.contains('open')) {
-    el('monoBtn').click();
-  }
-  // Letter modal dismiss (Enter / Space / E / Esc) — but not on the same press that opened it
-  if (!letterGuard && ['Enter', ' ', 'Escape', 'e', 'E'].includes(e.key) && el('letterModal').classList.contains('open')) {
-    el('letterModal').classList.remove('open');
-  }
-  // Codex dismiss (Esc)
-  if (e.key === 'Escape' && el('codexModal').classList.contains('open')) {
-    el('codexModal').classList.remove('open');
-  }
-});
 
-el('btnShare').onclick = () => {
-  const txt = `🌱 자립 방탈출 2D 클리어!\n⏱️ 소요시간: ${state.finalTimeStr} · ❌ 오답: ${state.misses}회\n15개 챕터의 자립 정책을 모두 완벽하게 해냈습니다!\n👉 https://jarip.vercel.app`;
+    function buildArcadeResultCanvas(theme) {
+      const dark = theme !== 'light';
+      const P = dark ? {
+        bg0: '#070c18', bg1: '#0f1a2e', bg2: '#0a1e2d',
+        g1: 'rgba(255,204,0,0.18)', g2: 'rgba(59,130,246,0.22)', g3: 'rgba(16,185,129,0.16)',
+        border: 'rgba(140,170,255,0.25)',
+        brand: 'rgba(200,210,240,0.95)',
+        badgeBg: 'rgba(255,204,0,0.14)', badgeTx: '#ffcc00',
+        hlA: '#ffcc00', hlB: '#34d399',
+        sub: 'rgba(210,220,245,0.92)',
+        tileBg: 'rgba(255,255,255,0.05)', tileBorder: 'rgba(140,170,255,0.18)', tileVal: '#eaf0ff', tileLab: 'rgba(150,165,200,0.95)',
+        pillBg: 'rgba(255,204,0,0.14)', pillBorder: 'rgba(255,204,0,0.45)', pillTx: '#eaf0ff',
+        quote: 'rgba(190,202,230,0.92)', cta: '#60a5fa', tag: 'rgba(140,155,190,0.9)',
+        badgeEarnedBg: 'rgba(255,204,0,0.12)', badgeEarnedBorder: 'rgba(255,204,0,0.45)',
+        badgeLockedBg: 'rgba(255,255,255,0.04)', badgeLockedBorder: 'rgba(140,170,255,0.12)'
+      } : {
+        bg0: '#f0f4fc', bg1: '#f8faff', bg2: '#ecf9f4',
+        g1: 'rgba(255,180,0,0.14)', g2: 'rgba(59,130,246,0.14)', g3: 'rgba(16,185,129,0.10)',
+        border: 'rgba(40,70,150,0.16)',
+        brand: 'rgba(90,104,130,0.95)',
+        badgeBg: 'rgba(255,180,0,0.14)', badgeTx: '#b45309',
+        hlA: '#b45309', hlB: '#0d9488',
+        sub: 'rgba(40,54,84,0.92)',
+        tileBg: 'rgba(20,28,48,0.045)', tileBorder: 'rgba(40,70,150,0.16)', tileVal: '#16213c', tileLab: 'rgba(90,104,130,0.95)',
+        pillBg: 'rgba(180,83,9,0.10)', pillBorder: 'rgba(180,83,9,0.40)', pillTx: '#1e1b3a',
+        quote: 'rgba(55,68,96,0.92)', cta: '#4f46e5', tag: 'rgba(120,132,160,0.95)',
+        badgeEarnedBg: 'rgba(255,180,0,0.12)', badgeEarnedBorder: 'rgba(180,83,9,0.35)',
+        badgeLockedBg: 'rgba(0,0,0,0.03)', badgeLockedBorder: 'rgba(40,70,150,0.10)'
+      };
 
-  if (navigator.share) {
-    navigator.share({
-      title: '자립 방탈출 2D',
-      text: txt,
-      url: 'https://jarip.vercel.app',
-    }).catch(console.error);
-  } else {
-    navigator.clipboard.writeText(txt).then(() => {
-      const btn = el('btnShare');
-      const orig = btn.innerHTML;
-      btn.innerHTML = '✅ 복사 완료!';
-      setTimeout(() => btn.innerHTML = orig, 2000);
-    }).catch(()=>{});
-  }
-};
+      const W = 1080, H = 1350;
+      const c = document.createElement('canvas'); c.width = W; c.height = H;
+      const x = c.getContext('2d');
+      const cxc = W / 2;
 
-/* ---------- share (result image card generation) ---------- */
-const KOFONT = "'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif";
+      // bg gradient
+      const bg = x.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, P.bg0); bg.addColorStop(0.55, P.bg1); bg.addColorStop(1, P.bg2);
+      x.fillStyle = bg; x.fillRect(0, 0, W, H);
 
-function roundRect2(ctx,x,y,w,h,r){
-  ctx.beginPath();
-  ctx.moveTo(x+r,y);
-  ctx.arcTo(x+w,y,x+w,y+h,r);
-  ctx.arcTo(x+w,y+h,x,y+h,r);
-  ctx.arcTo(x,y+h,x,y,r);
-  ctx.arcTo(x,y,x+w,y,r);
-  ctx.closePath();
-}
+      // glows
+      function glow(gx, gy, gr, col) { const g = x.createRadialGradient(gx, gy, 0, gx, gy, gr); g.addColorStop(0, col); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, W, H); }
+      glow(150, 120, 520, P.g1);
+      glow(980, 180, 520, P.g2);
+      glow(cxc, 1320, 640, P.g3);
 
-function buildArcadeResultCanvas(theme){
-  const dark = theme !== 'light';
-  const P = dark ? {
-    bg0:'#070c18', bg1:'#0f1a2e', bg2:'#0a1e2d',
-    g1:'rgba(255,204,0,0.18)', g2:'rgba(59,130,246,0.22)', g3:'rgba(16,185,129,0.16)',
-    border:'rgba(140,170,255,0.25)',
-    brand:'rgba(200,210,240,0.95)',
-    badgeBg:'rgba(255,204,0,0.14)', badgeTx:'#ffcc00',
-    hlA:'#ffcc00', hlB:'#34d399',
-    sub:'rgba(210,220,245,0.92)',
-    tileBg:'rgba(255,255,255,0.05)', tileBorder:'rgba(140,170,255,0.18)', tileVal:'#eaf0ff', tileLab:'rgba(150,165,200,0.95)',
-    pillBg:'rgba(255,204,0,0.14)', pillBorder:'rgba(255,204,0,0.45)', pillTx:'#eaf0ff',
-    quote:'rgba(190,202,230,0.92)', cta:'#60a5fa', tag:'rgba(140,155,190,0.9)',
-    badgeEarnedBg:'rgba(255,204,0,0.12)', badgeEarnedBorder:'rgba(255,204,0,0.45)',
-    badgeLockedBg:'rgba(255,255,255,0.04)', badgeLockedBorder:'rgba(140,170,255,0.12)'
-  } : {
-    bg0:'#f0f4fc', bg1:'#f8faff', bg2:'#ecf9f4',
-    g1:'rgba(255,180,0,0.14)', g2:'rgba(59,130,246,0.14)', g3:'rgba(16,185,129,0.10)',
-    border:'rgba(40,70,150,0.16)',
-    brand:'rgba(90,104,130,0.95)',
-    badgeBg:'rgba(255,180,0,0.14)', badgeTx:'#b45309',
-    hlA:'#b45309', hlB:'#0d9488',
-    sub:'rgba(40,54,84,0.92)',
-    tileBg:'rgba(20,28,48,0.045)', tileBorder:'rgba(40,70,150,0.16)', tileVal:'#16213c', tileLab:'rgba(90,104,130,0.95)',
-    pillBg:'rgba(180,83,9,0.10)', pillBorder:'rgba(180,83,9,0.40)', pillTx:'#1e1b3a',
-    quote:'rgba(55,68,96,0.92)', cta:'#4f46e5', tag:'rgba(120,132,160,0.95)',
-    badgeEarnedBg:'rgba(255,180,0,0.12)', badgeEarnedBorder:'rgba(180,83,9,0.35)',
-    badgeLockedBg:'rgba(0,0,0,0.03)', badgeLockedBorder:'rgba(40,70,150,0.10)'
-  };
+      // border
+      x.strokeStyle = P.border; x.lineWidth = 3;
+      roundRect2(x, 20, 20, W - 40, H - 40, 40); x.stroke();
 
-  const W=1080, H=1350;
-  const c=document.createElement('canvas'); c.width=W; c.height=H;
-  const x=c.getContext('2d');
-  const cxc=W/2;
+      x.textAlign = 'center'; x.textBaseline = 'alphabetic';
 
-  // bg gradient
-  const bg=x.createLinearGradient(0,0,0,H);
-  bg.addColorStop(0,P.bg0); bg.addColorStop(0.55,P.bg1); bg.addColorStop(1,P.bg2);
-  x.fillStyle=bg; x.fillRect(0,0,W,H);
+      // brand
+      x.fillStyle = P.brand;
+      x.font = "600 34px " + KOFONT;
+      x.fillText('\uD83C\uDF38 \uC790\uB9BD\uD574\uBD04  \u00B7  \uC790\uB9BD \uBC29\uD0C8\uCD9C 2D', cxc, 100);
 
-  // glows
-  function glow(gx,gy,gr,col){ const g=x.createRadialGradient(gx,gy,0,gx,gy,gr); g.addColorStop(0,col); g.addColorStop(1,'rgba(0,0,0,0)'); x.fillStyle=g; x.fillRect(0,0,W,H); }
-  glow(150,120,520,P.g1);
-  glow(980,180,520,P.g2);
-  glow(cxc,1320,640,P.g3);
+      // mode badge
+      x.font = "700 26px " + KOFONT;
+      const badgeText = '\uD83C\uDFAE 2D \uC544\uCF00\uC774\uB4DC RPG \uBAA8\uB4DC';
+      const bw = x.measureText(badgeText).width + 56;
+      x.fillStyle = P.badgeBg;
+      roundRect2(x, cxc - bw / 2, 125, bw, 50, 25); x.fill();
+      x.fillStyle = P.badgeTx; x.fillText(badgeText, cxc, 159);
 
-  // border
-  x.strokeStyle=P.border; x.lineWidth=3;
-  roundRect2(x,20,20,W-40,H-40,40); x.stroke();
+      // big emoji
+      x.font = "120px " + KOFONT;
+      x.fillText('\uD83C\uDFE1\uD83C\uDF89', cxc, 310);
 
-  x.textAlign='center'; x.textBaseline='alphabetic';
+      // headline gradient
+      x.font = "800 88px " + KOFONT;
+      const hl = '\uCD5C\uC885 \uD0C8\uCD9C \uC131\uACF5!';
+      const hw = x.measureText(hl).width;
+      const hg = x.createLinearGradient(cxc - hw / 2, 0, cxc + hw / 2, 0);
+      hg.addColorStop(0, P.hlA); hg.addColorStop(1, P.hlB);
+      x.fillStyle = hg; x.fillText(hl, cxc, 430);
 
-  // brand
-  x.fillStyle=P.brand;
-  x.font="600 34px "+KOFONT;
-  x.fillText('\uD83C\uDF38 \uC790\uB9BD\uD574\uBD04  \u00B7  \uC790\uB9BD \uBC29\uD0C8\uCD9C 2D', cxc, 100);
+      // subtitle
+      x.fillStyle = P.sub;
+      x.font = "600 36px " + KOFONT;
+      x.fillText('\uD558\uB78C\uC774\uAC00 15\uAC1C \uCC55\uD130\uB97C \uBAA8\uB450 \uD0C8\uCD9C\uD558\uACE0', cxc, 505);
+      x.fillText('\uB2F9\uB2F9\uD55C \uC790\uB9BD\uC758 \uBB38\uC744 \uC5F4\uC5C8\uC2B5\uB2C8\uB2E4!', cxc, 553);
 
-  // mode badge
-  x.font="700 26px "+KOFONT;
-  const badgeText='\uD83C\uDFAE 2D \uC544\uCF00\uC774\uB4DC RPG \uBAA8\uB4DC';
-  const bw=x.measureText(badgeText).width+56;
-  x.fillStyle=P.badgeBg;
-  roundRect2(x,cxc-bw/2,125,bw,50,25); x.fill();
-  x.fillStyle=P.badgeTx; x.fillText(badgeText, cxc, 159);
+      // stat tiles 4
+      const tiles = [
+        { v: state.finalTimeStr || '00:00', l: '\uD0C8\uCD9C \uC2DC\uAC04' },
+        { v: String(state.misses), l: '\uC624\uB2F5 \uD69F\uC218' },
+        { v: state.collectedLetters.size + '/15', l: '\uD3B8\uC9C0 \uC218\uC9D1' },
+        { v: state.collectedPolicies.size + '/15', l: '\uC815\uCC45 \uD574\uAE08' }
+      ];
+      const tpad = 60, tgap = 20, tw2 = (W - tpad * 2 - tgap * 3) / 4, ty = 600, th = 170;
+      tiles.forEach((t, i) => {
+        const tx2 = tpad + i * (tw2 + tgap);
+        x.fillStyle = P.tileBg;
+        roundRect2(x, tx2, ty, tw2, th, 22); x.fill();
+        x.strokeStyle = P.tileBorder; x.lineWidth = 2;
+        roundRect2(x, tx2, ty, tw2, th, 22); x.stroke();
+        x.fillStyle = P.tileVal;
+        x.font = "800 56px " + KOFONT;
+        x.fillText(t.v, tx2 + tw2 / 2, ty + 86);
+        x.fillStyle = P.tileLab;
+        x.font = "600 28px " + KOFONT;
+        x.fillText(t.l, tx2 + tw2 / 2, ty + 136);
+      });
 
-  // big emoji
-  x.font="120px "+KOFONT;
-  x.fillText('\uD83C\uDFE1\uD83C\uDF89', cxc, 310);
+      // badges section
+      const result = { misses: state.misses, letters: state.collectedLetters.size, elapsedMs: Date.now() - state.startTime };
+      const badgeY = 820;
+      x.fillStyle = P.sub;
+      x.font = "700 32px " + KOFONT;
+      x.fillText('\uD83C\uDFC5 \uD68D\uB4DD \uBC43\uC9C0', cxc, badgeY);
 
-  // headline gradient
-  x.font="800 88px "+KOFONT;
-  const hl='\uCD5C\uC885 \uD0C8\uCD9C \uC131\uACF5!';
-  const hw=x.measureText(hl).width;
-  const hg=x.createLinearGradient(cxc-hw/2,0,cxc+hw/2,0);
-  hg.addColorStop(0,P.hlA); hg.addColorStop(1,P.hlB);
-  x.fillStyle=hg; x.fillText(hl, cxc, 430);
+      const bpad = 80, bgap = 16;
+      const bbw = (W - bpad * 2 - bgap * (BADGES.length - 1)) / BADGES.length;
+      BADGES.forEach((b, i) => {
+        const bx = bpad + i * (bbw + bgap);
+        const earned = b.test(result);
+        x.fillStyle = earned ? P.badgeEarnedBg : P.badgeLockedBg;
+        roundRect2(x, bx, badgeY + 18, bbw, 110, 16); x.fill();
+        x.strokeStyle = earned ? P.badgeEarnedBorder : P.badgeLockedBorder; x.lineWidth = 2;
+        roundRect2(x, bx, badgeY + 18, bbw, 110, 16); x.stroke();
+        x.font = "42px " + KOFONT;
+        if (!earned) { x.globalAlpha = 0.35; }
+        x.fillStyle = P.tileVal;
+        x.fillText(b.emoji, bx + bbw / 2, badgeY + 72);
+        x.globalAlpha = 1;
+        x.font = "600 22px " + KOFONT;
+        x.fillStyle = earned ? P.badgeTx : P.tileLab;
+        x.fillText(b.name, bx + bbw / 2, badgeY + 108);
+      });
 
-  // subtitle
-  x.fillStyle=P.sub;
-  x.font="600 36px "+KOFONT;
-  x.fillText('\uD558\uB78C\uC774\uAC00 15\uAC1C \uCC55\uD130\uB97C \uBAA8\uB450 \uD0C8\uCD9C\uD558\uACE0', cxc, 505);
-  x.fillText('\uB2F9\uB2F9\uD55C \uC790\uB9BD\uC758 \uBB38\uC744 \uC5F4\uC5C8\uC2B5\uB2C8\uB2E4!', cxc, 553);
+      // quote
+      x.fillStyle = P.quote;
+      x.font = "500 33px " + KOFONT;
+      x.fillText('\u201C\uC9C4\uC9DC \uD63C\uC790\uC778 \uC904 \uC54C\uC558\uC9C0\uB9CC,', cxc, 1040);
+      x.fillText('\uC218\uB9CE\uC740 \uC0AC\uB78C\uACFC \uC0AC\uD68C, \uC815\uBD80\uAC00 \uD568\uAED8\uC600\uB2E4.\u201D', cxc, 1085);
 
-  // stat tiles 4
-  const tiles=[
-    {v: state.finalTimeStr || '00:00', l:'\uD0C8\uCD9C \uC2DC\uAC04'},
-    {v: String(state.misses), l:'\uC624\uB2F5 \uD69F\uC218'},
-    {v: state.collectedLetters.size+'/15', l:'\uD3B8\uC9C0 \uC218\uC9D1'},
-    {v: state.collectedPolicies.size+'/15', l:'\uC815\uCC45 \uD574\uAE08'}
-  ];
-  const tpad=60, tgap=20, tw2=(W-tpad*2-tgap*3)/4, ty=600, th=170;
-  tiles.forEach((t,i)=>{
-    const tx2=tpad+i*(tw2+tgap);
-    x.fillStyle=P.tileBg;
-    roundRect2(x,tx2,ty,tw2,th,22); x.fill();
-    x.strokeStyle=P.tileBorder; x.lineWidth=2;
-    roundRect2(x,tx2,ty,tw2,th,22); x.stroke();
-    x.fillStyle=P.tileVal;
-    x.font="800 56px "+KOFONT;
-    x.fillText(t.v, tx2+tw2/2, ty+86);
-    x.fillStyle=P.tileLab;
-    x.font="600 28px "+KOFONT;
-    x.fillText(t.l, tx2+tw2/2, ty+136);
-  });
+      // CTA
+      x.fillStyle = P.cta;
+      x.font = "700 36px " + KOFONT;
+      x.fillText('\u25B6 \uB098\uB3C4 \uB3C4\uC804\uD558\uAE30 :  jarip.vercel.app', cxc, 1170);
 
-  // badges section
-  const result = { misses: state.misses, letters: state.collectedLetters.size, elapsedMs: Date.now() - state.startTime };
-  const badgeY = 820;
-  x.fillStyle=P.sub;
-  x.font="700 32px "+KOFONT;
-  x.fillText('\uD83C\uDFC5 \uD68D\uB4DD \uBC43\uC9C0', cxc, badgeY);
+      // hashtags
+      x.fillStyle = P.tag;
+      x.font = "600 30px " + KOFONT;
+      x.fillText('#\uC790\uB9BD\uC900\uBE44\uCCAD\uB144  #\uC790\uB9BD\uBC29\uD0C8\uCD9C  #\uC790\uB9BD\uD574\uBD04', cxc, 1234);
+      x.fillText('#\uC11C\uC6B8\uC2DC\uC544\uB3D9\uACF5\uB3D9\uC0DD\uD65C\uAC00\uC815\uC9C0\uC6D0\uC13C\uD130', cxc, 1278);
 
-  const bpad=80, bgap=16;
-  const bbw=(W-bpad*2-bgap*(BADGES.length-1))/BADGES.length;
-  BADGES.forEach((b,i)=>{
-    const bx=bpad+i*(bbw+bgap);
-    const earned = b.test(result);
-    x.fillStyle=earned ? P.badgeEarnedBg : P.badgeLockedBg;
-    roundRect2(x,bx,badgeY+18,bbw,110,16); x.fill();
-    x.strokeStyle=earned ? P.badgeEarnedBorder : P.badgeLockedBorder; x.lineWidth=2;
-    roundRect2(x,bx,badgeY+18,bbw,110,16); x.stroke();
-    x.font="42px "+KOFONT;
-    if(!earned) { x.globalAlpha=0.35; }
-    x.fillStyle=P.tileVal;
-    x.fillText(b.emoji, bx+bbw/2, badgeY+72);
-    x.globalAlpha=1;
-    x.font="600 22px "+KOFONT;
-    x.fillStyle= earned ? P.badgeTx : P.tileLab;
-    x.fillText(b.name, bx+bbw/2, badgeY+108);
-  });
-
-  // quote
-  x.fillStyle=P.quote;
-  x.font="500 33px "+KOFONT;
-  x.fillText('\u201C\uC9C4\uC9DC \uD63C\uC790\uC778 \uC904 \uC54C\uC558\uC9C0\uB9CC,', cxc, 1040);
-  x.fillText('\uC218\uB9CE\uC740 \uC0AC\uB78C\uACFC \uC0AC\uD68C, \uC815\uBD80\uAC00 \uD568\uAED8\uC600\uB2E4.\u201D', cxc, 1085);
-
-  // CTA
-  x.fillStyle=P.cta;
-  x.font="700 36px "+KOFONT;
-  x.fillText('\u25B6 \uB098\uB3C4 \uB3C4\uC804\uD558\uAE30 :  jarip.vercel.app', cxc, 1170);
-
-  // hashtags
-  x.fillStyle=P.tag;
-  x.font="600 30px "+KOFONT;
-  x.fillText('#\uC790\uB9BD\uC900\uBE44\uCCAD\uB144  #\uC790\uB9BD\uBC29\uD0C8\uCD9C  #\uC790\uB9BD\uD574\uBD04', cxc, 1234);
-  x.fillText('#\uC11C\uC6B8\uC2DC\uC544\uB3D9\uACF5\uB3D9\uC0DD\uD65C\uAC00\uC815\uC9C0\uC6D0\uC13C\uD130', cxc, 1278);
-
-  return c;
-}
-
-function canvasToBlob2(c){
-  return new Promise(res=>{ if(c.toBlob) c.toBlob(res,'image/png'); else res(dataURLtoBlob2(c.toDataURL('image/png'))); });
-}
-function dataURLtoBlob2(d){ const a=d.split(','),m=a[0].match(/:(.*?);/)[1],b=atob(a[1]),n=b.length,u=new Uint8Array(n); for(let i=0;i<n;i++)u[i]=b.charCodeAt(i); return new Blob([u],{type:m}); }
-
-// card theme picker
-let arcadeCardTheme='dark';
-document.querySelectorAll('.ctp-btn').forEach(b=>{
-  b.addEventListener('click',()=>{
-    arcadeCardTheme=b.dataset.cardtheme;
-    document.querySelectorAll('.ctp-btn').forEach(o=>o.classList.toggle('active',o===b));
-  });
-});
-
-// image share button
-el('btnShareImg').addEventListener('click', async ()=>{
-  const btn=el('btnShareImg'); const orig='\uD83D\uDCF8 \uC774\uBBF8\uC9C0\uB85C \uACF5\uC720\uD558\uAE30';
-  btn.disabled=true; btn.textContent='\uD83C\uDFA8 \uC774\uBBF8\uC9C0 \uB9CC\uB4DC\uB294 \uC911\u2026';
-  try{
-    const cvs=buildArcadeResultCanvas(arcadeCardTheme);
-    const blob=await canvasToBlob2(cvs);
-    const file=new File([blob],'\uC790\uB9BD\uBC29\uD0C8\uCD9C2D_\uACB0\uACFC.png',{type:'image/png'});
-    const shareText='\uD83C\uDF31 \uC790\uB9BD \uBC29\uD0C8\uCD9C 2D \uD074\uB9AC\uC5B4! \u23F1\uFE0F '+state.finalTimeStr+' \u00B7 \u274C \uC624\uB2F5 '+state.misses+'\uD68C\n\uD558\uB78C\uC774\uC640 15\uAC1C \uCC55\uD130\uB97C \uBAA8\uB450 \uD0C8\uCD9C\uD588\uC2B5\uB2C8\uB2E4!\n\uD83D\uDC49 https://jarip.vercel.app';
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-      await navigator.share({files:[file], title:'\uC790\uB9BD \uBC29\uD0C8\uCD9C 2D', text:shareText, url:'https://jarip.vercel.app'});
-      btn.textContent='\u2705 \uACF5\uC720 \uC644\uB8CC';
-    } else {
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a'); a.href=url; a.download='\uC790\uB9BD\uBC29\uD0C8\uCD9C2D_\uACB0\uACFC.png';
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(()=>URL.revokeObjectURL(url),4000);
-      btn.textContent='\u2705 \uC774\uBBF8\uC9C0 \uC800\uC7A5\uB428';
+      return c;
     }
-  }catch(e){
-    btn.textContent='\u26A0\uFE0F \uB2E4\uC2DC \uC2DC\uB3C4';
-  }
-  setTimeout(()=>{ btn.disabled=false; btn.textContent=orig; },2000);
-});
 
-el('btnIntroStart').onclick = () => {
-  if (!el('introOverlay').classList.contains('open')) return;
-  if (document.activeElement) document.activeElement.blur();
-  el('introOverlay').classList.remove('open');
-  state.startTime = Date.now();
-  enterRoom();
-};
+    function canvasToBlob2(c) {
+      return new Promise(res => { if (c.toBlob) c.toBlob(res, 'image/png'); else res(dataURLtoBlob2(c.toDataURL('image/png'))); });
+    }
+    function dataURLtoBlob2(d) { const a = d.split(','), m = a[0].match(/:(.*?);/)[1], b = atob(a[1]), n = b.length, u = new Uint8Array(n); for (let i = 0; i < n; i++)u[i] = b.charCodeAt(i); return new Blob([u], { type: m }); }
 
-el('btnRestart').onclick = () => {
-  if (!el('winModal').classList.contains('open')) return;
-  if (document.activeElement) document.activeElement.blur();
-  state.stageIdx = 0; state.hasKey = false;
-  state.player.x = 100; state.player.y = 220;
-  state.collectedLetters = new Set();
-  state.collectedPolicies = new Set();
-  state.particles = [];
-  state.misses = 0;
-  el('winModal').classList.remove('open');
-  el('letterCollection').classList.add('hidden');
-  el('introOverlay').classList.add('open');
-};
+    // card theme picker
+    let arcadeCardTheme = 'dark';
+    document.querySelectorAll('.ctp-btn').forEach(b => {
+      b.addEventListener('click', () => {
+        arcadeCardTheme = b.dataset.cardtheme;
+        document.querySelectorAll('.ctp-btn').forEach(o => o.classList.toggle('active', o === b));
+      });
+    });
 
-// Start loop
-requestAnimationFrame(loop);
+    // image share button
+    el('btnShareImg').addEventListener('click', async () => {
+      const btn = el('btnShareImg'); const orig = '\uD83D\uDCF8 \uC774\uBBF8\uC9C0\uB85C \uACF5\uC720\uD558\uAE30';
+      btn.disabled = true; btn.textContent = '\uD83C\uDFA8 \uC774\uBBF8\uC9C0 \uB9CC\uB4DC\uB294 \uC911\u2026';
+      try {
+        const cvs = buildArcadeResultCanvas(arcadeCardTheme);
+        const blob = await canvasToBlob2(cvs);
+        const file = new File([blob], '\uC790\uB9BD\uBC29\uD0C8\uCD9C2D_\uACB0\uACFC.png', { type: 'image/png' });
+        const shareText = '\uD83C\uDF31 \uC790\uB9BD \uBC29\uD0C8\uCD9C 2D \uD074\uB9AC\uC5B4! \u23F1\uFE0F ' + state.finalTimeStr + ' \u00B7 \u274C \uC624\uB2F5 ' + state.misses + '\uD68C\n\uD558\uB78C\uC774\uC640 15\uAC1C \uCC55\uD130\uB97C \uBAA8\uB450 \uD0C8\uCD9C\uD588\uC2B5\uB2C8\uB2E4!\n\uD83D\uDC49 https://jarip.vercel.app';
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: '\uC790\uB9BD \uBC29\uD0C8\uCD9C 2D', text: shareText, url: 'https://jarip.vercel.app' });
+          btn.textContent = '\u2705 \uACF5\uC720 \uC644\uB8CC';
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a'); a.href = url; a.download = '\uC790\uB9BD\uBC29\uD0C8\uCD9C2D_\uACB0\uACFC.png';
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 4000);
+          btn.textContent = '\u2705 \uC774\uBBF8\uC9C0 \uC800\uC7A5\uB428';
+        }
+      } catch (e) {
+        btn.textContent = '\u26A0\uFE0F \uB2E4\uC2DC \uC2DC\uB3C4';
+      }
+      setTimeout(() => { btn.disabled = false; btn.textContent = orig; }, 2000);
+    });
+
+    el('btnIntroStart').onclick = () => {
+      if (!el('introOverlay').classList.contains('open')) return;
+      if (document.activeElement) document.activeElement.blur();
+      el('introOverlay').classList.remove('open');
+      state.startTime = Date.now();
+      enterRoom();
+    };
+
+    el('btnRestart').onclick = () => {
+      if (!el('winModal').classList.contains('open')) return;
+      if (document.activeElement) document.activeElement.blur();
+      state.stageIdx = 0; state.hasKey = false;
+      state.player.x = 100; state.player.y = 220;
+      state.collectedLetters = new Set();
+      state.collectedPolicies = new Set();
+      state.particles = [];
+      state.misses = 0;
+      el('winModal').classList.remove('open');
+      el('letterCollection').classList.add('hidden');
+      el('introOverlay').classList.add('open');
+    };
+
+    // Start loop
+    requestAnimationFrame(loop);
   </script>
 </body>
 
