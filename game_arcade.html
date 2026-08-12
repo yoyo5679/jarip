@@ -1516,7 +1516,6 @@
           "순서 상관없음"
         ], answer: 0, type: "choice", hints: ["보호받음이 시작, 홀로서기가 완성."],
         props: [
-          { id: 'topstone', name: '가장 높은 디딤돌', x: 548, y: 290, type: 'stone', emoji: '✨', hideEmoji: true, radius: 55, hint: '이 길의 끝, 가장 높은 디딤돌. [E]키를 눌러 걸어온 자립의 여정을 순서대로 되짚어보자.' },
           { id: 'door', name: '출구 문', x: 700, y: 160, type: 'door', emoji: '🚪' }
         ]
       },
@@ -1658,18 +1657,6 @@
       if (['ArrowRight', 'KeyD'].includes(e.code)) state.keys.right = false;
     });
 
-    function bindCross(id, prop) {
-      const btn = el(id); if (!btn) return;
-      const press = (e) => { e.preventDefault(); state.keys[prop] = true; btn.classList.add('pressed'); };
-      const release = (e) => { if (e && e.cancelable) e.preventDefault(); state.keys[prop] = false; btn.classList.remove('pressed'); };
-      // Pointer Events = unified touch/mouse; touch pointers are implicitly captured,
-      // so pointerup reliably fires on the button even if the finger drifts.
-      btn.addEventListener('pointerdown', press);
-      btn.addEventListener('pointerup', release);
-      btn.addEventListener('pointercancel', release);
-      btn.addEventListener('pointerleave', release);
-      btn.addEventListener('contextmenu', (e) => e.preventDefault());
-    }
     /* ---------- Virtual Joystick — replaces the 4-way D-pad ----------
        설계 원칙: 조이스틱은 기존 D-pad가 쓰던 것과 '똑같은' state.keys.{up,down,left,right}
        불리언을 세팅한다. 덕분에 이동 루프(state.keys를 읽어 움직임)는 한 줄도 바꿀 필요가 없다.
