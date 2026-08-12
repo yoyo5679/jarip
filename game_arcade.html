@@ -2096,12 +2096,13 @@ window.addEventListener('keydown', (e) => {
 });
 
 el('btnShare').onclick = () => {
-  const txt = `🌱 자립 방탈출 2D 클리어!\n⏱️ 소요시간: ${state.finalTimeStr} · ❌ 오답: ${state.misses}회\n15개 챕터의 자립 정책을 모두 완벽하게 해냈습니다!\n(자립해봄 - 자립준비청년 정보 대시보드)`;
-  
+  const txt = `🌱 자립 방탈출 2D 클리어!\n⏱️ 소요시간: ${state.finalTimeStr} · ❌ 오답: ${state.misses}회\n15개 챕터의 자립 정책을 모두 완벽하게 해냈습니다!\n👉 https://jarip.vercel.app`;
+
   if (navigator.share) {
     navigator.share({
       title: '자립 방탈출 2D',
       text: txt,
+      url: 'https://jarip.vercel.app',
     }).catch(console.error);
   } else {
     navigator.clipboard.writeText(txt).then(() => {
@@ -2299,9 +2300,9 @@ el('btnShareImg').addEventListener('click', async ()=>{
     const cvs=buildArcadeResultCanvas(arcadeCardTheme);
     const blob=await canvasToBlob2(cvs);
     const file=new File([blob],'\uC790\uB9BD\uBC29\uD0C8\uCD9C2D_\uACB0\uACFC.png',{type:'image/png'});
-    const shareText='\uD83C\uDF31 \uC790\uB9BD \uBC29\uD0C8\uCD9C 2D \uD074\uB9AC\uC5B4! \u23F1\uFE0F '+state.finalTimeStr+' \u00B7 \u274C \uC624\uB2F5 '+state.misses+'\uD68C\n\uD558\uB78C\uC774\uC640 15\uAC1C \uCC55\uD130\uB97C \uBAA8\uB450 \uD0C8\uCD9C\uD588\uC2B5\uB2C8\uB2E4! \u2192 jarip.vercel.app';
+    const shareText='\uD83C\uDF31 \uC790\uB9BD \uBC29\uD0C8\uCD9C 2D \uD074\uB9AC\uC5B4! \u23F1\uFE0F '+state.finalTimeStr+' \u00B7 \u274C \uC624\uB2F5 '+state.misses+'\uD68C\n\uD558\uB78C\uC774\uC640 15\uAC1C \uCC55\uD130\uB97C \uBAA8\uB450 \uD0C8\uCD9C\uD588\uC2B5\uB2C8\uB2E4!\n\uD83D\uDC49 https://jarip.vercel.app';
     if(navigator.canShare && navigator.canShare({files:[file]})){
-      await navigator.share({files:[file], title:'\uC790\uB9BD \uBC29\uD0C8\uCD9C 2D', text:shareText});
+      await navigator.share({files:[file], title:'\uC790\uB9BD \uBC29\uD0C8\uCD9C 2D', text:shareText, url:'https://jarip.vercel.app'});
       btn.textContent='\u2705 \uACF5\uC720 \uC644\uB8CC';
     } else {
       const url=URL.createObjectURL(blob);
