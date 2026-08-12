@@ -2502,7 +2502,6 @@
         navigator.share({
           title: '자립 방탈출 2D',
           text: txt,
-          url: 'https://jarip.vercel.app',
         }).catch(console.error);
       } else {
         navigator.clipboard.writeText(txt).then(() => {
@@ -2702,7 +2701,7 @@
         const file = new File([blob], '\uC790\uB9BD\uBC29\uD0C8\uCD9C2D_\uACB0\uACFC.png', { type: 'image/png' });
         const shareText = '\uD83C\uDF31 \uC790\uB9BD \uBC29\uD0C8\uCD9C 2D \uD074\uB9AC\uC5B4! \u23F1\uFE0F ' + state.finalTimeStr + ' \u00B7 \u274C \uC624\uB2F5 ' + state.misses + '\uD68C\n\uD558\uB78C\uC774\uC640 15\uAC1C \uCC55\uD130\uB97C \uBAA8\uB450 \uD0C8\uCD9C\uD588\uC2B5\uB2C8\uB2E4!\n\uD83D\uDC49 https://jarip.vercel.app';
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: '\uC790\uB9BD \uBC29\uD0C8\uCD9C 2D', text: shareText, url: 'https://jarip.vercel.app' });
+          await navigator.share({ files: [file], title: '\uC790\uB9BD \uBC29\uD0C8\uCD9C 2D', url: 'https://jarip.vercel.app' });
           btn.textContent = '\u2705 \uACF5\uC720 \uC644\uB8CC';
         } else {
           const url = URL.createObjectURL(blob);
