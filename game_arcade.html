@@ -756,6 +756,14 @@
       color: #b0996e; font-style: italic;
     }
 
+    /* keycap chips for the controls guide */
+    .kcap {
+      display: inline-block; min-width: 16px; padding: 1px 6px; margin: 0 1px;
+      background: #1f2937; border: 1px solid #4b5563; border-bottom-width: 2px;
+      border-radius: 5px; font-family: monospace; font-size: 0.82rem; color: #fff;
+      line-height: 1.4;
+    }
+
     /* ===== Mobile: fit whole game on one screen ===== */
     @media (max-width: 640px) {
       .wrap { padding: 8px; min-height: 100dvh; }
@@ -858,6 +866,12 @@
             <strong style="color: #fff;">🕯️ 오늘부터 당신은 '하람'입니다.</strong><br>
             열여덟 번째 생일 아침, 8년을 보낸 공동생활가정에 케이크가 놓입니다. 모두가 축하해 주지만, 마음 한켠엔 '이제 이곳을 나가야 한다'는 압박이 조용히 차오릅니다. 그래도 — 원장님도, 담당 선생님도, 낯선 이름의 제도들도 아직 내 편입니다.<br>
             각 방의 문은 <strong>실제로 존재하는 지원 제도</strong>를 알아야 열립니다. 앞 방에서 얻은 숫자를 기억해 두세요.
+          </div>
+          <div style="background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.4); padding: 16px; border-radius: 12px; margin-bottom: 22px; text-align: left; font-size: 0.92rem; color: #d1d5db; line-height: 1.7;">
+            <strong style="color:#fff; display:block; margin-bottom:10px;">🎮 조작법</strong>
+            <div style="margin-bottom:6px;">💻 <b style="color:#fff;">PC 키보드</b> — <span class="kcap">↑</span><span class="kcap">↓</span><span class="kcap">←</span><span class="kcap">→</span> 또는 <span class="kcap">W</span><span class="kcap">A</span><span class="kcap">S</span><span class="kcap">D</span> 이동 · <span class="kcap">E</span>/<span class="kcap">Space</span> 조사·퀴즈 · <span class="kcap">Enter</span> 정답 제출</div>
+            <div style="margin-bottom:6px;">📱 <b style="color:#fff;">모바일</b> — 화면 아래 <b>방향 패드</b>로 이동, 빨간 <b style="color:#ef4444;">E</b> 버튼으로 조사</div>
+            <div>🎯 반짝이는 <b style="color:#fbbf24;">EXIT</b>로 가서 조사하면 퀴즈가 열려요!</div>
           </div>
           <button class="btn-submit" id="btnIntroStart" style="width: 100%; font-size: 1.2rem; padding: 18px;">🚪 탈출 시작하기</button>
         </div>
