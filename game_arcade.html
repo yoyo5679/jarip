@@ -1135,6 +1135,12 @@
         padding-top: 58px;
         padding-bottom: 18px;
       }
+      /* Fit the box inside the padded viewport so its inner overflow scrolls
+         (fixes 승리 모달의 편지·버튼이 잘려서 안 보이던 문제) */
+      .modal-box {
+        max-height: calc(100dvh - 84px);
+        -webkit-overflow-scrolling: touch;
+      }
 
       #introOverlay .modal-box {
         padding: 22px 18px !important;
@@ -1150,6 +1156,10 @@
         line-height: 1.5 !important;
         margin-bottom: 16px !important;
       }
+      /* Shorten the intro on mobile so 탈출 시작하기 is reachable in one scroll:
+         hide the long story box + shrink the big emoji */
+      #introOverlay .intro-lore { display: none !important; }
+      #introOverlay .modal-box > div:nth-child(2) { font-size: 2.6rem !important; margin-bottom: 6px !important; }
 
       /* Quiz input: stack input + 확인 so both are fully visible */
       .input-row {
@@ -1226,7 +1236,7 @@
               style="background: rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; border: 1px solid #4b5563;">플레이
               약 10~15분</span>
           </div>
-          <div
+          <div class="intro-lore"
             style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; border-left: 4px solid #f59e0b; text-align: left; margin-bottom: 30px; font-size: 0.95rem; color: #d1d5db; line-height: 1.7;">
             <strong style="color: #fff;">🕯️ 오늘부터 당신은 '하람'입니다.</strong><br>
             열여덟 번째 생일 아침, 8년을 보낸 공동생활가정에 케이크가 놓입니다. 모두가 축하해 주지만, 마음 한켠엔 '이제 이곳을 나가야 한다'는 압박이 조용히 차오릅니다. 그래도 — 원장님도, 담당
@@ -1307,13 +1317,13 @@
         </div>
 
         <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-          <button class="btn-share-img" id="btnShareImg">📸 이미지로 공유하기</button>
+          <button class="btn-share-img" id="btnShareImg" style="flex: 1;">📸 이미지 공유</button>
           <button class="btn-restart" id="btnShare"
-            style="background: linear-gradient(120deg, #6366f1, #3b82f6); flex: 1; font-size: 1rem; padding: 12px 16px;">📋
-            텍스트 공유</button>
-          <button class="btn-restart" id="btnRestart" style="flex: 1; font-size: 1rem; padding: 12px 16px;">다시
-            시작</button>
+            style="background: linear-gradient(120deg, #6366f1, #3b82f6); flex: 1; font-size: 1rem; padding: 12px 16px;">📋 텍스트 공유</button>
         </div>
+        <button id="btnRestart"
+          style="display: block; margin: 12px auto 0; background: none; border: none; color: var(--txt-dim); font-size: 0.9rem; text-decoration: underline; cursor: pointer;">🔄 다시
+          시작</button>
       </div>
     </div>
   </div>

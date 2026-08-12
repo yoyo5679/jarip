@@ -1550,12 +1550,49 @@ body {
   text-align: left;
 }
 
-/* 봄맞이 미니 정원 (고양이와 잔디밭) 스타일 */
-.header-garden {
+/* 사이트 소개 + 봄맞이 정원 래퍼 */
+.header-intro-wrap {
   flex: 1;
   max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0.5rem;
+}
+
+.site-intro {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #2e7d32;
+  text-align: center;
+  line-height: 1.45;
+  white-space: normal;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.site-intro-sub {
+  display: block;
+  font-weight: 500;
+  color: #558b2f;
+  font-size: 0.74rem;
+  margin: 3px 0 0;
+}
+
+[data-theme="dark"] .site-intro {
+  color: #81c784;
+}
+
+[data-theme="dark"] .site-intro-sub {
+  color: #66bb6a;
+}
+
+/* 봄맞이 미니 정원 (고양이와 잔디밭) 스타일 */
+.header-garden {
+  width: 100%;
+  max-width: 450px;
   height: 42px;
-  margin: 0 1.5rem;
   background: linear-gradient(to bottom, #e8f5e9, #c8e6c9);
   border: 1.5px solid #a5d6a7;
   border-radius: 20px;
