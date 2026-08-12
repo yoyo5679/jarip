@@ -1141,6 +1141,11 @@
         max-height: calc(100dvh - 84px);
         -webkit-overflow-scrolling: touch;
       }
+      /* 롤링페이퍼(편지) 자체 스크롤 제거 → 모달 박스 하나만 스크롤(중첩 스크롤 충돌 해결) */
+      .letter-collection {
+        max-height: none;
+        overflow: visible;
+      }
 
       #introOverlay .modal-box {
         padding: 22px 18px !important;
