@@ -395,12 +395,40 @@
     }
 
     @media (max-width: 640px) {
-      .cards-grid {
-        grid-template-columns: 1fr;
-      }
+      /* Compact hero so both mode cards sit on one screen */
+      .hero { margin-bottom: 16px; }
+      .hero h1 { font-size: 1.55rem; margin-bottom: 6px; }
+      .hero p { display: none; }
+      .badge-tag { margin-bottom: 10px; padding: 6px 14px; font-size: 0.78rem; }
+
+      .cards-grid { grid-template-columns: 1fr; gap: 14px; margin-bottom: 18px; }
+
+      /* Compact card: icon + title on top row, full-width button below */
       .mode-card {
-        padding: 24px 20px;
+        padding: 16px 18px;
+        display: grid;
+        grid-template-columns: auto 1fr;
+        grid-template-areas:
+          "icon title"
+          "btn  btn";
+        align-items: center;
+        gap: 8px 14px;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
       }
+      .card-badge { display: none; }
+      .card-icon {
+        grid-area: icon;
+        font-size: 2rem;
+        margin: 0;
+        width: 48px; height: 48px;
+        display: flex; align-items: center; justify-content: center;
+      }
+      .card-title { grid-area: title; font-size: 1.15rem; margin: 0; }
+      .card-desc, .tags-row, .meta-spec { display: none; }
+      .btn-play { grid-area: btn; width: 100%; padding: 13px; font-size: 1rem; margin-top: 4px; }
+      .mode-card.arcade .btn-play { font-size: 1.05rem; }
+
+      .footer-info { display: none; }
     }
   </style>
 </head>

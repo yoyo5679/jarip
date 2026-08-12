@@ -750,6 +750,40 @@
       margin-top: 14px; text-align: center; font-size: 0.8rem;
       color: #b0996e; font-style: italic;
     }
+
+    /* ===== Mobile: fit whole game on one screen ===== */
+    @media (max-width: 640px) {
+      .wrap { padding: 8px; min-height: 100dvh; }
+
+      /* Header: compact single row, no vertical text */
+      .topbar { padding: 8px 12px; margin-bottom: 8px; border-radius: 12px; }
+      .brand { font-size: 0.95rem; gap: 6px; }
+      .brand span { display: none; }              /* hide subtitle on mobile */
+      .tb-actions { gap: 6px; }
+      .btn-icon { padding: 7px 10px; font-size: 0.9rem; white-space: nowrap; gap: 0; }
+      .btn-icon .lbl { display: none; }            /* icon-only nav on mobile */
+
+      /* Game frame: tighter spacing */
+      .game-frame { padding: 10px; gap: 8px; border-radius: 18px; }
+
+      /* HUD: allow graceful wrap, smaller text */
+      .hud-bar { flex-wrap: wrap; gap: 6px 8px; padding: 8px 12px; justify-content: center; }
+      .stage-badge { font-size: 0.85rem; }
+      .stage-title { font-size: 0.82rem; flex: 1 1 100%; text-align: center; order: 3; }
+      .key-badge { font-size: 0.72rem; padding: 4px 9px; }
+
+      /* Canvas: cap height so everything fits above the fold */
+      .viewport-wrap { max-height: 42vh; }
+
+      /* Dialogue: leaner */
+      .rpg-dialogue { min-height: 64px; padding: 10px 14px; font-size: 0.92rem; line-height: 1.45; }
+      .rpg-dialogue .speaker { font-size: 0.82rem; }
+
+      /* Controls: slightly smaller D-pad */
+      .controls-pad { padding: 8px 18px; }
+      .dpad { grid-template-columns: repeat(3, 34px); grid-template-rows: repeat(3, 34px); }
+      .btn-d { width: 34px; height: 34px; font-size: 1rem; }
+    }
   </style>
 </head>
 
@@ -759,9 +793,9 @@
     <header class="topbar">
       <div class="brand">🌱 자립 방탈출 2D <span>(하람이의 자립 여정)</span></div>
       <div class="tb-actions">
-        <button class="btn-icon" id="btnCodex" type="button">📚 정책도감</button>
-        <a class="btn-icon" href="/game.html">🎮 모드 선택</a>
-        <a class="btn-icon" href="/">🏠 대시보드</a>
+        <button class="btn-icon" id="btnCodex" type="button">📚<span class="lbl"> 정책도감</span></button>
+        <a class="btn-icon" href="/game.html">🎮<span class="lbl"> 모드 선택</span></a>
+        <a class="btn-icon" href="/">🏠<span class="lbl"> 대시보드</span></a>
       </div>
     </header>
 
