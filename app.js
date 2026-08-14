@@ -314,12 +314,28 @@ document.addEventListener("DOMContentLoaded", () => {
     return 10;
   }
 
+  // 지역 값 정규화: "서울 외 (2)" -> "서울" (필터/드롭다운 매칭용)
+  function baseRegion(r) {
+    if (!r) return r;
+    const cleaned = String(r).replace(/\s*외\s*\(?\s*\d+\s*\)?.*$/, "").trim();
+    return cleaned || r;
+  }
+
+  // 지역 표시용: "서울 외 (2)" -> "서울 외 2개 지역"
+  function formatRegionLabel(r) {
+    if (!r) return r;
+    const m = String(r).match(/^(.*?)\s*외\s*\(?\s*(\d+)\s*\)?/);
+    if (m && m[1].trim()) return `${m[1].trim()} 외 ${m[2]}개 지역`;
+    return r;
+  }
+
   // 6. 필터 채우기 (데이터에 기반한 유동적 지역 목록)
   function populateRegionFilters() {
     const regionsSet = new Set(["전국"]);
     policies.forEach(p => {
-      if (p.region && p.region !== "전국") {
-        regionsSet.add(p.region);
+      const base = baseRegion(p.region);
+      if (base && base !== "전국") {
+        regionsSet.add(base);
       }
     });
 
@@ -462,7 +478,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // 필터링 적용
     const filtered = policies.filter(p => {
       const matchCategory = currentCategory === "all" || p.category === currentCategory;
-      const matchRegion = currentRegion === "all" || p.region === currentRegion || p.region === "전국";
+      const matchRegion = currentRegion === "all" || baseRegion(p.region) === currentRegion || p.region === "전국";
       const matchType = currentType === "all" || p.type === currentType;
       const matchSource = currentSource === "all" || p.source === currentSource;
       const matchBookmark = !showBookmarksOnly || isBookmarked(p.id);
@@ -477,24 +493,21 @@ document.addEventListener("DOMContentLoaded", () => {
       return matchCategory && matchRegion && matchSearch && matchType && matchSource && matchBookmark;
     });
 
-    // 정렬 로직 (기관 우선순위: 자립정보온 -> 서울 -> 경기 -> 부산 -> 기타 적용 후 정렬)
-    filtered.sort((a, b) => {
-      const rankA = getSourcePriorityRank(a);
-      const rankB = getSourcePriorityRank(b);
-      if (rankA !== rankB) return rankA - rankB;
+    // 정렬 로직 (선택한 정렬 기준이 1순위, 기관 우선순위는 동점 시 보조 기준)
+    const byId = (a, b) => {
+      if (typeof a.id === 'number' && typeof b.id === 'number') return b.id - a.id;
+      return String(b.id).localeCompare(String(a.id));
+    };
+    const bySourceRank = (a, b) => getSourcePriorityRank(a) - getSourcePriorityRank(b);
 
-      if (currentSort === "newest") {
-        if (typeof a.id === 'number' && typeof b.id === 'number') {
-          return b.id - a.id;
-        }
-        return String(b.id).localeCompare(String(a.id));
-      } else if (currentSort === "closing_soon") {
-        // 모집중 우선
+    filtered.sort((a, b) => {
+      if (currentSort === "closing_soon") {
+        // 1) 모집중 우선
         const aStatus = a.status === "모집중" ? 1 : 0;
         const bStatus = b.status === "모집중" ? 1 : 0;
         if (aStatus !== bStatus) return bStatus - aStatus;
-        
-        // 마감일 기준 오름차순 (가장 빠른 마감일이 먼저)
+
+        // 2) 마감일 오름차순 (가장 빠른 마감일이 먼저)
         const extractDate = (dateStr) => {
           if (!dateStr) return "9999-12-31";
           const match = dateStr.match(/\d{4}[-\.]\d{2}[-\.]\d{2}/g);
@@ -504,12 +517,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const aDate = extractDate(a.date);
         const bDate = extractDate(b.date);
         if (aDate !== bDate) return aDate.localeCompare(bDate);
-        if (typeof a.id === 'number' && typeof b.id === 'number') {
-          return b.id - a.id;
-        }
-        return String(b.id).localeCompare(String(a.id));
+
+        // 3) 동점이면 기관 우선순위 -> 최신 id
+        const r = bySourceRank(a, b);
+        if (r !== 0) return r;
+        return byId(a, b);
       }
-      return 0;
+
+      // 최신순: 최신 id 우선, 동점 시 기관 우선순위
+      const idCmp = byId(a, b);
+      if (idCmp !== 0) return idCmp;
+      return bySourceRank(a, b);
     });
 
     if (filtered.length === 0) {
@@ -534,7 +552,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div style="display:flex;gap:0.4rem;align-items:center;">
             ${getDdayBadge(p.date)}
             ${getStatusBadge(p.status)}
-            <span class="card-region">${escapeHTML(p.region)}</span>
+            <span class="card-region">${escapeHTML(formatRegionLabel(p.region))}</span>
             <button class="btn-bookmark${isBookmarked(p.id) ? ' marked' : ''}" data-id="${escapeHTML(String(p.id))}"
               aria-pressed="${isBookmarked(p.id)}"
               aria-label="${isBookmarked(p.id) ? '즐겨찾기 해제' : '즐겨찾기 추가'}"
@@ -690,7 +708,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <span class="badge ${p.category}">${getCategoryLabel(p.category)}</span>
         ${getDdayBadge(p.date)}
         ${getStatusBadge(p.status)}
-        <span class="card-region">${escapeHTML(p.region)}</span>
+        <span class="card-region">${escapeHTML(formatRegionLabel(p.region))}</span>
       </div>
       <h3 style="margin:0 0 1.25rem;font-size:1.15rem;line-height:1.5;color:var(--color-text);">${escapeHTML(p.title)}</h3>
       <div class="card-metadata" style="margin-bottom:1rem;">
@@ -775,7 +793,7 @@ document.addEventListener("DOMContentLoaded", () => {
 ━━━━━━━━━━━━━━━━━━━━
 📌 지원사업: ${p.title}
 🏢 지원주체: ${p.provider}
-📍 지원지역: ${p.region}
+📍 지원지역: ${formatRegionLabel(p.region)}
 👥 대상자 요건:
 - ${p.target}
 
