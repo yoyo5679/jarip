@@ -2426,6 +2426,7 @@
 
     /* ---------- Letter (stationery) ---------- */
     let letterGuard = false; // prevents the same keypress that opens a letter from also closing it
+    let letterOpenedAt = 0;  // touch guard: ignore backdrop taps right after opening (Android)
     function openLetter(room) {
       const l = LETTERS.find(x => x.room === room);
       if (!l) return;
@@ -2447,10 +2448,12 @@
         : `📮 지금까지 ${got}/15 · 남은 편지는 다른 방에 숨어 있어요.`;
       el('letterModal').classList.add('open');
       letterGuard = true;
+      letterOpenedAt = Date.now();
       setTimeout(() => { letterGuard = false; }, 0); // release after this key event finishes
     }
     el('letterClose').onclick = () => el('letterModal').classList.remove('open');
     el('letterModal').addEventListener('click', (e) => {
+      if (Date.now() - letterOpenedAt < 400) return; // ignore the same tap that opened it (Android)
       if (e.target === el('letterModal')) el('letterModal').classList.remove('open');
     });
 
