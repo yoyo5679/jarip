@@ -92,6 +92,23 @@ const axiosInstance = axios.create({
   validateStatus: () => true
 });
 
+// 낡은 SSL(약한 DH 키)을 쓰는 사이트(grouphome.kr 등)용 레거시 에이전트
+const legacyHttpsAgent = new https.Agent({
+  rejectUnauthorized: false,
+  ciphers: 'DEFAULT@SECLEVEL=1',
+  minVersion: 'TLSv1'
+});
+
+// grouphome.kr 전용 GET: https(레거시 TLS) → 실패 시 http 재시도
+async function legacyGet(url) {
+  try {
+    return await axiosInstance.get(url, { httpsAgent: legacyHttpsAgent });
+  } catch (e) {
+    const httpUrl = url.replace(/^https:/, 'http:');
+    return await axiosInstance.get(httpUrl, { httpsAgent: legacyHttpsAgent });
+  }
+}
+
 // 파일 경로 설정
 const DATA_FILE = path.join(__dirname, 'data.js');
 const APP_FILE = path.join(__dirname, 'app.js');
@@ -532,6 +549,282 @@ async function crawlSmyc() {
   }
 }
 
+// 게시판 앵커 텍스트에서 깔끔한 제목만 추출하는 공용 헬퍼
+function cleanBoardTitle(rawText) {
+  let t = (rawText || '').replace(/\s+/g, ' ').trim();
+  // 앞쪽 글번호(순수 숫자) 제거
+  t = t.replace(/^\d+\s+/, '');
+  // 등록일(yyyy-mm-dd / yyyy.mm.dd) 이후는 목록 메타정보이므로 제거
+  t = t.replace(/\s*\d{4}[-.]\d{2}[-.]\d{2}.*$/, '');
+  // '조회 123', '작성자', 'NEW', '답변' 등 목록 꼬리표 제거
+  t = t.replace(/\s*(조회\s*\d+|작성자.*|첨부파일.*|new|hot)\s*$/i, '');
+  return t.trim();
+}
+
+// 6. 충남아동자립지원전담기관 크롤링 (메이크샵 rwdboard: /bbs/rwdboard/{id})
+async function crawlChungnam() {
+  console.log('--- 충남아동자립지원전담기관 크롤링 시작 ---');
+  const BASE = 'http://www.cnjarip.co.kr';
+  const listUrl = `${BASE}/bbs/rwdboard`;
+  const newPolicies = [];
+  const seen = new Set();
+
+  try {
+    for (let page = 1; page <= 2; page++) {
+      const url = page > 1 ? `${listUrl}?page=${page}` : listUrl;
+      const response = await axiosInstance.get(url);
+      if (response.status !== 200) {
+        console.error(`충남 사이트 응답 에러: ${response.status}`);
+        break;
+      }
+
+      const $ = cheerio.load(response.data);
+      $('a[href*="/bbs/rwdboard/"]').each((i, el) => {
+        const a = $(el);
+        const href = a.attr('href') || '';
+        const m = href.match(/\/bbs\/rwdboard\/(\d+)/);
+        if (!m) return;
+        const id = m[1];
+        if (seen.has(id)) return;
+
+        const title = cleanBoardTitle(a.text());
+        if (!title || title.length < 3) return;
+
+        const shouldSkip = BLACKLIST.some(word => title.includes(word));
+        if (shouldSkip) return;
+
+        seen.add(id);
+        const link = `${BASE}/bbs/rwdboard/${id}`;
+
+        newPolicies.push({
+          title: title.startsWith('[') ? title : `[충남아동자립지원전담기관] ${title}`,
+          category: detectCategory(title),
+          type: '공공·지자체',
+          provider: '충남아동자립지원전담기관',
+          region: '충남',
+          target: '충남 거주 보호아동 및 자립준비청년',
+          content: `충남아동자립지원전담기관에서 우리 자립준비청년들을 위해 준비한 [${title}] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 우측 하단의 '원문 바로가기' 링크를 꾹~ 눌러서 꼼꼼히 확인해봐요! 😉`,
+          tip: '제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.',
+          link: link,
+          date: '상시 모집',
+          status: '모집중',
+          source: '충남아동자립지원전담기관'
+        });
+      });
+    }
+
+    console.log(`충남 자립 공고 ${newPolicies.length}건 수집 완료`);
+    return newPolicies;
+  } catch (error) {
+    console.error('충남 사이트 크롤링 오류:', error.message);
+    return [];
+  }
+}
+
+// 7. 인천광역시자립지원전담기관 크롤링 (그누보드: _NBoard/board.php?bo_table=info&wr_id={id})
+async function crawlIncheon() {
+  console.log('--- 인천광역시자립지원전담기관 크롤링 시작 ---');
+  const BASE = 'https://www.injarip.or.kr';
+  const listUrl = `${BASE}/_NBoard/board.php?bo_table=info`;
+  const SKIP_LINK_TEXT = new Set(['이전글', '다음글', '목록', '글쓰기', '답변', '수정', '삭제']);
+  const newPolicies = [];
+  const seen = new Set();
+
+  try {
+    for (let page = 1; page <= 2; page++) {
+      const url = `${listUrl}&page=${page}`;
+      const response = await axiosInstance.get(url);
+      if (response.status !== 200) {
+        console.error(`인천 사이트 응답 에러: ${response.status}`);
+        break;
+      }
+
+      const $ = cheerio.load(response.data);
+      $('a[href*="bo_table=info"][href*="wr_id="]').each((i, el) => {
+        const a = $(el);
+        const href = a.attr('href') || '';
+        const m = href.match(/wr_id=(\d+)/);
+        if (!m) return;
+        const id = m[1];
+        if (seen.has(id)) return;
+
+        const title = cleanBoardTitle(a.text());
+        if (!title || title.length < 5 || SKIP_LINK_TEXT.has(title)) return;
+
+        const shouldSkip = BLACKLIST.some(word => title.includes(word));
+        if (shouldSkip) return;
+
+        seen.add(id);
+        const link = `${BASE}/_NBoard/board.php?bo_table=info&wr_id=${id}`;
+
+        newPolicies.push({
+          title: title.startsWith('[') ? title : `[인천광역시자립지원전담기관] ${title}`,
+          category: detectCategory(title),
+          type: '공공·지자체',
+          provider: '인천광역시자립지원전담기관',
+          region: '인천',
+          target: '인천 거주 보호아동 및 자립준비청년',
+          content: `인천광역시자립지원전담기관에서 우리 자립준비청년들을 위해 준비한 [${title}] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 우측 하단의 '원문 바로가기' 링크를 꾹~ 눌러서 꼼꼼히 확인해봐요! 😉`,
+          tip: '제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.',
+          link: link,
+          date: '상시 모집',
+          status: '모집중',
+          source: '인천광역시자립지원전담기관'
+        });
+      });
+    }
+
+    console.log(`인천 자립 공고 ${newPolicies.length}건 수집 완료`);
+    return newPolicies;
+  } catch (error) {
+    console.error('인천 사이트 크롤링 오류:', error.message);
+    return [];
+  }
+}
+
+// 8. 전라북도자립지원전담기관 크롤링 (굿네이버스 CMS: /board/{code}/info/{id})
+async function crawlJeonbuk() {
+  console.log('--- 전라북도자립지원전담기관 크롤링 시작 ---');
+  const BASE = 'https://jbjarip.goodneighbors.kr';
+  // 공지사항 / 자립정책 및 정보 / 청년채용정보 게시판
+  const boards = [
+    `${BASE}/gnjbjarip/board/cd103101100/default`,
+    `${BASE}/gnjbjarip/board/cd104102100/default`,
+    `${BASE}/gnjbjarip/board/cd104103100/default`,
+  ];
+  const newPolicies = [];
+  const seen = new Set();
+
+  try {
+    for (const boardUrl of boards) {
+      const response = await axiosInstance.get(boardUrl);
+      if (response.status !== 200) {
+        console.error(`전북 사이트 응답 에러(${boardUrl}): ${response.status}`);
+        continue;
+      }
+
+      const $ = cheerio.load(response.data);
+      $('a[href*="/info/"]').each((i, el) => {
+        const a = $(el);
+        const href = a.attr('href') || '';
+        const m = href.match(/\/board\/(cd\d+)\/info\/(\d+)/);
+        if (!m) return;
+        const boardCode = m[1];
+        const id = m[2];
+        const key = `${boardCode}-${id}`;
+        if (seen.has(key)) return;
+
+        const title = cleanBoardTitle(a.text());
+        if (!title || title.length < 3) return;
+
+        const shouldSkip = BLACKLIST.some(word => title.includes(word));
+        if (shouldSkip) return;
+
+        seen.add(key);
+        const link = href.startsWith('http') ? href : `${BASE}${href.startsWith('/') ? '' : '/'}${href}`;
+
+        newPolicies.push({
+          title: title.startsWith('[') ? title : `[전라북도자립지원전담기관] ${title}`,
+          category: detectCategory(title),
+          type: '공공·지자체',
+          provider: '전라북도자립지원전담기관',
+          region: '전북',
+          target: '전북 거주 보호아동 및 자립준비청년',
+          content: `전라북도자립지원전담기관에서 우리 자립준비청년들을 위해 준비한 [${title}] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 우측 하단의 '원문 바로가기' 링크를 꾹~ 눌러서 꼼꼼히 확인해봐요! 😉`,
+          tip: '제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.',
+          link: link,
+          date: '상시 모집',
+          status: '모집중',
+          source: '전라북도자립지원전담기관'
+        });
+      });
+    }
+
+    console.log(`전북 자립 공고 ${newPolicies.length}건 수집 완료`);
+    return newPolicies;
+  } catch (error) {
+    console.error('전북 사이트 크롤링 오류:', error.message);
+    return [];
+  }
+}
+
+// 9. 전국아동청소년그룹홈협의회 '열린공지' 크롤링 (page_153.php?sn={번호})
+async function crawlGrouphome() {
+  console.log('--- 전국아동청소년그룹홈협의회(열린공지) 크롤링 시작 ---');
+  const BASE = 'https://grouphome.kr';
+  const listBase = `${BASE}/pages/page_153.php`;
+  const newPolicies = [];
+  const seen = new Set();
+
+  try {
+    for (let page = 1; page <= 3; page++) {
+      const url = page > 1 ? `${listBase}?page=${page}` : listBase;
+      let response;
+      try {
+        response = await legacyGet(url);
+      } catch (e) {
+        console.error(`그룹홈 요청 실패(page ${page}): ${e.message}`);
+        break;
+      }
+      if (response.status !== 200) {
+        console.error(`그룹홈 응답 에러(page ${page}): ${response.status}`);
+        break;
+      }
+
+      const $ = cheerio.load(response.data);
+      $('a[href*="sn="]').each((i, el) => {
+        const a = $(el);
+        const href = a.attr('href') || '';
+        // 열린공지(page_153) 글만: sn 파라미터 추출
+        const m = href.match(/[?&]sn=(\d+)/);
+        if (!m) return;
+        // page_153 게시판 링크가 아닌 경우 제외 (다른 게시판 sn 혼입 방지)
+        if (href.includes('page_') && !href.includes('page_153')) return;
+        const sn = m[1];
+        if (seen.has(sn)) return;
+
+        let title = cleanBoardTitle(a.text());
+        // 페이지 타이틀 꼬리표(' - 열린공지') 제거
+        title = title.replace(/\s*-\s*열린공지\s*$/, '').trim();
+        if (!title || title.length < 5) return;
+
+        // 자립준비청년(자립사업) 관련 글만 수집 (돌봄교육·이벤트 등 그 외 공지 제외)
+        const JARIP_KEYWORDS = ['자립', '보호종료', '보호종결'];
+        if (!JARIP_KEYWORDS.some(k => title.includes(k))) return;
+
+        // 마감/종료 등 블랙리스트 검사 (단, '보호종료/보호종결'은 종료 status가 아니므로 예외)
+        const titleForBlacklist = title.replace(/보호종료/g, '').replace(/보호종결/g, '');
+        const shouldSkip = BLACKLIST.some(word => titleForBlacklist.includes(word));
+        if (shouldSkip) return;
+
+        seen.add(sn);
+        const link = `${BASE}/pages/page_153.php?sn=${sn}`;
+
+        newPolicies.push({
+          title: title.startsWith('[') ? title : `[그룹홈 열린공지] ${title}`,
+          category: detectCategory(title),
+          type: 'NGO·복지재단',
+          provider: '전국아동청소년그룹홈협의회',
+          region: '전국',
+          target: '보호아동·자립준비청년 (그룹홈 등)',
+          content: `전국아동청소년그룹홈협의회 열린공지에 올라온 [${title}] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 우측 하단의 '원문 바로가기' 링크를 꾹~ 눌러서 꼼꼼히 확인해봐요! 😉`,
+          tip: '제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 원문 게시글을 꼭 확인해 주세요.',
+          link: link,
+          date: '상시 모집',
+          status: '모집중',
+          source: '그룹홈 열린공지'
+        });
+      });
+    }
+
+    console.log(`그룹홈 열린공지 공고 ${newPolicies.length}건 수집 완료`);
+    return newPolicies;
+  } catch (error) {
+    console.error('그룹홈 크롤링 오류:', error.message);
+    return [];
+  }
+}
+
 // 5. 수집 데이터를 data.js에 업데이트하는 메인 함수
 async function main() {
   try {
@@ -541,7 +834,11 @@ async function main() {
       const ggData = await crawlGyeonggi();
       const busanData = await crawlBusan();
       const smycData = await crawlSmyc();
-      const scraped = [...smycData, ...busanData, ...ggData, ...seoulData, ...jariponData];
+      const incheonData = await crawlIncheon();
+      const chungnamData = await crawlChungnam();
+      const jeonbukData = await crawlJeonbuk();
+      const grouphomeData = await crawlGrouphome();
+      const scraped = [...grouphomeData, ...smycData, ...jeonbukData, ...chungnamData, ...incheonData, ...busanData, ...ggData, ...seoulData, ...jariponData];
 
     if (scraped.length === 0) {
       console.log('수집된 신규 정책이 없습니다.');
@@ -729,8 +1026,24 @@ async function main() {
       if (combined.includes('부산') && (combined.includes('전담기관') || combined.includes('지원센터') || src.includes('부산'))) {
         return 4;
       }
+      // 5순위: 인천 전담기관
+      if (combined.includes('인천') && (combined.includes('전담기관') || combined.includes('지원센터') || src.includes('인천'))) {
+        return 5;
+      }
+      // 6순위: 충남 전담기관
+      if (combined.includes('충남') && (combined.includes('전담기관') || combined.includes('지원센터') || src.includes('충남'))) {
+        return 6;
+      }
+      // 7순위: 전북 전담기관
+      if ((combined.includes('전북') || combined.includes('전라북도')) && (combined.includes('전담기관') || combined.includes('지원센터') || src.includes('전북'))) {
+        return 7;
+      }
+      // 8순위: 경북 전담기관
+      if ((combined.includes('경북') || combined.includes('경상북도')) && (combined.includes('전담기관') || combined.includes('지원센터') || src.includes('경북'))) {
+        return 8;
+      }
 
-      // 5순위: 기타 기관
+      // 기타 기관
       return 10;
     };
 
@@ -742,16 +1055,30 @@ async function main() {
       return (a.id || 0) - (b.id || 0);
     });
 
-    // data.js 버전 번호 올리기 (캐시 무효화)
-    const verRegex = /window\.initialDataVersion\s*=\s*["'](v\d{4}\.\d{2}\.\d{2}_v)(\d+)["']/m;
+    // 크롤링 반영 일자(KST) 계산
+    const _kstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
+    const _todayDash = _kstNow.toISOString().split('T')[0];   // YYYY-MM-DD
+    const _todayDot = _todayDash.replace(/-/g, '.');          // YYYY.MM.DD
+
+    // data.js 버전 올리기 (날짜=오늘로 현행화 + 번호 증가 → 캐시 무효화)
+    const verRegex = /window\.initialDataVersion\s*=\s*["']v\d{4}\.\d{2}\.\d{2}_v(\d+)["']/m;
     const verMatch = dataContent.match(verRegex);
     let newVersionStr = '';
     if (verMatch) {
-      const prefix = verMatch[1];
-      const nextNum = parseInt(verMatch[2], 10) + 1;
-      newVersionStr = `${prefix}${nextNum}`;
+      const nextNum = parseInt(verMatch[1], 10) + 1;
+      newVersionStr = `v${_todayDot}_v${nextNum}`;
       dataContent = dataContent.replace(verRegex, `window.initialDataVersion = "${newVersionStr}"`);
     }
+
+    // 최종 업데이트 일자 기록 (UI 노출용) — 있으면 갱신, 없으면 버전 줄 뒤에 삽입
+    if (/window\.lastUpdated\s*=/.test(dataContent)) {
+      dataContent = dataContent.replace(/window\.lastUpdated\s*=\s*["'][^"']*["'];?/, `window.lastUpdated = "${_todayDash}";`);
+    } else {
+      dataContent = dataContent.replace(/(window\.initialDataVersion\s*=\s*"[^"]*";)/, `$1\nwindow.lastUpdated = "${_todayDash}";`);
+    }
+
+    // 헤더 주석의 '마지막 크롤링 일시' 현행화
+    dataContent = dataContent.replace(/\/\/ 마지막 크롤링 일시: \d{4}-\d{2}-\d{2}/, `// 마지막 크롤링 일시: ${_todayDash}`);
 
     // data.js 갱신 (정책 배열 + 버전 동시 업데이트)
     const formattedPolicies = JSON.stringify(existingPolicies, null, 2);

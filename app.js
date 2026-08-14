@@ -141,6 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
     populateSourceFilters();
     renderPolicies();
     renderStats();
+    renderMetaInfo();
     renderRegionalCenters();
     setupEventListeners();
     setupPullToRefresh();
@@ -471,6 +472,23 @@ document.addEventListener("DOMContentLoaded", () => {
     return "public";
   }
 
+  // 8-1. 크롤러 공통 안내문(보일러플레이트) 팁 감지 — 카드에는 숨김
+  function isBoilerplateTip(tip) {
+    if (!tip) return false;
+    const t = tip.replace(/\s+/g, "");
+    return /신청전에.*(상세페이지|안내페이지|원문게시글|게시글|페이지).*확인/.test(t)
+        || /변동될수있으므로.*확인/.test(t);
+  }
+
+  // 8-2. 최종 업데이트 일시 표시
+  function renderMetaInfo() {
+    const el = document.getElementById("lastUpdatedText");
+    if (el) {
+      const d = (window.lastUpdated || "").toString().trim();
+      el.textContent = d || "정보 없음";
+    }
+  }
+
   // 9. 정책 목록 렌더링
   function renderPolicies() {
     cardsGrid.innerHTML = "";
@@ -598,7 +616,7 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>` : ''}
         </div>
         <p class="card-desc">${escapeHTML(p.content)}</p>
-        ${p.tip ? `<div class="card-tip">💡 <b>전담요원 꿀팁:</b> ${escapeHTML(p.tip)}</div>` : ''}
+        ${(p.tip && !isBoilerplateTip(p.tip)) ? `<div class="card-tip">💡 <b>전담요원 꿀팁:</b> ${escapeHTML(p.tip)}</div>` : ''}
         <div class="card-actions">
           <a href="${safeUrl(p.link)}" target="_blank" rel="noopener noreferrer" class="btn-card link">
             <span>원문 바로가기</span> 🔗
@@ -734,7 +752,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ${p.source ? `<div class="meta-row"><span class="label">출처</span><span class="value" style="font-size:0.78rem;color:var(--color-text-light);">${escapeHTML(p.source)}</span></div>` : ''}
       </div>
       <p style="font-size:0.88rem;line-height:1.7;color:var(--color-text-muted);margin-bottom:1rem;">${escapeHTML(p.content)}</p>
-      ${p.tip ? `<div class="card-tip" style="margin-bottom:1.25rem;">💡 <b>전담요원 꿀팁:</b> ${escapeHTML(p.tip)}</div>` : ''}
+      ${(p.tip && !isBoilerplateTip(p.tip)) ? `<div class="card-tip" style="margin-bottom:1.25rem;">💡 <b>전담요원 꿀팁:</b> ${escapeHTML(p.tip)}</div>` : ''}
       <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
         <a href="${safeUrl(p.link)}" target="_blank" rel="noopener noreferrer" class="btn-card link" style="display:inline-flex;">
           <span>원문 바로가기</span> 🔗
