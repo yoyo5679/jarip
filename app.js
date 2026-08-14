@@ -500,7 +500,22 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     const bySourceRank = (a, b) => getSourcePriorityRank(a) - getSourcePriorityRank(b);
 
+    // 특정 지역 선택 시: 그 지역 전용 사업을 먼저(0) → 다지역(1) → 전국(2)
+    const regionRank = (p) => {
+      if (currentRegion === "all") return 0;
+      if (p.region === currentRegion) return 0;
+      if (baseRegion(p.region) === currentRegion) return 1;
+      if (p.region === "전국") return 2;
+      return 3;
+    };
+
     filtered.sort((a, b) => {
+      // 지역을 선택한 경우, 그 지역 사업을 최상단으로
+      if (currentRegion !== "all") {
+        const rr = regionRank(a) - regionRank(b);
+        if (rr !== 0) return rr;
+      }
+
       if (currentSort === "closing_soon") {
         // 1) 모집중 우선
         const aStatus = a.status === "모집중" ? 1 : 0;
