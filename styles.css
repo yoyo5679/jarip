@@ -1635,6 +1635,58 @@ body {
   margin: 3px 0 0;
 }
 
+/* 클릭 가능한 인트로 (제작 의도 열기) */
+.site-intro[role="button"] {
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 12px;
+  transition: background-color 0.18s ease, transform 0.18s ease;
+}
+.site-intro[role="button"]:hover {
+  background-color: rgba(129, 199, 132, 0.14);
+  transform: translateY(-1px);
+}
+.site-intro[role="button"]:focus-visible {
+  outline: 2px solid #66bb6a;
+  outline-offset: 2px;
+}
+.site-intro-more {
+  display: inline-block;
+  margin-top: 5px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: linear-gradient(135deg, #66bb6a, #43a047);
+  padding: 2px 10px;
+  border-radius: 999px;
+  letter-spacing: 0;
+}
+
+/* 제작 의도 모달 본문 */
+.about-modal-box {
+  max-width: 540px;
+}
+.about-modal-body {
+  line-height: 1.72;
+  font-size: 0.92rem;
+  color: var(--color-text, #333);
+}
+.about-modal-body p {
+  margin: 0 0 0.95rem;
+}
+.about-modal-body p:last-child {
+  margin-bottom: 0;
+}
+.about-modal-body b {
+  color: #2e7d32;
+}
+[data-theme="dark"] .about-modal-body {
+  color: #e0e0e0;
+}
+[data-theme="dark"] .about-modal-body b {
+  color: #81c784;
+}
+
 [data-theme="dark"] .site-intro {
   color: #81c784;
 }

@@ -160,9 +160,12 @@
         
         <!-- 사이트 소개 + 봄맞이 미니 정원 -->
         <div class="header-intro-wrap desktop-only">
-          <p class="site-intro">
+          <p class="site-intro" id="siteIntroBtn" role="button" tabindex="0" title="제작 의도 자세히 보기"
+             onclick="openAboutModal()"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openAboutModal();}">
             🌸 자립준비청년을 위한 지원 정책을 한눈에!
             <span class="site-intro-sub">금융·주거·교육·취업까지, 나에게 맞는 지원을 찾아보세요.</span>
+            <span class="site-intro-more">ℹ️ 제작 의도 보기</span>
           </p>
           <div class="header-garden" aria-hidden="true">
             <div class="grass-field">
@@ -410,6 +413,22 @@
     </div>
   </div>
 
+  <!-- 제작 의도 모달 -->
+  <div id="aboutModal" class="links-modal-overlay" onclick="closeAboutModal(event)">
+    <div class="links-modal-box about-modal-box">
+      <div class="links-modal-header">
+        <span class="links-modal-title">🌸 자립해봄을 만든 이유</span>
+        <button class="links-modal-close" onclick="closeAboutModal()" aria-label="닫기"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="links-modal-body about-modal-body">
+        <p>보호가 끝나고 세상에 첫발을 내딛는 순간, 우리가 챙길 수 있는 지원은 생각보다 많아요. 그런데 그 정보가 기관마다, 사이트마다 흩어져 있어서 "이런 게 있었어?" 하고 뒤늦게 아는 경우가 참 많더라고요.</p>
+        <p>그래서 <b>자립해봄</b>을 만들었어요. 전국 자립지원전담기관, 자립정보ON, 여러 재단·기업의 지원사업을 한곳에 자동으로 모았어요. 금융·주거·교육·취업까지, 흩어진 정보를 매일 긁어와 최신 상태로 정리하고, 어렵고 딱딱한 행정 용어 대신 편하게 읽히는 말로 다시 풀어 썼어요. 🌷</p>
+        <p>복잡한 검색 없이, 내 지역과 관심사에 맞는 지원을 빠르게 찾을 수 있도록. <b>정보를 몰라서 받을 수 있는 걸 놓치는 일이 없기를</b> 바라는 마음으로 하나하나 담았어요.</p>
+        <p>혹시 빠진 정보나 "이런 기능도 있었으면" 하는 게 있다면 언제든 알려주세요. 여러분의 자립 여정에 작은 이정표가 되고 싶어요. 함께 걸어갈게요! 🌱</p>
+      </div>
+    </div>
+  </div>
+
   <script>
     // 링크 모달 데이터 정의
     const MODAL_LINKS = {
@@ -476,6 +495,21 @@
       document.getElementById('linksModal').classList.remove('open');
       document.body.style.overflow = '';
     }
+
+    // 제작 의도 모달
+    function openAboutModal() {
+      document.getElementById('aboutModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeAboutModal(e) {
+      if (e && e.target !== document.getElementById('aboutModal')) return;
+      document.getElementById('aboutModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    // ESC로 닫기
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeAboutModal();
+    });
   </script>
   <!-- Service Worker Registration -->
   <script>
