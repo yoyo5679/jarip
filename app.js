@@ -420,7 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
       '정기': '#3b82f6'
     };
     const color = colors[status] || '#64748b';
-    return `<span style="background:${color};color:#fff;padding:2px 8px;border-radius:10px;font-size:0.7rem;font-weight:700;">${escapeHTML(status)}</span>`;
+    return `<span style="background:${color};color:#fff;padding:2px 8px;border-radius:10px;font-size:0.7rem;font-weight:700;white-space:nowrap;flex-shrink:0;display:inline-block;">${escapeHTML(status)}</span>`;
   }
 
   // 마감일까지 남은 일수 계산 (신청기간 문자열에서 마지막 날짜를 마감일로 간주)
