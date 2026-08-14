@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // 2. DOM 요소 참조
   const cardsGrid = document.getElementById("cardsGrid");
   const regionFilter = document.getElementById("regionFilter");
+  const regionFilterSort = document.getElementById("regionFilterSort");
   const sourceFilter = document.getElementById("sourceFilter");
   const searchInput = document.getElementById("searchInput");
   const tabButtons = document.querySelectorAll(".tab-btn");
@@ -337,13 +338,14 @@ document.addEventListener("DOMContentLoaded", () => {
       return a.localeCompare(b, 'ko');
     });
 
-    regionFilter.innerHTML = '<option value="all">📍 전체 지역</option>';
-    sortedRegions.forEach(r => {
-      const option = document.createElement("option");
-      option.value = r;
-      option.textContent = r;
-      regionFilter.appendChild(option);
-    });
+    const optionsHTML = '<option value="all">📍 전체 지역</option>' +
+      sortedRegions.map(r => `<option value="${escapeHTML(r)}">${escapeHTML(r)}</option>`).join('');
+    regionFilter.innerHTML = optionsHTML;
+    // 정렬 줄의 지역 드롭다운도 동일하게 채우기
+    if (regionFilterSort) {
+      regionFilterSort.innerHTML = optionsHTML;
+      regionFilterSort.value = currentRegion;
+    }
   }
 
   function populateSourceFilters() {
@@ -911,11 +913,17 @@ ${p.link}
       });
     }
 
-    // 지역 필터링
-    regionFilter.addEventListener("change", (e) => {
-      currentRegion = e.target.value;
+    // 지역 필터링 (상단 검색바 + 정렬 줄 드롭다운 동기화)
+    const applyRegionChange = (value) => {
+      currentRegion = value;
+      if (regionFilter) regionFilter.value = value;
+      if (regionFilterSort) regionFilterSort.value = value;
       renderPolicies();
-    });
+    };
+    regionFilter.addEventListener("change", (e) => applyRegionChange(e.target.value));
+    if (regionFilterSort) {
+      regionFilterSort.addEventListener("change", (e) => applyRegionChange(e.target.value));
+    }
 
     // 출처 필터링
     sourceFilter.addEventListener("change", (e) => {

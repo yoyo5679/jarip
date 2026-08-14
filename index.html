@@ -235,21 +235,28 @@
 
       <!-- 기관 구분 및 정렬 필터 -->
       <div class="type-filter-container">
-        <div class="filter-group">
-          <span class="filter-label">🏢 기관:</span>
-          <div class="type-tabs">
-            <button class="type-btn active" data-type="all">전체</button>
-            <button class="type-btn" data-type="공공·지자체">🏛️ 공공·지자체</button>
-            <button class="type-btn" data-type="NGO·복지재단">🤝 NGO·복지재단</button>
-            <button class="type-btn" data-type="기업·사회공헌">🏢 기업·사회공헌</button>
+        <div class="filter-main-row">
+          <div class="filter-group">
+            <span class="filter-label">🏢 기관:</span>
+            <div class="type-tabs">
+              <button class="type-btn active" data-type="all">전체</button>
+              <button class="type-btn" data-type="공공·지자체">🏛️ 공공·지자체</button>
+              <button class="type-btn" data-type="NGO·복지재단">🤝 NGO·복지재단</button>
+              <button class="type-btn" data-type="기업·사회공헌">🏢 기업·사회공헌</button>
+            </div>
+          </div>
+          <div class="sort-section">
+            <select id="regionFilterSort" class="sort-select" aria-label="지역 선택">
+              <option value="all">📍 전체 지역</option>
+            </select>
+            <select id="sortFilter" class="sort-select" aria-label="정렬 기준">
+              <option value="newest">최신순</option>
+              <option value="closing_soon">마감임박순</option>
+            </select>
           </div>
         </div>
-        <div class="sort-section">
+        <div class="filter-fav-row">
           <button id="bookmarkFilterBtn" class="bookmark-filter-btn" type="button" aria-pressed="false" title="즐겨찾기한 사업만 보기">⭐ 즐겨찾기</button>
-          <select id="sortFilter" class="sort-select" aria-label="정렬 기준">
-            <option value="newest">최신순</option>
-            <option value="closing_soon">마감임박순</option>
-          </select>
         </div>
       </div>
 

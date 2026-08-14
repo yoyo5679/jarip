@@ -875,8 +875,9 @@ body {
 /* 기관 구분 필터 스타일링 */
 .type-filter-container {
   display: flex;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.55rem;
   background-color: var(--bg-card);
   backdrop-filter: blur(var(--blur-amount));
   -webkit-backdrop-filter: blur(var(--blur-amount));
@@ -885,6 +886,50 @@ body {
   border: 1px solid var(--border-color);
   width: fit-content;
   margin-top: -0.5rem;
+}
+
+/* 상단 줄: 기관 탭 + 지역/정렬 */
+.filter-main-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* 하단 줄: 즐겨찾기 */
+.filter-fav-row {
+  display: flex;
+  align-items: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.sort-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.sort-select {
+  padding: 0.4rem 0.6rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-sidebar);
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sort-select:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .type-filter-container .filter-label {
@@ -1108,13 +1153,23 @@ body {
   /* 기관 구분 필터 가로 스크롤 */
   .type-filter-container {
     width: 100%;
+    box-sizing: border-box;
+  }
+  /* 상단 줄(기관 탭+지역+정렬)만 가로 스크롤 */
+  .filter-main-row {
     overflow-x: auto;
     flex-wrap: nowrap;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    box-sizing: border-box;
   }
-  .type-filter-container::-webkit-scrollbar { display: none; }
+  .filter-main-row::-webkit-scrollbar { display: none; }
+
+  .sort-section {
+    flex-shrink: 0;
+  }
+  .sort-select {
+    flex-shrink: 0;
+  }
 
   .type-tabs {
     flex-wrap: nowrap;
