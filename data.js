@@ -1,7 +1,7 @@
 // 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관 + 부산자립지원전담기관)
-// 마지막 크롤링 일시: 2026-08-18
-window.initialDataVersion = "v2026.08.18_v95";
-window.lastUpdated = "2026-08-18"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
+// 마지막 크롤링 일시: 2026-08-19
+window.initialDataVersion = "v2026.08.19_v96";
+window.lastUpdated = "2026-08-19"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
 window.initialPolicies = [
   {
     "id": 106,
@@ -752,6 +752,21 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "자립정보ON",
     "id": 954
+  },
+  {
+    "title": "[자립정보ON] 자립청년대상 실리콘 무료교육 프로그램",
+    "category": "education",
+    "type": "공공·지자체",
+    "provider": "베스트코킹",
+    "region": "전국",
+    "target": "자립준비청년 대상",
+    "content": "🏡 자립 준비하는 우리 친구들 주목! 🏡 자립생활에 기술 하나 더하고 싶다면? 베스트코킹에서 실리콘 무료 교육 프로그램으로 꿀기술 장착할 기회가 활짝 열렸어! 전국 어디든 상관없이 상시 모집 중이니 부담 없이 신청해봐. 🛠️ 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2045&menuPos=1",
+    "date": "상시 모집",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 955
   },
   {
     "id": 505,
