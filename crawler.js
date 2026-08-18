@@ -944,17 +944,20 @@ async function main() {
     // 교차 소스 중복 판별
     const isSimilarTitle = (p1, p2) => {
       // 동일 제공기관(provider)의 다른 사업인 경우 중복으로 보지 않음 (다른 공고임)
-      if (p1.provider === p2.provider) return false;
+      if (p1.provider && p2.provider && p1.provider === p2.provider) return false;
 
       const c1 = cleanTitleForCompare(p1.title, p1.provider);
       const c2 = cleanTitleForCompare(p2.title, p2.provider);
       
       // 정규화된 텍스트가 완전히 같으면 중복
-      if (c1 === c2) return true;
+      if (c1 && c2 && c1 === c2) return true;
       
-      // 한쪽이 다른 쪽을 포함하면 중복 (핵심 텍스트가 4글자 이상일 때)
-      if (c1.length >= 4 && c2.length >= 4) {
-        if (c1.includes(c2) || c2.includes(c1)) return true;
+      // 두 텍스트 모두 충분히 길고(8글자 이상) 길이 차이가 적을 때(3글자 이하)만 포함 관계 인정
+      if (c1 && c2 && Math.min(c1.length, c2.length) >= 8) {
+        const lenDiff = Math.abs(c1.length - c2.length);
+        if (lenDiff <= 3 && (c1.includes(c2) || c2.includes(c1))) {
+          return true;
+        }
       }
       
       return false;
