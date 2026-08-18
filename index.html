@@ -3,44 +3,98 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>자립해봄 - 자립준비청년 지원 정보 공유 대시보드</title>
+  <title>자립해봄 - 자립준비청년 지원 정보·정책 대시보드</title>
   
-  <!-- SEO Meta Tags -->
-  <meta name="description" content="자립해봄은 자립준비청년(보호종료아동)을 위한 맞춤형 자립정착금, 자립수당, LH 주거지원 등 청년 정책 대시보드입니다. AI 자립지원 챗봇 실시간 상담 서비스를 받아보세요.">
-  <meta name="keywords" content="자립해봄, 자립해봄 AI 챗봇, 자립준비청년, 보호종료아동, 보호종료 청년, 아동그룹홈 자립, 자립정착금, 자립수당, 자립준비청년 혜택, 자립준비청년 지원금, 자립준비청년 주거지원, LH 자립준비청년, 자립지원전담기관, 아동공동생활가정지원센터, 그룹홈 지원기관, 자립정보ON, 자립 정보 대시보드, AI 자립상담 챗봇, 자립준비청년 커뮤니티">
+  <!-- SEO Primary Meta Tags -->
+  <meta name="title" content="자립해봄 - 자립준비청년 지원 정보·정책 대시보드">
+  <meta name="description" content="자립해봄 | 자립준비청년(보호종료아동)을 위한 맞춤형 자립정착금, 자립수당, LH 주거지원, 취업·교육 혜택 및 전국 지원기관 정보를 한눈에 확인하는 정책 대시보드와 AI 자립상담 챗봇입니다.">
+  <meta name="keywords" content="자립해봄, 자립준비청년, 보호종료아동, 보호종료 청년, 자립정착금, 자립수당, 자립준비청년 혜택, 자립준비청년 지원금, 자립준비청년 주거지원, LH 자립준비청년, 자립지원전담기관, 아동공동생활가정지원센터, 아동그룹홈 자립, 자립정보ON, AI 자립상담 챗봇, 자립해봄 대시보드">
   <meta name="author" content="자립해봄">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical" href="https://jarip.vercel.app/">
   
-  <!-- Structured Data for Google Site Name -->
+  <!-- Structured Data (JSON-LD) for Google Search Engine Optimization -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "자립해봄",
-    "alternateName": ["JARIP", "자립해봄 대시보드"],
-    "url": "https://jarip.vercel.app/"
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://jarip.vercel.app/#website",
+        "url": "https://jarip.vercel.app/",
+        "name": "자립해봄",
+        "alternateName": ["자립해봄", "자립준비청년 자립해봄", "JARIP", "자립해봄 대시보드", "자립해봄 AI"],
+        "description": "자립준비청년(보호종료아동)을 위한 맞춤형 정책 정보 공유 대시보드 및 AI 자립상담 챗봇",
+        "inLanguage": "ko-KR",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://jarip.vercel.app/?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      },
+      {
+        "@type": "WebApplication",
+        "@id": "https://jarip.vercel.app/#webapp",
+        "name": "자립해봄",
+        "url": "https://jarip.vercel.app/",
+        "applicationCategory": "SocialAssistanceApplication",
+        "operatingSystem": "All",
+        "browserRequirements": "Requires JavaScript. Requires HTML5.",
+        "description": "자립준비청년을 위한 실시간 지원정책 검색, 금융·주거·취업 혜택 정보 및 AI 맞춤 상담 서비스",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "KRW"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://jarip.vercel.app/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "자립해봄은 어떤 서비스인가요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "자립해봄은 자립준비청년(보호종료아동)과 그룹홈 청년들이 흩어져 있는 자립정착금, 자립수당, LH 주거지원, 취업 및 장학 혜택 등의 정부·지자체·민간 정책을 한눈에 찾고 AI 챗봇을 통해 맞춤 상담을 받을 수 있는 종합 정보 플랫폼입니다."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "자립준비청년 지원 정책에는 어떤 것들이 있나요?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "금융·경제(자립정착금, 자립수당, 디딤씨앗통장 등), 주거지원(LH 청년 전세임대, 매입임대, 공공임대 우선공급 등), 교육·장학(대학 등록금 지원, 자격증 취득 지원), 취업·진로 및 생활·의료 지원 등 다양한 분야의 정책이 마련되어 있습니다."
+            }
+          }
+        ]
+      }
+    ]
   }
   </script>
 
-  <!-- Open Graph / Facebook (SNS 공유용) -->
+  <!-- Open Graph / Facebook / KakaoTalk (SNS 미리보기 최적화) -->
   <meta property="og:site_name" content="자립해봄">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://jarip.vercel.app">
-  <meta property="og:title" content="자립해봄 - 자립준비청년 지원 정보 공유 대시보드">
-  <meta property="og:description" content="자립해봄은 자립준비청년(보호종료아동)을 위한 맞춤형 자립정착금, 자립수당, LH 주거지원 등 청년 정책 대시보드입니다. AI 자립지원 챗봇 실시간 상담 서비스를 받아보세요.">
+  <meta property="og:url" content="https://jarip.vercel.app/">
+  <meta property="og:title" content="자립해봄 - 자립준비청년 지원 정보·정책 대시보드">
+  <meta property="og:description" content="자립해봄 | 자립준비청년을 위한 자립정착금, 자립수당, LH 주거지원 등 맞춤형 지원 정책 대시보드 & AI 자립상담 챗봇">
   <meta property="og:image" content="https://jarip.vercel.app/icons/icon-192.png">
+  <meta property="og:locale" content="ko_KR">
 
-  <!-- Twitter -->
-  <meta property="twitter:card" content="summary_large_image">
-  <meta property="twitter:url" content="https://jarip.vercel.app">
-  <meta property="twitter:title" content="자립해봄 - 자립준비청년 지원 정보 공유 대시보드">
-  <meta property="twitter:description" content="자립해봄은 자립준비청년(보호종료아동)을 위한 맞춤형 자립정착금, 자립수당, LH 주거지원 등 청년 정책 대시보드입니다. AI 자립지원 챗봇 실시간 상담 서비스를 받아보세요.">
-  <meta property="twitter:image" content="https://jarip.vercel.app/icons/icon-192.png">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://jarip.vercel.app/">
+  <meta name="twitter:title" content="자립해봄 - 자립준비청년 지원 정보·정책 대시보드">
+  <meta name="twitter:description" content="자립해봄 | 자립준비청년을 위한 맞춤형 정책 대시보드 & AI 자립상담 챗봇">
+  <meta name="twitter:image" content="https://jarip.vercel.app/icons/icon-192.png">
 
-  <!-- Google Search Console & Naver Search Advisor Verification (소유권 인증 코드 삽입용) -->
+  <!-- Google Search Console & Naver Search Advisor Verification -->
   <meta name="google-site-verification" content="rNn65yzxeE3INfM09Jz1bYE4Uau48rwG88jqqJguYv4" />
   <!-- <meta name="naver-site-verification" content="여기에_네이버_인증키를_넣으세요" /> -->
 
-  <!-- FontAwesome Icon CDN (임시 바로가기 화살표용) -->
+  <!-- FontAwesome Icon CDN -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="styles.css?v=20260707_01">
   
@@ -54,7 +108,22 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 </head>
 <body>
-
+  <!-- Search Engine & Crawler Noscript Content -->
+  <noscript>
+    <div style="padding: 24px; background: #f8fafc; color: #1e293b; font-family: sans-serif; line-height: 1.6;">
+      <h2>🌸 자립해봄 - 자립준비청년 지원 정보·정책 대시보드</h2>
+      <p><strong>자립해봄</strong>은 보호종료아동 및 자립준비청년, 아동그룹홈 청년을 위한 맞춤형 정책 정보 공유 대시보드입니다.</p>
+      <h3>주요 지원 분야</h3>
+      <ul>
+        <li><strong>💰 금융·경제:</strong> 자립정착금(지자체별 1,000만~2,000만원), 자립수당(월 50만원), 디딤씨앗통장(CDA) 매칭 지원</li>
+        <li><strong>🏠 주거지원:</strong> LH 청년 전세임대, 매입임대, 행복주택 우선공급, 서울시 희망디딤돌 주거지원</li>
+        <li><strong>🎓 교육·장학:</strong> 대학 등록금 전액 지원, 국가장학금 Ⅰ유형 연계, 자격증 취득 지원금</li>
+        <li><strong>💼 취업·진로:</strong> 국민취업지원제도 1유형, 맞춤형 인턴십 및 직업훈련 연계</li>
+        <li><strong>🍀 생활·의료:</strong> 건강보험 의료급여 2종 지원, 심리상담 및 멘토링 프로그램 지원</li>
+      </ul>
+      <p>💡 AI 자립상담 챗봇 및 실시간 정책 검색을 이용하시려면 브라우저의 자바스크립트를 활성화해 주세요.</p>
+    </div>
+  </noscript>
 
   <div class="app-container">
     

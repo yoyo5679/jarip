@@ -36,6 +36,6 @@
     }
   ],
   "rewrites": [
-    { "source": "/((?!sitemap\\.xml|robots\\.txt|styles\\.css|app\\.js|data\\.js|manifest\\.json|sw\\.js|icons/.*|admin\\.html|game\\.html).*)", "destination": "/index.html" }
+    { "source": "/((?!sitemap\\.xml|robots\\.txt|styles\\.css|app\\.js|data\\.js|manifest\\.json|sw\\.js|icons/.*|assets/.*|admin\\.html|game\\.html|game_story\\.html|game_arcade\\.html).*)", "destination": "/index.html" }
   ]
 }
