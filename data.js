@@ -1,7 +1,7 @@
 // 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관 + 부산자립지원전담기관)
-// 마지막 크롤링 일시: 2026-08-14
-window.initialDataVersion = "v2026.08.14_v93";
-window.lastUpdated = "2026-08-14"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
+// 마지막 크롤링 일시: 2026-08-18
+window.initialDataVersion = "v2026.08.18_v94";
+window.lastUpdated = "2026-08-18"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
 window.initialPolicies = [
   {
     "id": 106,
@@ -1622,6 +1622,21 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "부산광역시자립지원전담기관",
     "id": 942
+  },
+  {
+    "title": "[부산자립지원전담기관] 자립축하사업 자립축하키트 지원 5회기 참여자 모집",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "부산광역시보호아동자립지원센터",
+    "region": "부산",
+    "target": "부산 거주 보호연장아동 및 자립준비청년",
+    "content": "부산에 사는 자립준비청년 친구들, 주목! 📢 부산자립지원전담기관에서 자립축하키트 🎁랑 5회기 프로그램까지 챙겨주는 핵이득 지원사업이 떴어요. 2026년 8월 18일부터 28일까지 신청 받으니 놓치지 말고 꼭 지원해봐요! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
+    "link": "https://www.busanjarip.or.kr/edu/sub5_2.php?zipEncode=9G2yYfwztb3B0zspKXwzPzwELTMj9uwBH5wELTMjX0tzNfgC39MBMedo10tB150BM5wAMetpSfMvWLME",
+    "date": "2026-08-18 ~ 2026-08-28",
+    "status": "모집중",
+    "source": "부산광역시자립지원전담기관",
+    "id": 949
   },
   {
     "title": "[삼산종합사회복지관] 자립준비청년들의 자립역량강화 PG '드립업' 8월 요리교실 안내",
