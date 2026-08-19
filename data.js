@@ -1,6 +1,6 @@
 // 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관 + 부산자립지원전담기관)
 // 마지막 크롤링 일시: 2026-08-19
-window.initialDataVersion = "v2026.08.19_v96";
+window.initialDataVersion = "v2026.08.19_v97";
 window.lastUpdated = "2026-08-19"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
 window.initialPolicies = [
   {
@@ -1232,6 +1232,21 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "서울자립지원전담기관",
     "id": 951
+  },
+  {
+    "title": "[서울현대교육재단] 미래내일 일경험 사업 「리턴투워크 3기」모집",
+    "category": "education",
+    "type": "공공·지자체",
+    "provider": "서울자립지원전담기관",
+    "region": "서울",
+    "target": "서울시 거주 보호아동 및 자립준비청년",
+    "content": "우리 친구들, 알바 경험 쌓고 싶은데 막막했잖아? 😵‍💫 서울자립지원전담기관에서 '리턴투워크 3기'라는 대박 기회를 가져왔어! 서울 사는 자립준비청년이라면 꿀 같은 일경험 쌓고, 미래 준비도 탄탄하게 할 수 있는 기회니까 8월 19일부터 9월 4일까지 놓치지 마! ✨ 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
+    "link": "https://www.sjarip.or.kr/home/kor/support/cmmn/view.do?menuPos=10&idx2=594",
+    "date": "2026-08-19 ~ 2026-09-04",
+    "status": "모집중",
+    "source": "서울자립지원전담기관",
+    "id": 956
   },
   {
     "id": 602,
