@@ -1,7 +1,7 @@
 // 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관 + 부산자립지원전담기관)
-// 마지막 크롤링 일시: 2026-08-19
-window.initialDataVersion = "v2026.08.19_v97";
-window.lastUpdated = "2026-08-19"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
+// 마지막 크롤링 일시: 2026-08-20
+window.initialDataVersion = "v2026.08.20_v98";
+window.lastUpdated = "2026-08-20"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
 window.initialPolicies = [
   {
     "id": 106,
@@ -767,6 +767,21 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "자립정보ON",
     "id": 955
+  },
+  {
+    "title": "[자립정보ON] 2026년 [청년의날 페스티벌] 참석자 모집",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "충남아동자립지원전담기관",
+    "region": "충남",
+    "target": "자립준비청년 대상",
+    "content": "얘들아, 📢 2026년 청년의 날 페스티벌에서 찐친 만들고 에너지 충전할 사람 여기 모여! 충남에 사는 자립준비청년이라면 누구나 참여 가능하고, 충남아동자립지원전담기관에서 멋진 경험을 선물해 줄 거야. 🎁 8월 20일부터 9월 18일까지 신청 기간이니까 놓치지 말고 지금 바로 지원해봐! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2047&menuPos=1",
+    "date": "2026-08-20 ~ 2026-09-18",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 957
   },
   {
     "id": 505,
