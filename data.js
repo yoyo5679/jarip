@@ -1,7 +1,7 @@
 // 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관 + 부산자립지원전담기관)
-// 마지막 크롤링 일시: 2026-08-25
-window.initialDataVersion = "v2026.08.25_v101";
-window.lastUpdated = "2026-08-25"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
+// 마지막 크롤링 일시: 2026-08-26
+window.initialDataVersion = "v2026.08.26_v102";
+window.lastUpdated = "2026-08-26"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
 window.initialPolicies = [
   {
     "id": 106,
@@ -977,6 +977,36 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "자립정보ON",
     "id": 979
+  },
+  {
+    "title": "[자립정보ON] 2026년 9월 자립역량강화교육 체험클래스",
+    "category": "education",
+    "type": "공공·지자체",
+    "provider": "충남아동자립지원전담기관",
+    "region": "충남",
+    "target": "자립준비청년 대상",
+    "content": "충남 친구들 주목! 📢 2026년 9월, 충남아동자립지원전담기관에서 자립역량강화교육 체험클래스 신청을 받아요. 혼자서 이것저것 준비하기 막막했다면, 이번 기회에 재미있는 클래스 들으면서 꿀팁도 얻어가자! 🍯 신청은 2026년 8월 25일부터 9월 1일까지니까 놓치지 마세요! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2065&menuPos=1",
+    "date": "2026-08-25 ~ 2026-09-01",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 980
+  },
+  {
+    "title": "[자립정보ON] 2026년도 한국환경공단 신입직원 채용(~9/8)",
+    "category": "job",
+    "type": "공공·지자체",
+    "provider": "한국환경공단",
+    "region": "전국",
+    "target": "자립준비청년 대상",
+    "content": "와우! 📢 환경 지키는 멋진 직업에 관심 있는 친구들 주목! 🌏 한국환경공단에서 신입 직원을 채용한대! 자립준비청년들을 위한 특별한 기회니까 놓치지 마. 9월 8일까지 접수니까 서둘러 고고! 🏃‍♀️ 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2064&menuPos=1",
+    "date": "2026-08-28 ~ 2026-09-08",
+    "status": "모집예정",
+    "source": "자립정보ON",
+    "id": 981
   },
   {
     "id": 505,
