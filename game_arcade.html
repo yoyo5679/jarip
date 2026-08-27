@@ -546,6 +546,31 @@
       color: var(--accent)
     }
 
+    .btn-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 14px;
+      padding: 10px 18px;
+      border: 1px dashed var(--accent);
+      border-radius: 12px;
+      background: rgba(255, 204, 0, 0.08);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background .15s ease
+    }
+
+    .btn-hint:hover {
+      background: rgba(255, 204, 0, 0.2)
+    }
+
+    .btn-hint:disabled {
+      opacity: .5;
+      cursor: default
+    }
+
     /* ===== Victory Modal Content ===== */
     .win-content {
       text-align: center;
@@ -1327,6 +1352,7 @@
       <div class="modal-subtitle" id="modalSub"></div>
       <div class="quiz-q" id="modalQ"></div>
       <div id="modalContent"></div>
+      <div><button class="btn-hint" id="btnHint">💡 힌트 보기</button></div>
       <div class="feedback-msg" id="modalFeedback"></div>
       <div class="hint-text hidden" id="modalHint"></div>
     </div>
@@ -2321,6 +2347,13 @@
       el('modalFeedback').textContent = '';
       el('modalHint').classList.add('hidden');
 
+      // 힌트 버튼 초기화 (매 퀴즈마다 다시 사용 가능)
+      const hintBtn = el('btnHint');
+      if (hintBtn) {
+        hintBtn.disabled = false;
+        hintBtn.textContent = '💡 힌트 보기';
+      }
+
       const content = el('modalContent'); content.innerHTML = '';
 
       if (stage.type === 'input') {
@@ -2405,6 +2438,16 @@
 
     el('modalClose').onclick = () => el('quizModal').classList.remove('open');
     el('winClose').onclick = () => el('winModal').classList.remove('open');
+
+    // 힌트 보기 버튼: 정답을 몰라도 눌러서 힌트를 볼 수 있어요
+    el('btnHint').onclick = () => {
+      const stage = STAGES[state.stageIdx];
+      if (!stage || !stage.hints) return;
+      el('modalHint').textContent = `💡 힌트: ${stage.hints.join(' ')}`;
+      el('modalHint').classList.remove('hidden');
+      el('btnHint').disabled = true;
+      el('btnHint').textContent = '💡 힌트를 확인했어요';
+    };
 
     /* ---------- Policy Codex ---------- */
     function renderCodex() {
