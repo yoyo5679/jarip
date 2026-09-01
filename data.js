@@ -1,7 +1,7 @@
 // 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관 + 부산자립지원전담기관)
-// 마지막 크롤링 일시: 2026-08-31
-window.initialDataVersion = "v2026.08.31_v105";
-window.lastUpdated = "2026-08-31"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
+// 마지막 크롤링 일시: 2026-09-01
+window.initialDataVersion = "v2026.09.01_v106";
+window.lastUpdated = "2026-09-01"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
 window.initialPolicies = [
   {
     "id": 106,
@@ -1112,6 +1112,81 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "자립정보ON",
     "id": 995
+  },
+  {
+    "title": "[자립정보ON] 서울숲 전시, 함께할 청년 작가를 찾습니다",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "한국고아사랑협회",
+    "region": "전국",
+    "target": "자립준비청년 대상",
+    "content": "한국고아사랑협회에서 우리 자립준비청년들을 위해 준비한 [서울숲 전시, 함께할 청년 작가를 찾습니다] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 우측 하단의 '원문 바로가기' 링크를 꾹~ 눌러서 꼼꼼히 확인해봐요! 😉",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2077&menuPos=1",
+    "date": "2026-08-31 ~ 2026-09-11",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 998
+  },
+  {
+    "title": "[자립정보ON] 자립준비청년 매트리스 지원사업",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "사단법인 야나",
+    "region": "서울 외 (1)",
+    "target": "자립준비청년 대상",
+    "content": "사단법인 야나에서 우리 자립준비청년들을 위해 준비한 [자립준비청년 매트리스 지원사업] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 우측 하단의 '원문 바로가기' 링크를 꾹~ 눌러서 꼼꼼히 확인해봐요! 😉",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2076&menuPos=1",
+    "date": "상시 모집",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 999
+  },
+  {
+    "title": "[자립정보ON] 이랜드 인생학교",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "이랜드재단",
+    "region": "전국",
+    "target": "자립준비청년 대상",
+    "content": "이랜드재단에서 우리 자립준비청년들을 위해 준비한 [이랜드 인생학교] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 우측 하단의 '원문 바로가기' 링크를 꾹~ 눌러서 꼼꼼히 확인해봐요! 😉",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2075&menuPos=1",
+    "date": "2026-08-31 ~ 2026-09-05",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 1000
+  },
+  {
+    "title": "[자립정보ON] 포니정재단 발돋움장학사업",
+    "category": "economic",
+    "type": "공공·지자체",
+    "provider": "아이들과미래재단",
+    "region": "전국",
+    "target": "자립준비청년 대상",
+    "content": "아이들과미래재단에서 우리 자립준비청년들을 위해 준비한 [포니정재단 발돋움장학사업] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 우측 하단의 '원문 바로가기' 링크를 꾹~ 눌러서 꼼꼼히 확인해봐요! 😉",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2074&menuPos=1",
+    "date": "2026-08-26 ~ 2026-09-14",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 1001
+  },
+  {
+    "title": "[자립정보ON] 「경기도자립준비청년 법률SOS (4차,경기북부)」 참여",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "경기도자립지원전담기관",
+    "region": "경기",
+    "target": "자립준비청년 대상",
+    "content": "경기도자립지원전담기관에서 우리 자립준비청년들을 위해 준비한 [「경기도자립준비청년 법률SOS (4차,경기북부)」 참여] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 우측 하단의 '원문 바로가기' 링크를 꾹~ 눌러서 꼼꼼히 확인해봐요! 😉",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2073&menuPos=1",
+    "date": "2026-08-28 ~ 2026-09-14",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 1002
   },
   {
     "id": 505,
