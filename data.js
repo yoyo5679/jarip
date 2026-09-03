@@ -1,7 +1,7 @@
 // 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관 + 부산자립지원전담기관)
-// 마지막 크롤링 일시: 2026-09-03
-window.initialDataVersion = "v2026.09.03_v108";
-window.lastUpdated = "2026-09-03"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
+// 마지막 크롤링 일시: 2026-09-04
+window.initialDataVersion = "v2026.09.04_v109";
+window.lastUpdated = "2026-09-04"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
 window.initialPolicies = [
   {
     "id": 106,
@@ -2477,6 +2477,36 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "부산광역시자립지원전담기관",
     "id": 984
+  },
+  {
+    "title": "[부산자립지원전담기관] 따숨키트지원사업 4회기(추석) 명절음식 만들기 참여...",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "부산광역시보호아동자립지원센터",
+    "region": "부산",
+    "target": "부산 거주 보호연장아동 및 자립준비청년",
+    "content": "부산 친구들 주목! 📣 추석 명절, 혼자 보내지 말고 우리 같이 맛있는 명절 음식 만들어볼까요? 부산자립지원전담기관에서 따뜻한 명절 키트도 받고, 요리 실력도 뽐낼 수 있는 기회가 찾아왔어요! 🧑‍🍳 9월 3일부터 10일까지 신청 가능하니 놓치지 마세요! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
+    "link": "https://www.busanjarip.or.kr/edu/sub5_2.php?zipEncode=9G2yYfwztb3B0zspKXwzPzwELTMj9uwBH5wELTMjX0tzNfgC39MBMato10tB150BM5wAMetpSfMvWLME",
+    "date": "2026-09-03 ~ 2026-09-10",
+    "status": "모집중",
+    "source": "부산광역시자립지원전담기관",
+    "id": 1010
+  },
+  {
+    "title": "[부산자립지원전담기관] 따숨키트지원사업 4회기(추석) 참여자 모집",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "부산광역시보호아동자립지원센터",
+    "region": "부산",
+    "target": "부산 거주 보호연장아동 및 자립준비청년",
+    "content": "부산 사는 친구들 주목! 🙋‍♀️ 곧 있으면 추석인데, 우리 명절 분위기 좀 내볼까? 부산자립지원전담기관에서 센스 터지는 따숨키트를 준비했대! ✨ 9월 3일부터 10일까지 딱 일주일간 신청 받으니, 서둘러서 푸짐한 키트 겟하고 행복한 추석 보내자! 🌕 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
+    "link": "https://www.busanjarip.or.kr/edu/sub5_2.php?zipEncode=9G2yYfwztb3B0zspKXwzPzwELTMj9uwBH5wELTMjX0tzNfgC39MBMKdo10tB150BM5wAMetpSfMvWLME",
+    "date": "2026-09-03 ~ 2026-09-10",
+    "status": "모집중",
+    "source": "부산광역시자립지원전담기관",
+    "id": 1011
   },
   {
     "title": "[삼산종합사회복지관] 자립준비청년들의 자립역량강화 PG '드립업' 8월 요리교실 안내",
