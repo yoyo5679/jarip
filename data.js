@@ -1,7 +1,7 @@
 // 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관 + 부산자립지원전담기관)
-// 마지막 크롤링 일시: 2026-09-04
-window.initialDataVersion = "v2026.09.04_v109";
-window.lastUpdated = "2026-09-04"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
+// 마지막 크롤링 일시: 2026-09-07
+window.initialDataVersion = "v2026.09.07_v110";
+window.lastUpdated = "2026-09-07"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
 window.initialPolicies = [
   {
     "id": 106,
@@ -1219,6 +1219,81 @@ window.initialPolicies = [
     "id": 1008
   },
   {
+    "title": "[자립정보ON] 청년의날 맞이, 국회 자립 대담[자립, 무공해]",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "초록우산 옹호사업본부",
+    "region": "전국",
+    "target": "자립준비청년 대상",
+    "content": "얘들아, 9월 7일부터 22일까지 국회에서 자립준비청년들을 위한 특별한 대담회가 열린대! 🗣️ 초록우산 옹호사업본부에서 청년의 날을 맞아 준비한 \"자립, 무공해\" 대담에서 우리들의 진짜 이야기를 들려줄 기회야. 😉 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2087&menuPos=1",
+    "date": "2026-09-07 ~ 2026-09-22",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 1015
+  },
+  {
+    "title": "[자립정보ON] 청년사업가 지원사업",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "드림메이커스 사회적협동조합",
+    "region": "전국",
+    "target": "자립준비청년 대상",
+    "content": "사장님 꿈나무들 여기 모여랏! 🙋‍♀️ 드림메이커스 사회적협동조합에서 전국 자립준비청년들을 위한 '청년사업가 지원사업'을 상시 모집하고 있대! ✨ 번뜩이는 아이디어가 있다면 망설이지 말고 도전해서 멋진 사장님이 되어보는 건 어때? 🤩 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2086&menuPos=1",
+    "date": "상시 모집",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 1016
+  },
+  {
+    "title": "[온:청년]자립생활에 꼭! 필요한 안부박스를 지원합니다",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "월드비전",
+    "region": "전국",
+    "target": "자립준비청년 대상",
+    "content": "얘들아, 월드비전에서 자립 준비하는 친구들을 위해 따뜻한 안부박스를 쏜대! 🎁 9월 4일부터 25일까지 전국 어디든 신청 가능하니까, 혼자 애쓰지 말고 꼭 신청해서 꿀템들 챙겨봐! 💪 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2085&menuPos=1",
+    "date": "2026-09-04 ~ 2026-09-25",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 1017
+  },
+  {
+    "title": "[자립정보ON] 2026  서울시 청년인생설계학교 3기 참여자 모집",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "서울특별시",
+    "region": "서울",
+    "target": "자립준비청년 대상",
+    "content": "얘들아, 혹시 내 미래가 좀 막막하게 느껴질 때 없어? 🤔 서울시에서 우리 자립준비청년 친구들을 위한 '청년인생설계학교 3기'를 연대! 🌟 9월 7일부터 28일까지 신청받으니, 미리 내 인생 계획 세우고 싶은 친구들은 놓치지 마! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2084&menuPos=1",
+    "date": "2026-09-07 ~ 2026-09-28",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 1018
+  },
+  {
+    "title": "[자립정보ON] 추석 때 뭐해? 공연 보고 삼겹살 먹고!",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "한국고아사랑협회",
+    "region": "전국",
+    "target": "자립준비청년 대상",
+    "content": "얘들아, 추석 때 혼자 보낼까 봐 심심했지? 🥺 한국고아사랑협회에서 전국 자립준비청년 친구들을 위해 공연도 보여주고 맛난 삼겹살까지 쏜대! 🥩 9월 1일부터 21일까지 신청 기간이니까 놓치지 말고 지금 바로 신청 고고! 🏃‍♀️ 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2081&menuPos=1",
+    "date": "2026-09-01 ~ 2026-09-21",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 1019
+  },
+  {
     "id": 505,
     "title": "[서울자립지원전담기관] 자립준비청년 법률상담(매월 진행)",
     "category": "life",
@@ -2209,6 +2284,21 @@ window.initialPolicies = [
     "id": 991
   },
   {
+    "title": "[9/7~] 2026년 하반기 단기자립체험 모집 안내",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "경기도자립지원전담기관",
+    "region": "경기",
+    "target": "경기도 거주 보호아동 및 자립준비청년",
+    "content": "경기도에 사는 친구들 주목! 👀 2026년 하반기 단기자립체험 기회가 왔어요! 🏠 경기도자립지원전담기관에서 미리 자립생활을 경험해볼 수 있는 프로그램을 모집 중인데, 완전 꿀팁이라구요! 🍯 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
+    "link": "https://www.ggjarip.or.kr/community_01.html?actobj=notice&acttype=VIEWINFO&bbs_code=notice&bbs_key=79739098834443_6a96850cc634c",
+    "date": "2026-09-01 ~ 모집 시까지",
+    "status": "모집중",
+    "source": "경기도자립지원전담기관",
+    "id": 1014
+  },
+  {
     "id": 702,
     "title": "[부산자립지원전담기관] 2026 나로서기 자립준비청년 SOS 긴급지원사업",
     "category": "economic",
@@ -2507,6 +2597,36 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "부산광역시자립지원전담기관",
     "id": 1011
+  },
+  {
+    "title": "[부산자립지원전담기관] 자립축하사업 자립축하키트 6회기 참여자 모집",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "부산광역시보호아동자립지원센터",
+    "region": "부산",
+    "target": "부산 거주 보호연장아동 및 자립준비청년",
+    "content": "부산에 사는 자립준비청년 친구들! 🙋‍♀️ 혼자서도 씩씩하게 잘 해내고 있는 여러분을 응원하며, 부산광역시보호아동자립지원센터에서 특별한 자립축하키트를 선물해준대요! 🎁 9월 7일부터 23일까지 신청 가능하니, 놓치지 말고 꼭 받아가세요! ✨ 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
+    "link": "https://www.busanjarip.or.kr/edu/sub5_2.php?zipEncode=9G2yYfwztb3B0zspKXwzPzwELTMj9uwBH5wELTMjX0tzNfgC39MBMito10tB150BM5wAMetpSfMvWLME",
+    "date": "2026-09-07 ~ 2026-09-23",
+    "status": "모집중",
+    "source": "부산광역시자립지원전담기관",
+    "id": 1012
+  },
+  {
+    "title": "[HUG WITH START] 주거지원사업 추가참여자 모집",
+    "category": "housing",
+    "type": "공공·지자체",
+    "provider": "부산광역시보호아동자립지원센터",
+    "region": "부산",
+    "target": "부산 거주 보호연장아동 및 자립준비청년",
+    "content": "부산 사는 친구들 주목! 📢 \"HUG WITH START\"에서 주거지원사업 추가 참여자를 모집한대! 🏠 든든한 보금자리, 부산시보호아동자립지원센터가 도와줄 테니, 9월 7일부터 18일까지 놓치지 말고 신청해 봐! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
+    "link": "https://www.busanjarip.or.kr/edu/sub5_2.php?zipEncode=9G2yYfwztb3B0zspKXwzPzwELTMj9uwBH5wELTMjX0tzNfgC39MBMeto10tB150BM5wAMetpSfMvWLME",
+    "date": "2026-09-07 ~ 2026-09-18",
+    "status": "모집중",
+    "source": "부산광역시자립지원전담기관",
+    "id": 1013
   },
   {
     "title": "[삼산종합사회복지관] 자립준비청년들의 자립역량강화 PG '드립업' 8월 요리교실 안내",
