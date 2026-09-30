@@ -247,6 +247,8 @@
     .rb.jump { background: rgba(80, 170, 255, .5); }
     .rb.skill { background: rgba(190, 110, 255, .5); width: clamp(40px, 11vh, 50px); }
     .rb.skill.cd { filter: grayscale(1); }
+    .rb.dash { display: none; background: rgba(90, 210, 200, .5); width: clamp(40px, 11vh, 50px); }
+    .rb.dash.show { display: flex; }
     .rb.talk { display: none; background: rgba(255, 196, 0, .8); opacity: 1; animation: talkPulse 1.2s ease-in-out infinite; }
     .rb.talk.show { display: flex; }
     @keyframes talkPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
@@ -283,6 +285,36 @@
     .item .btn { padding: 5px 12px; font-size: 14px; margin-top: 2px; }
     .item.owned { background: #f3fbef; border-color: #b9e0a5; }
     .item .btn:disabled { filter: grayscale(1); opacity: .6; cursor: default; }
+    /* ---------- 미니게임 ---------- */
+    .mini { position: absolute; inset: 0; z-index: 36; display: none; background: #000; }
+    .mini.on { display: block; }
+    .mini canvas { touch-action: none; }
+    .mini-top { position: absolute; left: 0; right: 0; top: 0; display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+      background: linear-gradient(rgba(0,0,0,.55), transparent); color: #fff; font-size: clamp(14px, 2.2vw, 22px); }
+    .mini-sub { color: #ffe08a; font-size: .8em; }
+    .mini-x { margin-left: auto; font-family: inherit; font-size: 18px; width: 38px; height: 38px; border-radius: 50%; border: 2px solid rgba(255,255,255,.6); background: rgba(0,0,0,.35); color: #fff; cursor: pointer; }
+    .mini-help { position: absolute; left: 50%; bottom: 3%; transform: translateX(-50%); width: min(92%, 760px); text-align: center;
+      background: rgba(40,28,18,.72); color: #fff; border-radius: 12px; padding: 6px 12px; font-size: clamp(11px, 1.6vw, 15px); pointer-events: none; }
+    .mini-result { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.45); }
+    .mini-result.on { display: flex; }
+    .mini-card { background: var(--panel); border: 3px solid var(--panel-edge); border-radius: 20px; padding: 18px 26px; text-align: center; min-width: 260px; animation: pop .4s cubic-bezier(.2,1.6,.4,1); }
+    .mini-card h3 { margin: 0; font-weight: normal; font-size: 28px; color: #8a4b0c; }
+    .mini-stars { font-size: 38px; margin: 6px 0; min-height: 10px; }
+    .mini-card p { margin: 4px 0 12px; color: #6b4a2a; }
+    .mini-btns { display: flex; gap: 8px; justify-content: center; }
+    .stage-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 12px; }
+    .stages { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .stg { font-family: inherit; cursor: pointer; border-radius: 14px; border: 2px solid #ecd4ab; background: #fff; padding: 8px 4px; color: #8a4b0c; font-size: 18px; }
+    .stg small { display: block; font-size: 13px; letter-spacing: -1px; }
+    .stg.clear { background: #fff7e0; border-color: #ffc24a; }
+    .stg:disabled { background: #f1e8d8; color: #b4a184; border-style: dashed; cursor: default; }
+    .pcard.letter { background: #fffdf5; }
+    .ltext { font-size: 16px !important; line-height: 1.7 !important; margin: 10px 0 6px !important; color: #4a3520 !important; }
+    .lfrom { text-align: right; color: #a0703a !important; }
+    .book-sec { margin: 16px 0 8px; font-size: 18px; color: #8a4b0c; text-align: left; }
+    .letters { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+    .lbtn { font-family: inherit; font-size: 14px; cursor: pointer; border-radius: 12px; padding: 8px; border: 2px solid #ecd4ab; background: #fff; color: #8a4b0c; }
+    .lbtn:disabled { background: #f1e8d8; color: #b4a184; border-style: dashed; cursor: default; }
     .end-home { max-width: 100%; max-height: 30vh; border-radius: 14px; border: 3px solid #ecd4ab; margin: 4px 0 10px; }
     .loading { color: #fff; font-size: 18px; }
     .loading .bar { width: 220px; margin: 10px auto 0; height: 12px; }
@@ -299,6 +331,7 @@
       <div class="btns">
         <!-- NPC·포탈 근처에서만 나타나는 대화 버튼 (↑ 키와 같은 역할) -->
         <div class="rb talk" data-k="up" id="talkBtn"><span class="i">💬</span>대화</div>
+        <div class="rb dash" data-k="dash" id="dashBtn"><span class="i">💨</span>대시</div>
         <div class="rb skill" data-k="skill" id="skillBtn"><span class="i">✨</span>스킬</div>
         <div class="rb jump" data-k="jump"><span class="i">⤴</span>점프</div>
         <div class="rb attack" data-k="attack"><span class="i">⭐</span>공격</div>
@@ -323,13 +356,14 @@
           <button class="qs" data-pot="potL" title="큰 물약 (2)">💖<b id="qPotL">0</b><small>2</small></button>
         </div>
         <div class="hud-btns">
+          <button class="hbtn" id="stageBtn">🎮 스테이지</button>
           <button class="hbtn" id="bookBtn">📖 정책 도감</button>
           <button class="hbtn" id="exitBtn">🏠 나가기</button>
         </div>
         <div class="tracker" id="tracker"></div>
         <div class="map-banner" id="mapBanner"></div>
         <div class="toast" id="toast"></div>
-        <div class="keys-help" id="keysHelp">← → 이동 · Space 점프 · Z 공격 · X 스킬 · ↑ 대화/포탈/사다리 · ↓+Space 내려가기 · 1·2 물약</div>
+        <div class="keys-help" id="keysHelp">← → 이동 · Space 점프 · Z 공격 · X 스킬 · ↑ 대화/포탈/사다리 · ↓+Space 내려가기 · 1·2 물약 · V 대시</div>
       </div>
 
 
@@ -345,7 +379,7 @@
       </div>
 
       <!-- Card reward popup -->
-      <div class="card-pop" id="cardPop"></div>
+      <div class="card-pop" id="cardPop" style="z-index:45"></div>
 
       <!-- Loading -->
       <div class="screen on" id="scrLoading" style="background:#1e2a44">
@@ -376,6 +410,20 @@
         </div>
       </div>
 
+      <!-- Stage select (미니게임) -->
+      <div class="screen dim" id="scrStage" style="background:rgba(0,0,0,.25)">
+        <div class="panel">
+          <h2>🎮 도전 스테이지</h2>
+          <p class="lead">별을 모으면 희망코인을 받아요! 앞 단계를 깨면 다음 단계가 열려요. · <b id="stageStars"></b></p>
+          <div class="stage-tabs">
+            <button class="btn" data-st="gate">🏃 게이트 달리기</button>
+            <button class="btn ghost" data-st="pin">🧷 핀 뽑기 퍼즐</button>
+          </div>
+          <div class="stages" id="stageList"></div>
+          <div class="btn-row"><button class="btn" id="stageClose">닫기</button></div>
+        </div>
+      </div>
+
       <!-- Shop -->
       <div class="screen dim" id="scrShop" style="background:rgba(0,0,0,.25)">
         <div class="panel">
@@ -384,6 +432,7 @@
           <div class="shop-tabs">
             <button class="btn" data-tab="pot">🧪 물약</button>
             <button class="btn ghost" data-tab="furn">🛋️ 가구</button>
+            <button class="btn ghost" data-tab="skill">✨ 스킬</button>
           </div>
           <div class="shop-list" id="shopList"></div>
           <div class="btn-row"><button class="btn" id="shopClose">닫기</button></div>
@@ -394,8 +443,10 @@
       <div class="screen dim" id="scrBook" style="background:rgba(0,0,0,.25)">
         <div class="panel">
           <h2>📖 정책 도감</h2>
-          <p class="lead">퀘스트를 깨면서 모은 자립 지원 정책이에요. 모두 모아봐요!</p>
+          <p class="lead">퀘스트를 깨면서 모은 자립 지원 정책이에요. 모두 모아봐요! · <b id="bookCount"></b></p>
           <div class="cards" id="bookCards"></div>
+          <div class="book-sec" id="letterHead"></div>
+          <div class="letters" id="bookLetters"></div>
           <div class="btn-row"><button class="btn" id="bookClose">닫기</button></div>
         </div>
       </div>
@@ -418,6 +469,9 @@
     </div>
   </div>
 
+<script src="assets/adventure/pin_logic.js"></script>
+<script src="assets/adventure/pin_levels.js"></script>
+<script src="assets/adventure/minigames.js"></script>
 <script>
 (() => {
   'use strict';
@@ -453,7 +507,40 @@
     counselor: { img: 'npc_counselor', name: '마음쉼터 상담 선생님' },
     mentor:    { img: 'npc_mentor',    name: '자립 선배 태오' },
     shop:      { img: 'npc_shop',      name: '잡화점 하나 사장님' },
+    center:    { img: 'npc_center',    name: '지원센터 윤슬 선생님' },
+    teacher:   { img: 'npc_teacher',   name: '배움마켓 강 강사' },
+    pharm:     { img: 'npc_pharm',     name: '동네 약국 약사님' },
+    agency:    { img: 'npc_agency',    name: '전담기관 한결 상담원' },
+    cafe:      { img: 'npc_cafe',      name: '햇살카페 도윤 사장님' },
+    jobcenter: { img: 'npc_jobcenter', name: '고용센터 서진 상담사' },
+    visitor:   { img: 'npc_director',  name: '원장님' }, // '내 첫 집'에 찾아오는 원장님 (집들이 퀘스트)
   };
+
+  // 스킬 상점: 코인으로 산다
+  const SKILLS = {
+    djump:  { em: '🪽', name: '2단 점프', price: 150, desc: '공중에서 점프를 한 번 더! 높은 발판도 거뜬해요.' },
+    dash:   { em: '💨', name: '대시', price: 200, desc: '앞으로 휙 순간 이동! PC는 V 키, 폰은 대시 버튼.' },
+    magnet: { em: '🧲', name: '코인 자석', price: 120, desc: '근처에 떨어진 코인과 아이템이 알아서 따라와요.' },
+  };
+
+  // 아케이드 모드 편지 15통 — 맵 곳곳에 숨겨둔 수집품. {아}/{이가} 등은 이름 받침에 맞춰 바뀐다
+  const LETTERS = [
+    { map: 'home',   x: 720,  y: 302, text: '{name아}, 네가 처음 그룹홈에 왔던 날이 아직도 선해. 그 작던 아이가 이렇게 멋지고 든든한 어른이 됐구나.', from: '원장님' },
+    { map: 'home',   x: 1100, y: 385, text: '서두르지 않아도 돼. 네 속도로 걸어도 충분히 멀리 갈 수 있어. 파이팅!', from: '담당 선생님' },
+    { map: 'home',   x: 1400, y: 300, text: '매일 밤 기도했어. 우리 {name이가} 따뜻한 곳에서 배불리 먹고 잘 자고 있기를. 보고 싶구나.', from: '원장님' },
+    { map: 'town',   x: 1100, y: 212, text: '모르는 걸 물어보러 온 네가 이미 대단한 거야. 배움에는 나이도 늦음도 없단다.', from: '배움마켓 강사' },
+    { map: 'town',   x: 1560, y: 385, text: '{name} 씨, 매달 20일은 국가가 {name} 씨를 기억하는 날이에요. 잊지 않을게요.', from: '행정복지센터 복지팀' },
+    { map: 'town',   x: 1950, y: 300, text: '오늘 처음으로 내 이름으로 된 통장을 열었다. 손이 떨렸다. 이게 내 돈이라니... 아직 실감이 안 난다.', from: '{name}의 일기' },
+    { map: 'bank',   x: 820,  y: 300, text: '꼬마 때 동전 모으러 오던 아이가 벌써 이렇게 컸네요. 앞으로도 좋은 일만 가득하길.', from: '○○은행 창구' },
+    { map: 'bank',   x: 1800, y: 215, text: '5천만원... 이 숫자의 무게는 돈이 아니라, 나를 믿어준 사람들의 마음이었다.', from: '{name}의 메모' },
+    { map: 'bank',   x: 2100, y: 380, text: '같이 걸어서 여기까지 왔다. 뒤돌아보면 우리가 걸어온 발자국이 얼마나 많은지 보여.', from: '동료 청년' },
+    { map: 'house',  x: 680,  y: 302, text: '좋은 집이야. 여기서 따뜻한 밥 해먹고, 편히 자렴. 축하한다, {name아}.', from: '행복부동산 아저씨' },
+    { map: 'house',  x: 1200, y: 120, text: '아프면 참지 말고 꼭 오렴. 건강이 제일이야.', from: '동네 약국 약사님' },
+    { map: 'house',  x: 1520, y: 300, text: '전국 어디로 이사 가든 우리가 찾아갈게. {name} 씨는 혼자가 아니에요.', from: '자립지원전담기관' },
+    { map: 'forest', x: 1030, y: 302, text: '울어도 괜찮아. 그건 약한 게 아니야. 마음껏 울고 나면, 조금 더 가벼워질 거야.', from: '상담사 선생님' },
+    { map: 'forest', x: 1650, y: 300, text: '{name아}, 이 길엔 늘 함께 걷는 우리가 있어. 서로 정보도 나누고, 앞으로도 쭉 같이 가자.', from: '자립 커뮤니티 동기' },
+    { map: 'forest', x: 2300, y: 480, text: '{name아}, 이 편지들은 네가 이 세상에서 사랑받고 있다는 증거야. 앞으로도 쭉, 우리가 응원할게.', from: '우리 모두' },
+  ];
 
   // 상점: 물약은 인벤토리로, 가구는 '내 집' 정해진 자리에 놓인다 (x, 바닥 기준 y, 높이)
   const POTIONS = {
@@ -472,23 +559,42 @@
     furn_tv:     { name: 'TV와 게임기',   price: 200, x: 1030, y: 480, h: 104, desc: '쉬는 날엔 게임 한 판.' },
     furn_bed:    { name: '포근한 침대',   price: 220, x: 1170, y: 480, h: 96,  desc: '푹 자야 내일도 힘이 나요.' },
   };
+  const SKILL_HOW = {
+    djump: IS_TOUCH ? '공중에서 점프 버튼을 한 번 더 눌러봐.' : '공중에서 Space를 한 번 더 눌러봐.',
+    dash: IS_TOUCH ? '오른쪽에 💨 대시 버튼이 생겼어요.' : 'V 키로 대시!',
+    magnet: '근처 코인이 알아서 따라와요.',
+  };
   const BANK_CAP = 50; // 하루 매칭 한도(코인). 넣은 돈의 2배를 얹어준다 (디딤씨앗통장 1:2)
 
   const MOBS = {
     worry:  { img: 'mob_worry',  name: '걱정 구름',     h: 56,  hp: 30,  dmg: 8,  exp: 12,  speed: 45, coin: [3, 8] },
     debt:   { img: 'mob_debt',   name: '빚 코인',       h: 56,  hp: 50,  dmg: 11, exp: 18,  speed: 58, coin: [6, 14] },
     lonely: { img: 'mob_lonely', name: '외로움 그림자', h: 60,  hp: 80,  dmg: 14, exp: 26,  speed: 40, coin: [8, 18] },
+    scam:   { img: 'mob_scam',   name: '스미싱 문자',   h: 58,  hp: 70,  dmg: 13, exp: 24,  speed: 64, coin: [8, 16] },
     boss:   { img: 'mob_boss',   name: '불안 대왕',     h: 170, hp: 750, dmg: 20, exp: 260, speed: 55, coin: [150, 200], boss: true },
   };
 
   const CARDS = {
-    extend:  { em: '🏡', title: '보호기간 연장',   desc: '원하면 만 24세까지 시설이나 위탁가정에서 더 지낼 수 있어요. 아직 준비가 덜 됐다면 서두르지 않아도 돼요.' },
-    allow:   { em: '💸', title: '자립수당',         desc: '보호가 끝난 뒤 5년 동안 매달 50만원씩 들어와요. 매달 생활비 걱정을 조금 덜어줘요.' },
+    name:    { em: '🌅', title: '자립준비청년',      desc: '2021년부터 \'보호종료아동\' 대신 쓰는 이름이에요. 보호가 끝난 아이가 아니라, 스스로 설 것을 준비하는 청년이라는 뜻이에요.' },
+    extend: { em: '🏡', title: '보호기간 연장',   desc: '원하면 만 24세까지 시설이나 위탁가정에서 더 지낼 수 있어요. 아직 준비가 덜 됐다면 서두르지 않아도 돼요.' },
+    center:  { em: '🤝', title: '아동공동생활가정 지원센터', desc: '서울시 그룹홈(아동공동생활가정)을 나온 청년을 돕는 곳이에요. 퇴소 6개월 전부터 자립 뒤까지 한 사람을 1:1로 챙기는 집중사례관리를 해요.' },
+    baeum:   { em: '🛒', title: '배움마켓',         desc: '서울시가 전국 최초로 만든 자립역량교육이에요. 금융·주거·노동·법률까지, 혼자 살아가는 법을 배워요.' },
+    allow:   { em: '💸', title: '자립수당',         desc: '보호가 끝난 뒤 5년 동안 매달 50만원씩 들어와요(매월 20일). 서울은 대중교통비 월 6만원도 5년간 더 지원해요.' },
     settle:  { em: '💰', title: '자립정착금',       desc: '독립할 때 한 번에 받는 목돈이에요. 금액은 지역마다 달라요(서울은 2,000만원). 쓰기 전에 꼭 계획부터 세워요!' },
     didim:   { em: '🌱', title: '디딤씨앗통장',     desc: '내가 저축한 돈의 2배를 나라가 더 넣어주는 통장이에요. 적은 돈이라도 꾸준히 넣으면 든든한 씨앗돈이 돼요.' },
     lh:      { em: '🏠', title: 'LH 전세임대주택',  desc: '전세금은 LH가 대부분 내주고, 나는 보증금 100만원만 내면 돼요. 2년마다 재계약하면서 오래 살 수 있어요.' },
     mind:    { em: '💜', title: '심리상담·정서지원', desc: '마음이 지칠 땐 전문 상담을 받을 수 있어요. 도움을 청하는 것도 용기예요. 혼자 버티지 않아도 괜찮아요.' },
+    medical: { em: '🩺', title: '의료비 지원',       desc: '병원·약국 진료비의 약 14%만 내면 돼요(의료급여 2종 수준). 보호가 끝난 뒤 5년까지 지원돼요. 아프면 참지 말고 병원부터!' },
+    agency:  { em: '📍', title: '자립지원전담기관',  desc: '전국 17개 시·도마다 있는, 자립준비청년만 전담해 돕는 기관이에요. 서울엔 서울자립지원전담기관이 있어요. 막히면 여기에 물어봐요.' },
     mentor:  { em: '🎐', title: '바람개비서포터즈', desc: '먼저 자립한 선배들이 후배를 챙겨주는 모임이에요. 궁금한 건 선배한테 편하게 물어봐요.' },
+    community: { em: '🧑‍🤝‍🧑', title: '자립준비청년 커뮤니티', desc: '같은 처지의 또래와 정보를 나누고 서로 돕는 자조모임이에요. 집 구하기, 돈 관리, 마음 다스리기 노하우를 함께 나눠요.' },
+    minwage: { em: '⏰', title: '최저임금',          desc: '2026년 최저임금은 시간당 10,320원이에요(주 40시간 일하면 월 2,156,880원). 이보다 적게 주면 법 위반이에요.' },
+    contract:{ em: '📝', title: '근로계약서',        desc: '일 시작 전에 임금·일하는 시간·쉬는 날을 적은 계약서를 쓰고, 한 부를 꼭 받아둬요. 안 써주면 법 위반이에요.' },
+    juhyu:   { em: '🗓️', title: '주휴수당',          desc: '한 주에 15시간 이상 일하고 약속한 날을 다 나오면, 쉬는 날 하루치 임금을 더 받아요.' },
+    call1350:{ em: '☎️', title: '월급 못 받으면 1350', desc: '월급이 밀리거나 부당한 일을 당하면 고용노동부 고객상담센터 1350에 물어봐요. 혼자 참지 않아도 돼요.' },
+    scam:    { em: '🛡️', title: '스미싱·보이스피싱 조심', desc: '모르는 번호가 보낸 링크는 누르지 말고 지워요. 돈이나 개인정보를 요구하면 112에 신고! "고수익 알바"는 한 번 더 의심해요.' },
+    total:   { em: '🧮', title: '5년 총 지원 약 5천만원', desc: '서울 자립정착금 2,000만원 + 자립수당 5년치(50만원×60개월) 3,000만원. 숫자보다 큰 건, 그만큼 나를 받쳐주는 손길이에요.' },
+    road:    { em: '🧭', title: '자립 로드맵',       desc: '보호 → 보호종료(또는 연장) → 배움·목돈 준비 → 내 집 마련 → 홀로서기. 단계마다 기댈 수 있는 제도가 있어요.' },
   };
 
   const QUESTS = {
@@ -603,7 +709,171 @@
         explain: '정답! <span class="hi">바람개비서포터즈</span>에서 선배들을 만날 수 있어. 막힐 땐 언제든 물어봐!',
       }],
       cards: ['mentor'], exp: 300, coins: 200,
-      after: '네 모험은 이제 시작이야. 응원할게!',
+      after: '참, 네 첫 집에 누가 찾아왔다던데? 첫 집 골목의 \'내 첫 집\' 포탈로 가 봐!',
+    },
+
+    /* ---- 스토리·아케이드 모드 내용을 옮긴 퀘스트 ---- */
+    qc: {
+      npc: 'center', title: '원장님 반찬통 찾기', requires: 'q1',
+      goal: { type: 'fetch', item: 'lunch', n: 1 }, goalLabel: '반찬통',
+      intro: [
+        '안녕, {name}! 나는 <span class="hi">서울시 아동공동생활가정 지원센터</span>에서 왔어. 그룹홈을 나서는 친구들을 계속 챙기는 게 내 일이야.',
+        '그런데 동생들이 장난으로 원장님이 싸 둔 🍱 <span class="hi">반찬통</span>을 언덕 꼭대기 발판에 숨겨놨대. 가져와 줄래?',
+      ],
+      active: '반찬통은 언덕 오른쪽 제일 높은 발판 위에 있어. 발판을 차례로 밟고 올라가 봐!',
+      ready: ['찾았구나! 원장님 마음이니까 꼭 챙겨 먹어.', '떠나기 전에 두 가지만 같이 확인하자.'],
+      quizzes: [{
+        q: '2021년부터 \'보호종료아동\' 대신 쓰는 이름이 있어. 스스로 설 것을 <span class="hi">준비하는 청년</span>이라는 뜻, 뭘까?',
+        choices: ['자립준비청년', '보호졸업청년', '독립청소년'], answer: 0,
+        hint: '\'자립\'으로 시작하는 여섯 글자야.',
+        explain: '맞아, <span class="hi">자립준비청년</span>! 보호가 끝난 아이가 아니라, 스스로 설 것을 준비하는 청년이라는 뜻이야.',
+      }, {
+        q: '그룹홈 청년 한 사람을 <span class="hi">1:1로 꾸준히 챙기는</span> 지원센터의 사업 이름은?',
+        choices: ['집중사례관리', '한 번 후원금 주고 끝', '퇴소하면 연락 끝'], answer: 0,
+        hint: '퇴소 6개월 전부터 자립 뒤까지, 한 사람을 전담해서 챙겨.',
+        explain: '정답! <span class="hi">집중사례관리</span>로 퇴소 6개월 전부터 1:1로 챙길게. 나가도 우리 인연은 안 끝나.',
+      }],
+      cards: ['name', 'center'], exp: 70, coins: 60,
+      after: '힘들면 언제든 연락해. 그룹홈을 나가도 우리 인연은 계속이야!',
+    },
+    qb: {
+      npc: 'teacher', title: '배움마켓 교실 지키기', requires: 'q1',
+      goal: { type: 'kill', mob: 'debt', n: 3 }, goalLabel: '빚 코인',
+      intro: [
+        '어서 와! 여기는 <span class="hi">배움마켓</span> 출장 교실이야. 통장 만들기, 월세 계약, 병원 가는 법까지 다 배우는 곳이지.',
+        '그런데 빚 코인들이 교실 앞을 어슬렁거려서 수업을 못 하고 있어. <span class="hi">빚 코인 3마리</span>만 쫓아줄래?',
+      ],
+      active: '빚 코인은 거리 오른쪽에 많아!',
+      ready: ['덕분에 수업 시작할 수 있겠다! 짧게 쪽지 시험 하나 볼까?'],
+      quizzes: [{
+        q: '서울시가 전국 최초로 만든 이 <span class="hi">자립역량교육</span>의 이름은?',
+        choices: ['배움마켓', '자립학교', '청년시장'], answer: 0,
+        hint: '\'배우는 시장(market)\'이라는 뜻이야.',
+        explain: '정답! <span class="hi">배움마켓</span>에서 금융·주거·노동·법률까지 살아가는 법을 배울 수 있어. 모르면 배우면 돼!',
+      }],
+      cards: ['baeum'], exp: 80, coins: 60,
+      after: '모르는 걸 물어보러 온 너, 이미 대단한 거야. 또 와!',
+    },
+    qm: {
+      npc: 'pharm', title: '동네 걱정 구름 쫓기', requires: 'q4',
+      goal: { type: 'kill', mob: 'worry', n: 3 }, goalLabel: '걱정 구름',
+      intro: [
+        '어머, 새로 이사 온 학생이구나? 혼자 살면 아파도 병원비 걱정에 꾹 참는 친구들이 많아.',
+        '요즘 동네에 걱정 구름이 퍼져서 다들 기운이 없네. <span class="hi">걱정 구름 3마리</span>만 쫓아줄래? 그럼 꼭 알아둘 걸 알려줄게.',
+      ],
+      active: '걱정 구름은 골목 바닥을 떠다녀!',
+      ready: ['고마워! 약속대로 알려줄게.'],
+      quizzes: [{
+        q: '자립준비청년 의료비 지원을 받으면, 병원·약국 진료비의 <span class="hi">몇 %만</span> 내면 될까?',
+        choices: ['약 14%', '약 50%', '100% 전부'], answer: 0,
+        hint: '의료급여 2종이랑 비슷한 수준이라 확 줄어들어.',
+        explain: '맞아! 진료비의 <span class="hi">약 14%만</span> 내면 돼. 보호가 끝나고 5년까지 지원되니까, 아프면 참지 말고 꼭 병원 가.',
+      }],
+      cards: ['medical'], exp: 120, coins: 90,
+      after: '아프면 참지 말고 꼭 오렴. 건강이 제일이야.',
+    },
+    qa: {
+      npc: 'agency', title: '사라진 안내문', requires: 'q4',
+      goal: { type: 'collect', item: 'guide', icon: '📋', n: 3, from: ['worry', 'debt', 'lonely'], rate: 0.6 }, goalLabel: '지원 안내문',
+      intro: [
+        '안녕하세요, <span class="hi">자립지원전담기관</span>에서 나왔어요. 자립준비청년만 전담해서 돕는 곳이에요.',
+        '그런데 나눠주려던 📋 <span class="hi">지원 안내문 3장</span>을 몬스터들이 가져가 버렸어요. 찾아다 줄래요?',
+      ],
+      active: '안내문은 이 골목 몬스터들이 들고 있어요!',
+      ready: ['찾아줘서 고마워요! 안내문 내용 같이 볼까요?'],
+      quizzes: [{
+        q: '전국 시·도에 있는 <span class="hi">자립지원전담기관</span>은 모두 몇 곳일까요? (광역 시·도 수와 같아요)',
+        choices: ['9곳', '17곳', '25곳'], answer: 1,
+        hint: '특별시·광역시·특별자치시 8곳 + 도 9곳!',
+        explain: '정답! 전국 <span class="hi">17개 시·도</span>마다 있어요. 서울엔 서울자립지원전담기관이 있고요. 서류 하나 막혀도 전화 주세요.',
+      }, {
+        q: '같은 처지의 또래가 모여 <span class="hi">정보를 나누고 서로 돕는 모임</span>을 뭐라고 할까요?',
+        choices: ['자조모임(자립준비청년 커뮤니티)', '유료 구독 모임', '혼자 버티기 모임'], answer: 0,
+        hint: '\'스스로(自) 돕는(助)\' 모임이에요.',
+        explain: '맞아요! <span class="hi">자조모임</span>에서 같은 길을 걷는 친구들을 만날 수 있어요. 혼자보다 같이가 훨씬 든든해요.',
+      }],
+      cards: ['agency', 'community'], exp: 130, coins: 100,
+      after: '전국 어디로 이사 가든 우리가 찾아갈게요. {name} 씨는 혼자가 아니에요.',
+    },
+    /* ---- 일터 거리 (새 지역) ---- */
+    qw1: {
+      npc: 'cafe', title: '사라진 주문서', requires: 'q4',
+      goal: { type: 'collect', item: 'order', icon: '🧾', n: 3, from: ['scam', 'debt'], rate: 0.6 }, goalLabel: '주문서',
+      intro: [
+        '어서 와요! 우리 카페 아르바이트 구하는 중인데, 마침 잘 왔네요.',
+        '그런데 스미싱 문자 몬스터들이 주문서를 다 채갔어요. 🧾 <span class="hi">주문서 3장</span>만 찾아줄래요? 찾아주면 바로 면접 볼게요!',
+      ],
+      active: '주문서는 거리의 스미싱 문자랑 빚 코인이 들고 있어요!',
+      ready: ['고마워요! 그럼 간단히 면접 볼까요? 일하기 전에 꼭 알아야 할 것부터요.'],
+      quizzes: [{
+        q: '2026년 <span class="hi">최저임금</span>은 시간당 얼마일까요?',
+        choices: ['9,860원', '10,030원', '10,320원'], answer: 2,
+        hint: '2025년 10,030원에서 290원 올랐어요.',
+        explain: '정답! 2026년 최저임금은 시간당 <span class="hi">10,320원</span>이에요. 이보다 적게 주면 안 돼요.',
+      }, {
+        q: '일을 시작할 때 <span class="hi">근로계약서</span>는 어떻게 해야 할까요?',
+        choices: ['말로만 약속하면 충분하다', '써서 한 부를 꼭 받아둔다', '일 끝나고 나중에 쓴다'], answer: 1,
+        hint: '말은 사라져도 종이는 남아요.',
+        explain: '맞아요! 근로계약서는 일하기 전에 쓰고 <span class="hi">한 부를 꼭 받아둬야</span> 해요. 안 써주면 법 위반이에요.',
+      }],
+      cards: ['minwage', 'contract'], exp: 160, coins: 120,
+      after: '다음 주부터 같이 일해요! 궁금한 건 옆 고용센터에 물어봐도 돼요.',
+    },
+    qw2: {
+      npc: 'jobcenter', title: '스미싱 순찰', requires: 'qw1',
+      goal: { type: 'kill', mob: 'scam', n: 4 }, goalLabel: '스미싱 문자',
+      intro: [
+        '고용센터에서 나왔어요. 여기선 취업 상담이랑 직업훈련도 도와드려요.',
+        '요즘 "고수익 알바" 문자로 속이는 스미싱이 많아요. <span class="hi">스미싱 문자 4마리</span>만 같이 잡아줄래요? 끝나면 알바 꿀팁 알려줄게요.',
+      ],
+      active: '스미싱 문자는 빠르게 움직여요. 대시 스킬이 있으면 편해요!',
+      ready: ['덕분에 거리가 조용해졌어요! 약속한 꿀팁이에요.'],
+      quizzes: [{
+        q: '일주일에 <span class="hi">15시간 이상</span> 일하고 약속한 날을 다 나오면 받는 수당은?',
+        choices: ['주휴수당', '야간수당', '명절수당'], answer: 0,
+        hint: '"한 주(週)에 쉬는(休) 날"에도 주는 돈이에요.',
+        explain: '정답! <span class="hi">주휴수당</span>이에요. 쉬는 날 하루치 임금을 더 받아요.',
+      }, {
+        q: '월급을 못 받았을 때 물어볼 수 있는 <span class="hi">고용노동부 상담 전화</span>는?',
+        choices: ['1350', '119', '114'], answer: 0,
+        hint: '고용노동부 고객상담센터 번호예요.',
+        explain: '맞아요! <span class="hi">1350</span>에 물어보면 돼요. 혼자 참지 마세요.',
+      }, {
+        q: '"고수익 알바! 링크 눌러 신청" — 모르는 번호로 이런 문자가 왔다면?',
+        choices: ['링크를 눌러 확인한다', '누르지 않고 지우고, 의심되면 112에 신고', '신분증 사진부터 보낸다'], answer: 1,
+        hint: '모르는 링크는 절대 누르지 않기!',
+        explain: '정답! 모르는 링크는 누르지 말고 지워요. 돈이나 개인정보를 요구하면 <span class="hi">112</span>에 신고해요.',
+      }],
+      cards: ['juhyu', 'call1350', 'scam'], exp: 180, coins: 140,
+      after: '일하다 막히면 언제든 고용센터로 와요!',
+    },
+    qf: {
+      npc: 'visitor', title: '첫 집들이 준비', requires: 'q6',
+      goal: { type: 'furn', n: 3 }, goalLabel: '가구',
+      intro: [
+        '(띵동) {name아}, 원장님이야! 반찬 좀 싸 왔어. 집 구경 좀 해도 될까?',
+        '어머, 아직 좀 휑하네. 이왕이면 다 같이 <span class="hi">집들이</span> 하자! 잡화점에서 <span class="hi">가구 3개</span>만 채워볼래?',
+      ],
+      active: '가구는 주민센터 거리 잡화점에서 살 수 있어. 코인이 모자라면 씨앗은행 저축도 써 봐!',
+      ready: ['와, 이제 진짜 집 같다! 우리 {name이} 다 컸네.', '집들이 전에, 같이 지난 길을 돌아볼까?'],
+      quizzes: [{
+        q: '가계부를 펴 볼까? 서울 자립정착금 <span class="hi">2,000만원</span> + 자립수당 5년치(<span class="hi">50만원 × 60개월</span>)를 더하면?',
+        choices: ['3,000만원', '5,000만원', '8,000만원'], answer: 1,
+        hint: '50 × 60 = 3,000. 여기에 2,000을 더해 봐.',
+        explain: '맞아, 약 <span class="hi">5,000만원</span>. 근데 이 숫자의 무게는 돈이 아니라, 널 믿어준 사람들 마음이야.',
+      }, {
+        q: '네가 걸어온 길, <span class="hi">순서대로</span> 맞는 건?',
+        choices: ['보호 → 보호종료(연장) → 배움·목돈 준비 → 내 집 → 홀로서기', '내 집 → 보호 → 배움 → 보호종료 → 홀로서기', '배움 → 내 집 → 보호종료 → 보호 → 홀로서기'], answer: 0,
+        hint: '\'보호받던 시절\'이 제일 먼저, \'홀로서기\'가 제일 마지막!',
+        explain: '맞아. 그 디딤돌 하나하나 아래에 널 받치던 손이 있었어.',
+      }, {
+        q: '혼자가 아니라, 이 많은 손을 딛고 스스로 서는 것. 이 여정의 <span class="hi">두 글자</span> 이름은?',
+        choices: ['자립', '독립', '고립'], answer: 0,
+        hint: '이 게임 제목에도 들어 있어!',
+        explain: '그래, <span class="hi">자립</span>. 혼자 서는 게 아니라 함께 딛고 서는 거야. (띵동) 어머, 다들 왔나 보다!',
+      }],
+      cards: ['total', 'road'], exp: 200, coins: 150,
+      after: '언제든 놀러 올게. 밥 잘 챙겨 먹고!',
     },
   };
 
@@ -613,18 +883,19 @@
       title: '보금자리 언덕', area: '햇살 마을', bg: 'bg_home', w: 2000,
       plats: [[330, 392, 220], [620, 302, 200], [980, 385, 260], [1320, 300, 220], [1560, 215, 170]],
       ladders: [],
-      npcs: [['director', 230]],
+      npcs: [['director', 230], ['center', 430]],
+      items: [{ item: 'lunch', icon: '🍱', x: 1640, y: 215, quest: 'qc' }],
       spawns: [['worry', -1, 520, 1750, 3], ['worry', 2, 0, 0, 1], ['worry', 3, 0, 0, 1]],
-      portals: [{ x: 1930, to: 'town', at: 0, need: 'q1' }],
+      portals: [{ x: 1930, to: 'town', at: 0, need: 'q1', gate: 'gate' }],
       start: 110,
     },
     town: {
       title: '주민센터 거리', area: '햇살 마을', bg: 'bg_town', w: 2400,
       plats: [[420, 392, 240], [720, 302, 220], [1000, 212, 220], [1420, 385, 300], [1820, 300, 260]],
       ladders: [[1180, 212, 480]],
-      npcs: [['clerk', 260], ['shop', 600]],
+      npcs: [['clerk', 260], ['shop', 600], ['teacher', 1000]],
       spawns: [['worry', -1, 520, 2200, 3], ['debt', -1, 900, 2200, 2], ['debt', 3, 0, 0, 1], ['worry', 4, 0, 0, 1], ['debt', 2, 0, 0, 1]],
-      portals: [{ x: 60, to: 'home', at: 0 }, { x: 2340, to: 'bank', at: 0, need: 'q2' }],
+      portals: [{ x: 60, to: 'home', at: 0 }, { x: 2340, to: 'bank', at: 0, need: 'q2', gate: 'pin' }],
       start: 140,
     },
     bank: {
@@ -633,7 +904,7 @@
       ladders: [[1880, 215, 480]],
       npcs: [['banker', 240]],
       spawns: [['debt', -1, 480, 2250, 4], ['debt', 1, 0, 0, 1], ['debt', 3, 0, 0, 1], ['debt', 4, 0, 0, 1], ['worry', 5, 0, 0, 1]],
-      portals: [{ x: 60, to: 'town', at: 1 }, { x: 2340, to: 'house', at: 0, need: 'q3' }],
+      portals: [{ x: 60, to: 'town', at: 1 }, { x: 2340, to: 'house', at: 0, need: 'q3', gate: 'gate' }],
       start: 140,
     },
     house: {
@@ -641,10 +912,10 @@
       // 사다리 1: 땅 → 발판(850~1050, y212) / 사다리 2: 그 발판 → 옥상(990~1380, y120)
       plats: [[360, 392, 200], [600, 302, 180], [850, 212, 200], [990, 120, 390], [1420, 300, 220], [1680, 390, 200]],
       ladders: [[890, 212, 480], [1020, 120, 212]],
-      npcs: [['house', 220]],
+      npcs: [['house', 220], ['pharm', 1300], ['agency', 1640]],
       spawns: [['worry', -1, 500, 1850, 3], ['debt', 4, 0, 0, 1], ['lonely', 5, 0, 0, 1]],
-      portals: [{ x: 60, to: 'bank', at: 1 }, { x: 1940, to: 'forest', at: 0, need: 'q4' }, { x: 560, to: 'myhome', at: 0, need: 'q4' }],
-      items: [{ item: 'key', x: 1300, y: 120, quest: 'q4' }],
+      portals: [{ x: 60, to: 'bank', at: 1 }, { x: 1940, to: 'work', at: 0, need: 'q4', gate: 'pin' }, { x: 560, to: 'myhome', at: 0, need: 'q4' }],
+      items: [{ item: 'key', icon: '🔑', x: 1300, y: 120, quest: 'q4' }],
       start: 140,
     },
     forest: {
@@ -653,12 +924,22 @@
       ladders: [],
       npcs: [['counselor', 240], ['mentor', 420]],
       spawns: [['lonely', -1, 620, 1700, 3], ['lonely', 1, 0, 0, 1], ['lonely', 3, 0, 0, 1], ['boss', -1, 1850, 2500, 1, 'q6']],
-      portals: [{ x: 60, to: 'house', at: 1 }],
+      portals: [{ x: 60, to: 'work', at: 1 }],
+      start: 140,
+    },
+    work: {
+      title: '일터 거리', area: '새싹 동네', bg: 'bg_work', w: 2400,
+      plats: [[380, 392, 240], [680, 300, 220], [980, 212, 220], [1300, 390, 260], [1620, 300, 240], [1940, 215, 220]],
+      ladders: [[1100, 212, 480]],
+      npcs: [['cafe', 260], ['jobcenter', 1480]],
+      spawns: [['scam', -1, 520, 2250, 4], ['debt', -1, 700, 2200, 2], ['scam', 1, 0, 0, 1], ['scam', 4, 0, 0, 1], ['debt', 3, 0, 0, 1]],
+      // 이미 마음 숲 퀘스트(q5)를 시작한 기존 플레이어는 일터 퀘스트 없이도 지나갈 수 있다
+      portals: [{ x: 60, to: 'house', at: 1 }, { x: 2340, to: 'forest', at: 0, need: 'qw1', skipIf: 'q5', gate: 'gate' }],
       start: 140,
     },
     myhome: {
       title: '내 첫 집', area: '새싹 동네', bg: 'bg_myhome', w: 1280, interior: true,
-      plats: [], ladders: [], npcs: [], spawns: [],
+      plats: [], ladders: [], npcs: [['visitor', 660, 'q6']], spawns: [], // 원장님은 보스(q6)를 깬 뒤 찾아온다
       portals: [{ x: 80, to: 'house', at: 2 }],
       start: 200,
     },
@@ -697,6 +978,11 @@
     s.furn = s.furn || [];
     s.bank = Object.assign({ bal: 0, day: '', today: 0 }, s.bank);
     s.cleared = !!s.cleared;
+    Object.keys(QUESTS).forEach(k => { if (!s.quests[k]) s.quests[k] = { state: 'none', n: 0 }; });
+    s.skills = Object.assign({ djump: false, dash: false, magnet: false }, s.skills);
+    s.letters = s.letters || [];
+    s.mini = Object.assign({ gate: {}, pin: {} }, s.mini); // 미니게임 단계별 별 개수
+    s.passed = s.passed || [];                              // 통과한 포탈 관문
     return s;
   }
   function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
@@ -711,7 +997,7 @@
   const KEYMAP = {
     ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down',
     ' ': 'jump', Alt: 'jump', KeyC: 'jump', KeyZ: 'attack', Control: 'attack', KeyX: 'skill', Shift: 'skill',
-    Digit1: 'potS', Digit2: 'potL', Numpad1: 'potS', Numpad2: 'potL',
+    Digit1: 'potS', Digit2: 'potL', Numpad1: 'potS', Numpad2: 'potL', KeyV: 'dash',
   };
   function kname(e) { return KEYMAP[e.key] || KEYMAP[e.code]; }
   addEventListener('keydown', e => {
@@ -889,13 +1175,25 @@
     let ax = 0;
     if (keys.left) ax -= 1;
     if (keys.right) ax += 1;
-    if (P.atk > 0.12 && P.ground) ax = 0; // 공격 중엔 잠깐 멈춤
     if (ax) P.face = ax;
+    P.dashCd = Math.max(0, (P.dashCd || 0) - dt);
     const kb = P.inv > 0.9; // 넉백 중
-    if (!kb) P.vx = ax * SPEED;
+    if (P.dashT > 0) {
+      // 대시 중: 앞으로 빠르게, 중력 거의 없음
+      P.dashT -= dt; P.vx = P.face * 780; P.vy = Math.min(P.vy, 0) * 0.5;
+      if (Math.random() < 0.7) fx.push({ kind: 'ghost', x: P.x, y: P.y, face: P.face, t: 0, life: 0.25 });
+    } else if (!kb) P.vx = ax * SPEED;
     if (pressed.jump && P.ground) {
       if (keys.down && P.y < GROUND - 1) { P.dropT = 0.28; P.ground = false; P.y += 2; }
-      else { P.vy = -JUMP; P.ground = false; }
+      else { P.vy = -JUMP; P.ground = false; P.airJump = false; }
+    } else if (pressed.jump && !P.ground && S.skills.djump && !P.airJump) {
+      // 2단 점프
+      P.airJump = true; P.vy = -JUMP * 0.92;
+      burst(P.x, P.y, '#bfe9ff', 10);
+    }
+    if (pressed.dash && S.skills.dash && P.dashCd <= 0) {
+      P.dashT = 0.2; P.dashCd = 0.9;
+      burst(P.x, P.y - 30, '#e0f4ff', 8);
     }
     if (pressed.attack && P.atkCd <= 0) attack(false);
     if (pressed.skill && P.skillCd <= 0) attack(true);
@@ -907,11 +1205,11 @@
     P.x = clamp(P.x, 20, map.w - 20);
     P.ground = false;
     if (P.vy >= 0) {
-      if (P.y >= GROUND) { P.y = GROUND; P.vy = 0; P.ground = true; }
+      if (P.y >= GROUND) { P.y = GROUND; P.vy = 0; P.ground = true; P.airJump = false; }
       else if (P.dropT <= 0) {
         for (const p of platsAll()) {
           if (P.x >= p[0] - 6 && P.x <= p[0] + p[2] + 6 && prevY <= p[1] && P.y >= p[1]) {
-            P.y = p[1]; P.vy = 0; P.ground = true; break;
+            P.y = p[1]; P.vy = 0; P.ground = true; P.airJump = false; break;
           }
         }
       }
@@ -926,18 +1224,41 @@
         burst(it.x, it.y - 30, '#ffd23f', 18);
       }
     });
+    // 편지 줍기
+    LETTERS.forEach((L, i) => {
+      if (L.map !== mapId || S.letters.includes(i)) return;
+      if (Math.abs(L.x - P.x) < 34 && Math.abs(L.y - P.y) < 44) {
+        S.letters.push(i); persist();
+        burst(L.x, L.y - 30, '#ffb3c7', 16);
+        showLetter(L, true);
+      }
+    });
+  }
+  function drawLetters() {
+    LETTERS.forEach((L, i) => {
+      if (L.map !== mapId || S.letters.includes(i)) return;
+      const bob = Math.sin(t * 3 + i) * 5;
+      ctx.save();
+      ctx.fillStyle = 'rgba(255,180,200,.35)';
+      ctx.beginPath(); ctx.arc(L.x, L.y - 26 + bob, 18 + Math.sin(t * 5 + i) * 3, 0, 7); ctx.fill();
+      ctx.font = '26px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('💌', L.x, L.y - 26 + bob);
+      ctx.restore();
+    });
   }
 
+  // 공격 간격 (예전 0.42초 → 0.24초). 공격 중에도 움직일 수 있다
+  const ATK_CD = 0.24, ATK_ANIM = 0.18;
   function attack(skill) {
     const dmgBase = 12 + S.lv * 4;
     if (skill) {
-      P.skillCd = 6; P.atk = 0.35; P.atkCd = 0.35;
+      P.skillCd = 4; P.atk = ATK_ANIM; P.atkCd = 0.28;
       fx.push({ kind: 'wave', x: P.x, y: P.y - 34, face: P.face, t: 0, life: 0.5 });
       const hits = mobs.filter(m => m.alive && m.dead <= 0 && inFront(m, 270, 90)).slice(0, 6);
       hits.forEach(m => hitMob(m, Math.round(dmgBase * 1.6 * rnd(.9, 1.15))));
     } else {
-      P.atkCd = 0.42; P.atk = 0.28;
-      fx.push({ kind: 'slash', x: P.x + P.face * 40, y: P.y - 36, face: P.face, t: 0, life: 0.25 });
+      P.atkCd = ATK_CD; P.atk = ATK_ANIM;
+      fx.push({ kind: 'slash', x: P.x + P.face * 40, y: P.y - 36, face: P.face, t: 0, life: 0.18 });
       const cand = mobs.filter(m => m.alive && m.dead <= 0 && inFront(m, 95, 60)).sort((a, b) => Math.abs(a.x - P.x) - Math.abs(b.x - P.x));
       if (cand[0]) hitMob(cand[0], Math.round(dmgBase * rnd(.85, 1.15)));
     }
@@ -966,7 +1287,7 @@
       if (!countable(id)) continue;
       if (q.goal.type === 'kill' && q.goal.mob === m.type) progress(id, 1);
       if (q.goal.type === 'collect' && q.goal.from.includes(m.type) && Math.random() < q.goal.rate)
-        drops.push({ kind: 'item', item: q.goal.item, quest: id, x: m.x, y: m.y, vx: rnd(-40, 40), vy: -300, base: m.y, t: 0 });
+        drops.push({ kind: 'item', item: q.goal.item, icon: q.goal.icon || '📄', quest: id, x: m.x, y: m.y, vx: rnd(-40, 40), vy: -300, base: m.y, t: 0 });
     }
     m.respawn = m.def.boss ? 1e9 : 6;
   }
@@ -1042,6 +1363,11 @@
   function updateDrops(dt) {
     for (const d of drops) {
       d.t += dt;
+      // 코인 자석 스킬: 가까운 드롭이 플레이어에게 끌려온다
+      if (S.skills.magnet && d.t > 0.3) {
+        const dx = P.x - d.x, dy = (P.y - 10) - d.y, dist = Math.hypot(dx, dy);
+        if (dist < 180 && dist > 1) { d.x += dx / dist * 420 * dt; d.y += dy / dist * 420 * dt; d.base = d.y; d.vy = 0; d.vx = 0; }
+      }
       if (d.vy !== 0 || d.y < d.base) { d.vy += 1200 * dt; d.y += d.vy * dt; d.x += d.vx * dt; if (d.y >= d.base) { d.y = d.base; d.vy = 0; d.vx = 0; } }
       if (d.t > 0.4 && Math.abs(d.x - P.x) < 30 && Math.abs(d.y - P.y) < 50) {
         d.gone = true;
@@ -1128,6 +1454,21 @@
     nextStep();
   }
 
+  function updateSkillUi() { $('dashBtn').classList.toggle('show', !!(S && S.skills.dash)); }
+
+  /* ---------- 편지 (아케이드 모드) ---------- */
+  function letterFill(s) { return fill(s); }
+  function showLetter(L, first) {
+    const back = mode; // 게임 중이면 play, 도감에서 열었으면 book 으로 돌아간다
+    mode = 'card';
+    const pop = $('cardPop');
+    pop.innerHTML = `<div class="pcard letter"><div class="got">${first ? `💌 숨겨진 편지 발견! (${S.letters.length}/${LETTERS.length})` : '💌 편지'}</div>
+      <p class="ltext">${letterFill(L.text)}</p><p class="lfrom">— ${letterFill(L.from)}</p>
+      <div class="btn-row" style="margin-top:12px"><button class="btn">간직할게</button></div></div>`;
+    pop.classList.add('on');
+    pop.querySelector('.btn').onclick = () => { pop.classList.remove('on'); mode = back; };
+  }
+
   /* ---------- 잡화점 ---------- */
   let shopTab = 'pot';
   function openShop(tab) {
@@ -1143,6 +1484,13 @@
       L.innerHTML = Object.entries(POTIONS).map(([id, p]) => `
         <div class="item"><div class="pic">${p.em}</div><b>${p.name}</b><p>${p.desc}<br>가진 개수: ${S.inv[id]}</p>
         <button class="btn" data-buy="${id}" ${S.coins < p.price ? 'disabled' : ''}>🪙 ${p.price}</button></div>`).join('');
+    } else if (shopTab === 'skill') {
+      L.innerHTML = Object.entries(SKILLS).map(([id, k]) => {
+        const own = S.skills[id];
+        return `<div class="item${own ? ' owned' : ''}"><div class="pic">${k.em}</div><b>${k.name}</b><p>${k.desc}</p>
+          ${own ? '<button class="btn" disabled>✔ 배웠어요</button>'
+                : `<button class="btn" data-buy="${id}" ${S.coins < k.price ? 'disabled' : ''}>🪙 ${k.price}</button>`}</div>`;
+      }).join('');
     } else {
       L.innerHTML = Object.entries(FURN).map(([id, f]) => {
         const own = S.furn.includes(id);
@@ -1154,24 +1502,102 @@
     L.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => buy(b.dataset.buy));
   }
   function buy(id) {
-    const item = POTIONS[id] || FURN[id];
+    const item = POTIONS[id] || FURN[id] || SKILLS[id];
+    if (SKILLS[id] && S.skills[id]) return;
     if (S.coins < item.price) return;
     S.coins -= item.price;
     if (POTIONS[id]) S.inv[id]++;
-    else if (!S.furn.includes(id)) { S.furn.push(id); toast(`🏠 ${item.name}을(를) 내 집에 놓았어요! (첫 집 골목 '내 첫 집' 포탈)`, 3200); }
+    else if (SKILLS[id]) { S.skills[id] = true; updateSkillUi(); toast(`${item.em} ${josa(item.name, '을', '를')} 배웠어요! ${SKILL_HOW[id]}`, 3600); }
+    else if (!S.furn.includes(id)) {
+      S.furn.push(id);
+      toast(`🏠 ${josa(item.name, '을', '를')} 내 집에 놓았어요! (첫 집 골목 '내 첫 집' 포탈)`, 3200);
+      // 집들이 퀘스트: 가구 수 반영
+      Object.keys(QUESTS).forEach(k => {
+        const q = QUESTS[k], st = S.quests[k];
+        if (q.goal.type === 'furn' && qs(k) === 'active' && S.furn.length > st.n) progress(k, Math.min(q.goal.n, S.furn.length) - st.n);
+      });
+    }
     updateHud(); updateTracker(); persist(); renderShop();
   }
 
+  function portalLocked(p) {
+    return !!(p.need && qs(p.need) !== 'done' && !(p.skipIf && qs(p.skipIf) !== 'none'));
+  }
   function usePortal(p) {
-    if (p.need && qs(p.need) !== 'done') {
+    if (portalLocked(p)) {
       toast('🔒 ' + NPCS[QUESTS[p.need].npc].name + '의 퀘스트를 먼저 끝내줘!');
       return;
+    }
+    // 처음 지나가는 앞쪽 포탈은 미니게임 관문 (이기거나, 한 번 지면 건너뛸 수 있다)
+    const key = mapId + '>' + p.to;
+    if (p.gate && !S.passed.includes(key)) {
+      const lv = nextStage(p.gate);
+      if (lv) {
+        toast(p.gate === 'gate' ? '🏃 관문 도전! 응원단을 모아 걱정 군단을 넘어가자' : '🧷 관문 도전! 핀을 뽑아 희망코인을 받아내자', 3000);
+        playMini(p.gate, lv, { canSkip: true }, () => { S.passed.push(key); persist(); fadeTo(() => enterMap(p.to, p.at)); });
+        return;
+      }
     }
     fadeTo(() => enterMap(p.to, p.at));
   }
 
+  /* ---------- 미니게임 스테이지 ---------- */
+  const STAGE_MAX = { gate: 15, pin: 15 };
+  function nextStage(kind) {
+    for (let i = 1; i <= STAGE_MAX[kind]; i++) if (!S.mini[kind][i]) return i;
+    return 0;
+  }
+  function stageReward(kind, lv, stars) {
+    const prev = S.mini[kind][lv] || 0;
+    if (stars <= prev) return 0;
+    S.mini[kind][lv] = stars;
+    return (stars - prev) * (10 + lv * 4);
+  }
+  /** 미니게임 실행. onPass: 이겼거나 (관문에서) 건너뛰었을 때 */
+  function playMini(kind, lv, extra, onPass, onBack) {
+    const prevMode = mode;
+    mode = 'mini';
+    for (const k in keys) keys[k] = false;
+    $('touch').classList.remove('on'); // 미니게임 중엔 다이얼·버튼 숨김
+    window.MiniGames.open(kind, lv, Object.assign({
+      charImg: IMG[S.char],
+      onDone(res) {
+        mode = prevMode === 'mini' ? 'play' : prevMode;
+        $('touch').classList.toggle('on', isTouch);
+        if (res.win) {
+          const coins = stageReward(kind, lv, res.stars);
+          if (coins) { S.coins += coins; toast(`⭐ ${res.stars}개! 희망코인 +${coins}`, 3000); }
+          updateHud(); persist();
+          onPass && onPass(res);
+        } else if (res.skip) { onPass && onPass(res); }
+        else { onBack && onBack(res); }
+      },
+    }, extra || {}));
+  }
+  let stageTab = 'gate';
+  function openStages(tab) {
+    stageTab = tab || stageTab; mode = 'stage';
+    const list = $('stageList');
+    const total = ['gate', 'pin'].reduce((a, k) => a + Object.values(S.mini[k]).reduce((x, y) => x + y, 0), 0);
+    $('stageStars').textContent = `모은 별 ⭐ ${total} / ${(STAGE_MAX.gate + STAGE_MAX.pin) * 3}`;
+    document.querySelectorAll('[data-st]').forEach(b => b.classList.toggle('ghost', b.dataset.st !== stageTab));
+    const open = nextStage(stageTab) || STAGE_MAX[stageTab];
+    let html = '';
+    for (let i = 1; i <= STAGE_MAX[stageTab]; i++) {
+      const st = S.mini[stageTab][i] || 0;
+      html += `<button class="stg${st ? ' clear' : ''}" data-lv="${i}" ${i > open ? 'disabled' : ''}>${i > open ? '🔒' : i}<small>${st ? '⭐'.repeat(st) : i > open ? '' : 'NEW'}</small></button>`;
+    }
+    list.innerHTML = html;
+    list.querySelectorAll('[data-lv]').forEach(b => b.onclick = () => {
+      screen(null);
+      playMini(stageTab, +b.dataset.lv, {}, () => openStages(), () => openStages());
+    });
+    screen('scrStage');
+  }
+
   /* ================= NPC / DIALOG ================= */
-  function npcList() { return map.npcs.map(([id, x]) => ({ id, x, def: NPCS[id] })); }
+  // 세 번째 값이 있으면 그 퀘스트를 깬 뒤에만 나타나는 NPC
+  function npcList() { return map.npcs.filter(n => !n[2] || qs(n[2]) === 'done').map(([id, x]) => ({ id, x, def: NPCS[id] })); }
   function nearNpc() { return npcList().find(n => Math.abs(n.x - P.x) < 80 && P.y > GROUND - 30); }
   function questOf(npcId) { return Object.keys(QUESTS).find(k => QUESTS[k].npc === npcId); }
   function npcMark(npcId) {
@@ -1186,13 +1612,19 @@
   }
 
   const dlg = { steps: [], i: 0, npc: null };
-  function fill(s) { return s.replace(/\{name\}/g, S.name).replace(/\{climb\}/g, CLIMB); }
+  // {name아}→하람아/지우야, {name이가}→하람이가/지우가, {name이}→하람이/지우
+  function fill(s) {
+    const n = S.name;
+    return s.replace(/\{name아\}/g, josa(n, '아', '야')).replace(/\{name이가\}/g, josa(n, '이가', '가'))
+      .replace(/\{name이\}/g, josa(n, '이', '')).replace(/\{name\}/g, n).replace(/\{climb\}/g, CLIMB);
+  }
 
   function talk(npc) {
     if (npc.id === 'shop') {
-      openDialog(npc, [{ menu: '어서 와요! 모험엔 물약, 새 집엔 가구가 필요하죠? 😊', opts: [
+      openDialog(npc, [{ menu: '어서 와요! 모험엔 물약, 새 집엔 가구, 그리고 새 스킬도 있어요! 😊', opts: [
         { label: '🧪 물약 보기', fn: () => openShop('pot') },
         { label: '🛋️ 가구 보기', fn: () => openShop('furn') },
+        { label: '✨ 스킬 배우기', fn: () => openShop('skill') },
         { label: '그냥 구경했어요', cls: 'ghost', fn: closeDialog },
       ] }]);
       return;
@@ -1249,6 +1681,7 @@
       B.append(btn('나중에', 'ghost', closeDialog), dlg.primary = btn('좋아, 할게! ✔', '', () => {
         const st = S.quests[s.id], q = QUESTS[s.id], npc = dlg.npc;
         st.state = 'active';
+        if (q.goal.type === 'furn') st.n = Math.min(q.goal.n, S.furn.length); // 이미 산 가구도 인정
         closeDialog();
         if (st.n >= q.goal.n) {
           // 미리 해둔 몫으로 이미 목표 달성 → 바로 보고 대화로
@@ -1284,7 +1717,7 @@
       gainExp(q.exp);
       updateTracker(); persist();
       showCards(q.cards.slice(), () => {
-        if (s.reward === 'q6') { setTimeout(showEnding, 500); return; }
+        if (s.reward === 'qf') { setTimeout(showEnding, 500); return; } // 엔딩: 첫 집들이 (스토리 모드 마지막 장면)
         openDialog(dlg.npc, [{ say: q.after }]);
       });
     }
@@ -1323,7 +1756,9 @@
   function updateTracker() {
     const el = $('tracker');
     const act = Object.keys(QUESTS).filter(k => ['active', 'ready'].includes(qs(k)));
-    const nextQ = Object.keys(QUESTS).find(k => qs(k) === 'none' && (!QUESTS[k].requires || qs(QUESTS[k].requires) === 'done'));
+    const avail = Object.keys(QUESTS).filter(available);
+    const npcMap = (npc) => Object.keys(MAPS).find(id => MAPS[id].npcs.some(n => n[0] === npc));
+    const here = avail.filter(k => map && npcMap(QUESTS[k].npc) === mapId && npcList().some(n => n.id === QUESTS[k].npc));
     let html = '<h4>📜 퀘스트</h4>';
     act.forEach(k => {
       const q = QUESTS[k], st = S.quests[k];
@@ -1331,22 +1766,25 @@
         ? `<div class="ready">✔ ${q.title} 완료!<br>→ ${NPCS[q.npc].name}한테 가서 ${UP} 눌러 보고하기</div>`
         : `<div>• ${q.title} (${q.goalLabel} ${st.n}/${q.goal.n})</div>`;
     });
-    if (!act.length && nextQ) {
-      const who = NPCS[QUESTS[nextQ].npc].name;
-      const here = map && map.npcs.some(n => n[0] === QUESTS[nextQ].npc);
-      html += here
-        ? `<div>💬 ${who}한테 말 걸어봐! (머리 위 <b style="color:#ffd23f">!</b>)</div>` +
-          (S.quests[nextQ].n ? `<div style="opacity:.8">미리 모은 ${QUESTS[nextQ].goalLabel} ${S.quests[nextQ].n}/${QUESTS[nextQ].goal.n}</div>` : '')
-        : `<div>🌀 오른쪽 끝 포탈을 타고 ${who} 만나러 가자!</div>`;
+    // 이 맵에서 받을 수 있는 퀘스트
+    here.slice(0, 3).forEach(k => {
+      const q = QUESTS[k], st = S.quests[k];
+      html += `<div>💬 ${NPCS[q.npc].name}한테 말 걸어봐! (<b style="color:#ffd23f">!</b>)` +
+        (st.n ? ` <span style="opacity:.8">미리 모은 ${q.goalLabel} ${st.n}/${q.goal.n}</span>` : '') + '</div>';
+    });
+    // 이 맵엔 없고 다른 맵에 있을 때: 어디로 가야 하는지
+    if (!act.length && !here.length && avail.length) {
+      const q = QUESTS[avail[0]], m = MAPS[npcMap(q.npc)];
+      html += `<div>🌀 포탈을 타고 '${m.title}'의 ${NPCS[q.npc].name} 만나러 가자!</div>`;
     }
-    el.innerHTML = html;
-    if (!act.length && !nextQ && S.cleared) {
+    if (!act.length && !avail.length && S.cleared) {
       // 엔딩 뒤 자유 모험: 다시 올 이유를 보여준다
       const left = bankLeft();
-      html += `<div>🏠 내 집 가구 ${S.furn.length}/${Object.keys(FURN).length}</div>`;
+      html += `<div>🏠 내 집 가구 ${S.furn.length}/${Object.keys(FURN).length} · 💌 편지 ${S.letters.length}/${LETTERS.length}</div>`;
       html += left > 0 ? `<div>🏦 씨앗은행 오늘 매칭 ${left}코인 남음</div>` : `<div>🏦 오늘 매칭 완료! 내일 또 와요</div>`;
     }
-    el.classList.toggle('on', act.length > 0 || !!nextQ || S.cleared);
+    el.innerHTML = html;
+    el.classList.toggle('on', act.length > 0 || avail.length > 0 || S.cleared);
   }
   let toastT;
   function toast(msg, ms = 2600) {
@@ -1372,14 +1810,14 @@
   }
 
   function screen(id) {
-    ['scrLoading', 'scrTitle', 'scrSelect', 'scrBook', 'scrShop', 'scrEnding'].forEach(s => $(s).classList.toggle('on', s === id));
+    ['scrLoading', 'scrTitle', 'scrSelect', 'scrBook', 'scrShop', 'scrStage', 'scrEnding'].forEach(s => $(s).classList.toggle('on', s === id));
   }
 
   function showEnding() {
     mode = 'ending';
     const mins = Math.max(1, Math.round((Date.now() - S.started) / 60000));
     $('endLead').innerHTML = `${S.name}, 정말 멋졌어! 마을 사람들을 도우면서 자립할 때 기댈 수 있는 제도를 ${S.cards.length}개나 알게 됐어.<br>모험 기록은 그대로 저장돼 있어. 계속 돌아다니면서 코인을 모으고, 씨앗은행에 저축하고, 내 집을 꾸며봐!`;
-    $('endStats').innerHTML = `<div><b>Lv.${S.lv}</b>레벨</div><div><b>${S.cards.length}/${Object.keys(CARDS).length}</b>정책 카드</div><div><b>${S.furn.length}/${Object.keys(FURN).length}</b>내 집 가구</div><div><b>${S.kills}</b>물리친 몬스터</div><div><b>${mins}분</b>플레이 시간</div>`;
+    $('endStats').innerHTML = `<div><b>Lv.${S.lv}</b>레벨</div><div><b>${S.cards.length}/${Object.keys(CARDS).length}</b>정책 카드</div><div><b>${S.furn.length}/${Object.keys(FURN).length}</b>내 집 가구</div><div><b>${S.letters.length}/${LETTERS.length}</b>숨겨진 편지</div><div><b>${S.kills}</b>물리친 몬스터</div><div><b>${mins}분</b>플레이 시간</div>`;
     $('endHome').innerHTML = `<img class="end-home" src="${homeSnapshot()}" alt="내 첫 집">` +
       (S.furn.length ? '' : '<p class="lead">아직 텅 빈 내 첫 집 — 잡화점에서 가구를 사서 채워봐!</p>');
     renderBook($('endCards'), true);
@@ -1437,6 +1875,7 @@
     }
     map.portals.forEach(drawPortal);
     items.forEach(drawItem);
+    drawLetters();
     npcList().forEach(drawNpc);
     mobs.forEach(drawMob);
     drops.forEach(drawDrop);
@@ -1473,6 +1912,7 @@
     house:  ['#9ad168', '#d09461', '#9b6436'],
     forest: ['#6bbf7a', '#7e6a9a', '#5a4a75'],
     myhome: ['#8a5a33', '#d9a86c', '#a8733f', 'wood'],
+    work:   ['#8cc9e0', '#b9a58e', '#8d7a63'],
   };
   // 맵 진입 시 정적 레이어(배경 축소본 + 땅/발판/사다리)를 미리 그려둔다
   const layers = { bg: null, world: null };
@@ -1564,7 +2004,7 @@
     ctx.restore();
   }
   function drawPortal(p) {
-    const locked = p.need && qs(p.need) !== 'done';
+    const locked = portalLocked(p);
     const y = GROUND - 50;
     ctx.save();
     for (let i = 0; i < 3; i++) {
@@ -1589,7 +2029,7 @@
     ctx.fillStyle = 'rgba(255,230,120,.35)';
     ctx.beginPath(); ctx.arc(it.x, it.y - 26 + bob, 22 + Math.sin(t * 5) * 3, 0, 7); ctx.fill();
     ctx.font = '30px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('🔑', it.x, it.y - 26 + bob);
+    ctx.fillText(it.icon || '🔑', it.x, it.y - 26 + bob);
     ctx.restore();
   }
 
@@ -1667,7 +2107,7 @@
     const breathe = walking ? 1 : 1 + Math.sin(t * 3) * 0.015;
     let rot = walking ? Math.sin(P.walkT * 14) * 0.04 : 0;
     if (!P.ground && !P.climb) rot = P.vy < 0 ? -0.06 : 0.04;
-    if (P.atk > 0) rot = (P.atk / 0.28) * -0.15;
+    if (P.atk > 0) rot = (P.atk / ATK_ANIM) * -0.15;
     const blink = P.inv > 0 && Math.floor(t * 20) % 2 === 0;
     // 캐릭터 원본은 오른쪽을 봄
     if (P.climb) {
@@ -1689,7 +2129,7 @@
       ctx.fillStyle = '#fff6c2'; ctx.beginPath(); ctx.arc(-3, -3, 3, 0, 7); ctx.fill();
     } else {
       ctx.font = '24px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('📄', d.x, d.y - 16 + bob);
+      ctx.fillText(d.icon || '📄', d.x, d.y - 16 + bob);
     }
     ctx.restore();
   }
@@ -1715,6 +2155,10 @@
     } else if (f.kind === 'quake') {
       ctx.strokeStyle = `rgba(160,90,255,${1 - k})`; ctx.lineWidth = 6;
       ctx.beginPath(); ctx.ellipse(f.x, f.y, 40 + k * 240, 10 + k * 18, 0, 0, 7); ctx.stroke();
+    } else if (f.kind === 'ghost') {
+      // 대시 잔상
+      const img = IMG[S.char];
+      if (img) { ctx.restore(); drawSprite(img, f.x, f.y, 80, f.face < 0, { alpha: 0.35 * (1 - k), noShadow: true }); return; }
     } else if (f.kind === 'lvup') {
       ctx.globalAlpha = 1 - k;
       const g = ctx.createLinearGradient(0, f.y - 200, 0, f.y);
@@ -1790,7 +2234,7 @@
     window.__adv = {
       get S() { return S; }, get P() { return P; }, get mobs() { return mobs; }, get drops() { return drops; },
       get items() { return items; }, get mapId() { return mapId; }, get mode() { return mode; }, perf,
-      hitMob: (m, d) => hitMob(m, d), enterMap: (id, at) => enterMap(id, at), QUESTS, MAPS,
+      hitMob: (m, d) => hitMob(m, d), enterMap: (id, at) => enterMap(id, at), QUESTS, MAPS, LETTERS, playMini: (k, lv, x, a, b) => playMini(k, lv, x, a, b),
     };
   }
 
@@ -1812,6 +2256,7 @@
     $('touch').classList.toggle('on', isTouch);
     $('keysHelp').style.display = isTouch ? 'none' : '';
     $('hudFace').src = A + S.char + '.png';
+    updateSkillUi();
     P = null;
     enterMap(S.map || 'home', null);
     mode = 'play';
@@ -1829,8 +2274,21 @@
     S = newSave(pickChar, name);
     persist(); startGame();
   };
-  $('bookBtn').onclick = () => { if (mode !== 'play') return; mode = 'book'; renderBook($('bookCards')); screen('scrBook'); };
+  $('bookBtn').onclick = () => {
+    if (mode !== 'play') return;
+    mode = 'book'; renderBook($('bookCards'));
+    $('bookCount').textContent = `정책 카드 ${S.cards.length}/${Object.keys(CARDS).length}`;
+    $('letterHead').textContent = `💌 숨겨진 편지 ${S.letters.length}/${LETTERS.length}`;
+    $('bookLetters').innerHTML = LETTERS.map((L, i) => S.letters.includes(i)
+      ? `<button class="lbtn" data-l="${i}">💌 ${fill(L.from)}</button>`
+      : `<button class="lbtn" disabled>❔ ${MAPS[L.map].title}</button>`).join('');
+    $('bookLetters').querySelectorAll('[data-l]').forEach(b => b.onclick = () => showLetter(LETTERS[+b.dataset.l], false));
+    screen('scrBook');
+  };
   $('bookClose').onclick = () => { screen(null); mode = 'play'; };
+  $('stageBtn').onclick = () => { if (mode === 'play') openStages(); };
+  $('stageClose').onclick = () => { screen(null); mode = 'play'; };
+  document.querySelectorAll('[data-st]').forEach(b => b.onclick = () => openStages(b.dataset.st));
   $('exitBtn').onclick = () => { persist(); location.href = 'game.html'; };
   $('againBtn').onclick = () => {
     if (!confirm('처음부터 다시 하면 코인·통장·가구 기록이 모두 지워져요. 정말 새로 시작할까요?')) return;

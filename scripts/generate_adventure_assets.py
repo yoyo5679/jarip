@@ -78,7 +78,15 @@ BACKGROUNDS = {
 }
 
 
-SPRITES["npc_shop"] = "a cheerful Korean general store owner woman in her 40s, short wavy hair with a bandana, green-free striped apron in orange and cream, holding a small shopping basket, facing left"
+SPRITES["npc_cafe"] = "a friendly Korean cafe owner man in his 30s, short curly hair, brown barista apron over a cream shirt, holding a coffee cup, warm smile, facing left"
+SPRITES["npc_jobcenter"] = "a dependable Korean public employment center counselor woman in her 30s, ponytail, navy vest over white blouse, ID badge, holding a folder with a job poster, facing left"
+SPRITES["mob_scam"] = "a sneaky little smartphone monster with a suspicious grin, glowing red warning-link on its screen, tiny arms holding a fishing hook, cute but mischievous"
+BACKGROUNDS["bg_work"] = "a busy cheerful downtown work street with a cozy cafe with a 'help wanted' sign, a convenience store, an employment center building, office buildings, bicycles, midday sky"
+SPRITES["npc_center"] ="a warm Korean social worker woman in her late 20s from a group home support center, short bob hair, beige blazer over a coral sweater, lanyard ID card, holding a clipboard, facing left"
+SPRITES["npc_teacher"] = "an energetic Korean life-skills instructor man in his 30s, neat undercut hair, round glasses, navy cardigan, holding a pointer stick and a small whiteboard, facing left"
+SPRITES["npc_pharm"] = "a kind Korean pharmacist woman in her 40s, hair tied back, white pharmacist coat over a sky-blue shirt, holding a small medicine bag, facing left"
+SPRITES["npc_agency"] = "a reliable Korean youth independence support counselor man in his 30s, short neat hair, orange windbreaker with a small map badge, holding a tablet, friendly smile, facing left"
+SPRITES["npc_shop"] ="a cheerful Korean general store owner woman in her 40s, short wavy hair with a bandana, green-free striped apron in orange and cream, holding a small shopping basket, facing left"
 BACKGROUNDS["bg_myhome"] = (
     "a cozy but EMPTY small Korean studio apartment interior seen straight from the side like a stage, "
     "warm cream wallpaper, one big window with morning light, wooden baseboard, NO furniture at all, empty room ready to decorate"
