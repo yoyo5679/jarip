@@ -209,30 +209,45 @@
     .stats b { display: block; font-weight: normal; font-size: 1.5em; color: var(--accent-dark); }
 
     /* ---------- Touch controls ---------- */
-    .touch { position: absolute; inset: auto 0 0 0; height: 0; display: none; z-index: 15; }
+    /* 폰 화면(뷰포트) 기준 고정 → 16:9 게임 화면 양옆 여백으로 조작부가 빠진다 */
+    .touch { position: fixed; inset: 0; display: none; z-index: 15; pointer-events: none; }
     .touch.on { display: block; }
-    .pad { position: absolute; bottom: 4%; pointer-events: auto; }
-    .pad.left { left: 1.5%; width: clamp(104px, 17vw, 160px); aspect-ratio: 1; bottom: 2%; opacity: .8; }
-    .pad.right { right: 1.5%; bottom: 3%; opacity: .85; display: grid; grid-template-columns: repeat(2, auto); gap: 10px; align-items: end; }
-    .tb {
-      position: absolute; width: 36%; height: 36%; border-radius: 50%;
-      background: rgba(255,255,255,.22); border: 2px solid rgba(255,255,255,.5); color: #fff;
-      display: flex; align-items: center; justify-content: center; font-size: clamp(16px, 3vw, 26px);
-      touch-action: none;
+    /* 왼쪽 아래 넓은 영역 어디든 엄지를 대면 그 자리에 다이얼이 생긴다 (플로팅 조이스틱) */
+    .stick-zone {
+      position: absolute; left: 0; bottom: 0; width: 42%; height: 62%;
+      pointer-events: auto; touch-action: none;
     }
-    .tb.up { left: 32%; top: 0; } .tb.down { left: 32%; bottom: 0; }
-    .tb.l { left: 0; top: 32%; } .tb.r { right: 0; top: 32%; }
+    .stick {
+      --r: clamp(46px, 13vh, 64px);
+      position: absolute; width: calc(var(--r) * 2); height: calc(var(--r) * 2);
+      left: calc(env(safe-area-inset-left, 0px) + 18px); bottom: 18px;
+      border-radius: 50%; border: 2px solid rgba(255,255,255,.55);
+      background: radial-gradient(circle, rgba(255,255,255,.10), rgba(255,255,255,.18));
+      opacity: .35; transition: opacity .2s;
+    }
+    .stick.active { opacity: .9; transition: none; }
+    .knob {
+      position: absolute; left: 50%; top: 50%; width: 46%; height: 46%; margin: -23% 0 0 -23%;
+      border-radius: 50%; background: rgba(255,255,255,.75); box-shadow: 0 2px 8px rgba(0,0,0,.35);
+    }
+    .btns {
+      position: absolute; right: calc(env(safe-area-inset-right, 0px) + 12px); bottom: 14px;
+      /* 세로 한 줄 → 가로 폰에서는 게임 화면 오른쪽 여백 안에 쏙 들어간다 */
+      display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: auto;
+    }
     .rb {
-      width: clamp(48px, 8.5vw, 74px); aspect-ratio: 1; border-radius: 50%; touch-action: none;
-      background: rgba(255, 159, 28, .55); border: 2px solid rgba(255,255,255,.65); color: #fff;
+      width: clamp(46px, 13vh, 62px); aspect-ratio: 1; border-radius: 50%; touch-action: none;
+      background: rgba(255, 159, 28, .5); border: 2px solid rgba(255,255,255,.6); color: #fff;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      font-size: clamp(11px, 1.8vw, 16px); line-height: 1.1;
+      font-size: clamp(10px, 2.6vh, 13px); line-height: 1.1; opacity: .5; transition: opacity .15s;
+      text-shadow: 0 1px 2px rgba(0,0,0,.5);
     }
-    .rb .i { font-size: 1.6em; }
-    .rb.jump { background: rgba(80, 170, 255, .55); }
-    .rb.skill { background: rgba(190, 110, 255, .55); width: clamp(44px, 8vw, 66px); }
-    .rb.skill.cd { opacity: .45; }
-    .tb.on, .rb.on { background: rgba(255,255,255,.55); }
+    .rb .i { font-size: 1.5em; }
+    .rb.attack { width: clamp(56px, 17vh, 70px); }
+    .rb.jump { background: rgba(80, 170, 255, .5); }
+    .rb.skill { background: rgba(190, 110, 255, .5); width: clamp(40px, 11vh, 50px); }
+    .rb.skill.cd { filter: grayscale(1); }
+    .rb.on { opacity: .95; background-color: rgba(255,255,255,.55); }
 
     .keys-help {
       position: absolute; left: 1.2%; bottom: 2%; color: rgba(255,255,255,.85); font-size: clamp(9px, 1.2vw, 12px);
@@ -249,6 +264,17 @@
 <body>
   <div class="rotate-tip">📱 폰을 가로로 돌리면 더 넓게 즐길 수 있어요!</div>
   <div id="app">
+    <!-- Touch controls: 게임 화면이 아니라 폰 화면 모서리에 붙여서, 가로 폰의 좌우 여백을 활용 -->
+    <div class="touch" id="touch">
+      <div class="stick-zone" id="stickZone">
+        <div class="stick" id="stick"><div class="knob" id="knob"></div></div>
+      </div>
+      <div class="btns">
+        <div class="rb skill" data-k="skill" id="skillBtn"><span class="i">✨</span>스킬</div>
+        <div class="rb jump" data-k="jump"><span class="i">⤴</span>점프</div>
+        <div class="rb attack" data-k="attack"><span class="i">⭐</span>공격</div>
+      </div>
+    </div>
     <div id="stage">
       <canvas id="cv" width="960" height="540"></canvas>
 
@@ -273,21 +299,6 @@
         <div class="keys-help" id="keysHelp">← → 이동 · Space 점프 · Z 공격 · X 스킬 · ↑ 대화/포탈/사다리 · ↓+Space 내려가기</div>
       </div>
 
-      <!-- Touch controls -->
-      <div class="touch" id="touch">
-        <div class="pad left">
-          <div class="tb up" data-k="up">▲</div>
-          <div class="tb l" data-k="left">◀</div>
-          <div class="tb r" data-k="right">▶</div>
-          <div class="tb down" data-k="down">▼</div>
-        </div>
-        <div class="pad right">
-          <div class="rb skill" data-k="skill" id="skillBtn"><span class="i">✨</span>스킬</div>
-          <div></div>
-          <div class="rb" data-k="attack"><span class="i">⭐</span>공격</div>
-          <div class="rb jump" data-k="jump"><span class="i">⤴</span>점프</div>
-        </div>
-      </div>
 
       <!-- Dialog -->
       <div class="dialog" id="dialog">
@@ -628,6 +639,39 @@
     b.addEventListener('pointercancel', off); b.addEventListener('pointerleave', off);
   });
   const isTouch = matchMedia('(pointer: coarse)').matches;
+
+  // 플로팅 조이스틱(다이얼): 누른 자리에 생기고, 기울인 방향을 방향키 입력으로 바꾼다
+  (() => {
+    const zone = $('stickZone'), stick = $('stick'), knob = $('knob');
+    let id = null, cx = 0, cy = 0;
+    const setDir = (k, v) => { if (v && !keys[k]) pressed[k] = true; keys[k] = v; };
+    const release = () => {
+      id = null; stick.classList.remove('active');
+      stick.style.left = stick.style.top = stick.style.bottom = ''; knob.style.transform = '';
+      ['left', 'right', 'up', 'down'].forEach(k => keys[k] = false);
+    };
+    zone.addEventListener('pointerdown', e => {
+      if (id !== null) return;
+      e.preventDefault(); id = e.pointerId; zone.setPointerCapture(id);
+      const zr = zone.getBoundingClientRect(), r = stick.offsetWidth / 2;
+      cx = e.clientX; cy = e.clientY;
+      stick.style.left = (cx - zr.left - r) + 'px'; stick.style.top = (cy - zr.top - r) + 'px'; stick.style.bottom = 'auto';
+      stick.classList.add('active');
+    });
+    zone.addEventListener('pointermove', e => {
+      if (e.pointerId !== id) return;
+      e.preventDefault();
+      const r = stick.offsetWidth / 2;
+      let dx = e.clientX - cx, dy = e.clientY - cy;
+      const d = Math.hypot(dx, dy);
+      if (d > r) { dx = dx / d * r; dy = dy / d * r; }
+      knob.style.transform = `translate(${dx}px, ${dy}px)`;
+      const nx = dx / r, ny = dy / r;
+      setDir('left', nx < -0.35); setDir('right', nx > 0.35);
+      setDir('up', ny < -0.6); setDir('down', ny > 0.6);
+    });
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => zone.addEventListener(ev, e => { if (e.pointerId === id) release(); }));
+  })();
 
   /* ================= WORLD STATE ================= */
   let mode = 'loading';
