@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>자립 어드벤처 - 홀로서기 월드 | 자립해봄</title>
+  <meta name="description" content="점프하고 모험하면서 자립준비청년 지원 정책을 배우는 2D 횡스크롤 어드벤처! 마을 사람들의 퀘스트를 깨고 정책 카드를 모아보세요.">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <link rel="canonical" href="https://jarip.vercel.app/game_adventure.html">
+  <meta property="og:site_name" content="자립해봄">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://jarip.vercel.app/game_adventure.html">
+  <meta property="og:title" content="자립 어드벤처 - 홀로서기 월드 | 자립해봄">
+  <meta property="og:description" content="점프하고 모험하면서 자립 지원 정책을 배우는 2D 횡스크롤 어드벤처!">
+  <meta property="og:image" content="https://jarip.vercel.app/assets/adventure/bg_title.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #3b2a1a;
+      --panel: rgba(255, 250, 240, 0.96);
+      --panel-edge: #c98f4a;
+      --accent: #ff9f1c;
+      --accent-dark: #d97706;
+      --hp: #ff5a5f;
+      --exp: #ffd23f;
+      --sky: #1e2a44;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0; height: 100%; background: var(--sky); color: var(--ink);
+      font-family: 'Jua', 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+      overflow: hidden; user-select: none; -webkit-user-select: none; touch-action: manipulation;
+    }
+    #app { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+    #stage {
+      position: relative; aspect-ratio: 16 / 9;
+      width: min(100vw, calc(100dvh * 16 / 9)); max-height: 100dvh;
+      background: #000; overflow: hidden; box-shadow: 0 0 40px rgba(0,0,0,.6);
+    }
+    canvas { display: block; width: 100%; height: 100%; image-rendering: auto; }
+
+    /* ---------- HUD ---------- */
+    .hud { position: absolute; inset: 0; pointer-events: none; display: none; }
+    .hud.on { display: block; }
+    .hud-card {
+      position: absolute; left: 1.2%; top: 2%;
+      display: flex; gap: 8px; align-items: center;
+      background: rgba(40, 28, 18, .72); border: 2px solid rgba(255, 214, 150, .55);
+      border-radius: 14px; padding: 6px 10px 6px 6px; color: #fff;
+      font-size: clamp(11px, 1.6vw, 16px);
+    }
+    .hud-face {
+      width: clamp(34px, 5vw, 52px); height: clamp(34px, 5vw, 52px); border-radius: 10px;
+      background: linear-gradient(#ffe7b8, #ffc97a); object-fit: contain; object-position: top;
+    }
+    .hud-name { margin-bottom: 3px; }
+    .hud-name b { color: var(--exp); margin-right: 4px; }
+    .bar {
+      position: relative; width: clamp(90px, 16vw, 170px); height: clamp(9px, 1.4vw, 14px);
+      background: rgba(0,0,0,.55); border-radius: 99px; overflow: hidden; margin-top: 2px;
+      border: 1px solid rgba(255,255,255,.25);
+    }
+    .bar i { position: absolute; inset: 0; width: 100%; border-radius: 99px; transition: width .2s; }
+    .bar.hp i { background: linear-gradient(#ff8a8d, var(--hp)); }
+    .bar.exp i { background: linear-gradient(#fff08a, var(--exp)); }
+    .bar span {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      font-size: clamp(8px, 1.1vw, 11px); color: #fff; text-shadow: 0 1px 2px #000;
+    }
+    .hud-coin { margin-top: 3px; color: #ffe08a; font-size: clamp(10px, 1.4vw, 14px); }
+
+    .hud-btns { position: absolute; right: 1.2%; top: 2%; display: flex; gap: 6px; pointer-events: auto; }
+    .hbtn {
+      font-family: inherit; font-size: clamp(11px, 1.5vw, 15px); color: #fff; cursor: pointer;
+      background: rgba(40, 28, 18, .72); border: 2px solid rgba(255, 214, 150, .55);
+      border-radius: 12px; padding: 6px 10px;
+    }
+    .hbtn:hover { background: rgba(70, 48, 28, .85); }
+
+    .tracker {
+      position: absolute; right: 1.2%; top: 13%; width: clamp(150px, 24vw, 250px);
+      background: rgba(40, 28, 18, .6); border-radius: 12px; padding: 8px 10px; color: #fff;
+      font-size: clamp(10px, 1.35vw, 14px); display: none;
+    }
+    .tracker.on { display: block; }
+    .tracker h4 { margin: 0 0 4px; color: var(--exp); font-weight: normal; font-size: 1em; }
+    .tracker div { line-height: 1.5; }
+    .tracker .ready { color: #8ef58e; }
+
+    .map-banner {
+      position: absolute; left: 50%; top: 16%; transform: translateX(-50%);
+      background: linear-gradient(90deg, transparent, rgba(30,20,10,.75) 20%, rgba(30,20,10,.75) 80%, transparent);
+      color: #fff; padding: 10px 80px; text-align: center; white-space: nowrap;
+      font-size: clamp(16px, 2.8vw, 30px); opacity: 0; transition: opacity .5s;
+      text-shadow: 0 2px 4px #000;
+    }
+    .map-banner small { display: block; font-size: .5em; color: #ffd98a; }
+    .map-banner.on { opacity: 1; }
+
+    .toast {
+      position: absolute; left: 50%; top: 30%; transform: translate(-50%, 0);
+      color: #fff; font-size: clamp(13px, 2vw, 20px); text-shadow: 0 2px 4px #000, 0 0 10px rgba(0,0,0,.6);
+      pointer-events: none; opacity: 0; transition: opacity .3s, transform .3s; text-align: center;
+    }
+    .toast.on { opacity: 1; transform: translate(-50%, -8px); }
+
+    /* ---------- Dialog ---------- */
+    .dialog {
+      position: absolute; left: 50%; bottom: 4%; transform: translateX(-50%);
+      width: min(92%, 760px); background: var(--panel); border: 3px solid var(--panel-edge);
+      border-radius: 18px; padding: 14px 16px 12px; display: none; gap: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.45); z-index: 20;
+    }
+    .dialog.on { display: flex; }
+    .dlg-face {
+      flex: 0 0 auto; width: clamp(64px, 11vw, 110px); height: clamp(64px, 11vw, 110px);
+      border-radius: 14px; background: linear-gradient(#fff3d6, #ffd89a); object-fit: contain;
+      border: 2px solid #e9b870;
+    }
+    .dlg-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .dlg-name {
+      align-self: flex-start; background: var(--accent); color: #fff; border-radius: 99px;
+      padding: 2px 12px; font-size: clamp(12px, 1.6vw, 16px); margin-bottom: 6px;
+    }
+    .dlg-text { font-size: clamp(13px, 1.9vw, 19px); line-height: 1.55; word-break: keep-all; min-height: 2.6em; }
+    .dlg-text .hi { color: #d9480f; }
+    .dlg-hint { color: #b45309; font-size: clamp(12px, 1.6vw, 16px); margin-top: 6px; min-height: 0; }
+    .dlg-btns { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin-top: 10px; }
+    .dlg-btns.quiz { flex-direction: column; align-items: stretch; }
+    .btn {
+      font-family: inherit; font-size: clamp(13px, 1.8vw, 17px); cursor: pointer;
+      border: none; border-radius: 12px; padding: 8px 16px; color: #fff;
+      background: linear-gradient(#ffb547, var(--accent-dark)); box-shadow: 0 3px 0 #9a4a06;
+    }
+    .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #9a4a06; }
+    .btn.ghost { background: #e9dcc6; color: var(--ink); box-shadow: 0 3px 0 #b8a584; }
+    .btn.choice { background: #fff; color: var(--ink); border: 2px solid #e2c28f; box-shadow: 0 3px 0 #d8b47a; text-align: left; }
+    .btn.choice.wrong { animation: shake .35s; background: #ffe3e3; border-color: #ff8787; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+    /* ---------- Screens (title / select / ending / book) ---------- */
+    .screen {
+      position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 30; text-align: center; padding: 3%;
+    }
+    .screen.on { display: flex; }
+    .screen.bg { background-repeat: no-repeat; background-size: 125% auto; background-position: 50% 0; background-color: #6b8f4e; }
+    .screen.dim::before { content: ''; position: absolute; inset: 0; background: rgba(20, 14, 8, .45); }
+    .screen > * { position: relative; }
+    .logo {
+      font-size: clamp(30px, 6.5vw, 72px); color: #fff; line-height: 1.05; margin: 0 0 4px;
+      -webkit-text-stroke: 2px #7a3e06; paint-order: stroke fill;
+      text-shadow: 0 5px 0 #7a3e06, 0 8px 20px rgba(0,0,0,.5);
+    }
+    .logo small { display: block; font-size: .42em; color: #ffe08a; -webkit-text-stroke: 1px #7a3e06; margin-top: 6px; }
+    .sub { color: #fff; font-size: clamp(12px, 1.8vw, 18px); text-shadow: 0 2px 4px #000; margin: 6px 0 18px; }
+    .title-btns { display: flex; flex-direction: column; gap: 10px; width: min(70%, 280px); }
+    .title-btns .btn { padding: 11px; font-size: clamp(15px, 2.2vw, 21px); }
+    .back-link { color: #fff; margin-top: 14px; font-size: clamp(11px, 1.5vw, 14px); opacity: .85; }
+
+    .panel {
+      background: var(--panel); border: 3px solid var(--panel-edge); border-radius: 20px;
+      padding: 2.4% 3%; width: min(96%, 900px); max-height: 94%; overflow: auto;
+      box-shadow: 0 10px 40px rgba(0,0,0,.5);
+    }
+    .panel h2 { margin: 0 0 4px; font-weight: normal; font-size: clamp(18px, 3vw, 30px); color: #8a4b0c; }
+    .panel p.lead { margin: 0 0 12px; font-size: clamp(12px, 1.6vw, 16px); color: #7a5a3a; }
+    .chars { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2%; margin-bottom: 12px; }
+    .char {
+      cursor: pointer; border: 3px solid #ecd4ab; border-radius: 16px; background: linear-gradient(#fffaf0, #ffe9c4);
+      padding: 6px 4px 8px; transition: transform .15s, border-color .15s;
+    }
+    .char img { width: 100%; aspect-ratio: 1; object-fit: contain; }
+    .char span { font-size: clamp(13px, 1.9vw, 19px); }
+    .char em { display: block; font-style: normal; font-size: clamp(10px, 1.3vw, 13px); color: #9b7652; }
+    .char:hover { transform: translateY(-3px); }
+    .char.sel { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,159,28,.35); transform: translateY(-3px); }
+    .name-row { display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap; }
+    .name-row input {
+      font-family: inherit; font-size: clamp(14px, 2vw, 19px); padding: 8px 12px; border-radius: 12px;
+      border: 2px solid #e2c28f; width: min(60%, 220px); text-align: center; color: var(--ink);
+    }
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; text-align: left; }
+    .pcard { background: #fff; border: 2px solid #ecd4ab; border-radius: 14px; padding: 10px 12px; }
+    .pcard .em { font-size: 28px; }
+    .pcard b { display: block; font-weight: normal; font-size: 17px; color: #8a4b0c; margin: 2px 0 4px; }
+    .pcard p { margin: 0; font-size: 13.5px; line-height: 1.5; color: #5a4632; font-family: 'Pretendard', 'Malgun Gothic', sans-serif; }
+    .pcard.locked { background: #f1e8d8; border-style: dashed; color: #b4a184; }
+    .pcard.locked b, .pcard.locked p { color: #b4a184; }
+    .panel .btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+
+    .card-pop {
+      position: absolute; inset: 0; display: none; align-items: center; justify-content: center; z-index: 40;
+      background: rgba(0,0,0,.45);
+    }
+    .card-pop.on { display: flex; }
+    .card-pop .pcard { width: min(80%, 340px); text-align: center; padding: 18px; animation: pop .45s cubic-bezier(.2,1.6,.4,1); }
+    .card-pop .pcard .em { font-size: 54px; }
+    .card-pop .pcard b { font-size: 22px; }
+    .card-pop .pcard p { font-size: 15px; }
+    .card-pop .got { color: var(--accent-dark); font-size: 15px; }
+    @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .stats { display: flex; gap: 10px; justify-content: center; margin: 10px 0 14px; flex-wrap: wrap; }
+    .stats div { background: #fff; border: 2px solid #ecd4ab; border-radius: 12px; padding: 6px 14px; font-size: clamp(12px, 1.6vw, 16px); }
+    .stats b { display: block; font-weight: normal; font-size: 1.5em; color: var(--accent-dark); }
+
+    /* ---------- Touch controls ---------- */
+    .touch { position: absolute; inset: auto 0 0 0; height: 0; display: none; z-index: 15; }
+    .touch.on { display: block; }
+    .pad { position: absolute; bottom: 4%; pointer-events: auto; }
+    .pad.left { left: 1.5%; width: clamp(104px, 17vw, 160px); aspect-ratio: 1; bottom: 2%; opacity: .8; }
+    .pad.right { right: 1.5%; bottom: 3%; opacity: .85; display: grid; grid-template-columns: repeat(2, auto); gap: 10px; align-items: end; }
+    .tb {
+      position: absolute; width: 36%; height: 36%; border-radius: 50%;
+      background: rgba(255,255,255,.22); border: 2px solid rgba(255,255,255,.5); color: #fff;
+      display: flex; align-items: center; justify-content: center; font-size: clamp(16px, 3vw, 26px);
+      touch-action: none;
+    }
+    .tb.up { left: 32%; top: 0; } .tb.down { left: 32%; bottom: 0; }
+    .tb.l { left: 0; top: 32%; } .tb.r { right: 0; top: 32%; }
+    .rb {
+      width: clamp(48px, 8.5vw, 74px); aspect-ratio: 1; border-radius: 50%; touch-action: none;
+      background: rgba(255, 159, 28, .55); border: 2px solid rgba(255,255,255,.65); color: #fff;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-size: clamp(11px, 1.8vw, 16px); line-height: 1.1;
+    }
+    .rb .i { font-size: 1.6em; }
+    .rb.jump { background: rgba(80, 170, 255, .55); }
+    .rb.skill { background: rgba(190, 110, 255, .55); width: clamp(44px, 8vw, 66px); }
+    .rb.skill.cd { opacity: .45; }
+    .tb.on, .rb.on { background: rgba(255,255,255,.55); }
+
+    .keys-help {
+      position: absolute; left: 1.2%; bottom: 2%; color: rgba(255,255,255,.85); font-size: clamp(9px, 1.2vw, 12px);
+      background: rgba(0,0,0,.35); padding: 4px 8px; border-radius: 8px; pointer-events: none;
+    }
+    .rotate-tip { display: none; color: #fff; text-align: center; padding: 10px; font-size: 14px; position: fixed; top: 0; left: 0; right: 0; }
+    @media (orientation: portrait) and (pointer: coarse) {
+      .rotate-tip { display: block; }
+    }
+    .loading { color: #fff; font-size: 18px; }
+    .loading .bar { width: 220px; margin: 10px auto 0; height: 12px; }
+  </style>
+</head>
+<body>
+  <div class="rotate-tip">📱 폰을 가로로 돌리면 더 넓게 즐길 수 있어요!</div>
+  <div id="app">
+    <div id="stage">
+      <canvas id="cv" width="960" height="540"></canvas>
+
+      <!-- HUD -->
+      <div class="hud" id="hud">
+        <div class="hud-card">
+          <img class="hud-face" id="hudFace" alt="">
+          <div>
+            <div class="hud-name"><b id="hudLv">Lv.1</b><span id="hudName"></span></div>
+            <div class="bar hp"><i id="hpFill"></i><span id="hpTxt"></span></div>
+            <div class="bar exp"><i id="expFill"></i><span id="expTxt"></span></div>
+            <div class="hud-coin">🪙 <span id="coinTxt">0</span> 희망코인</div>
+          </div>
+        </div>
+        <div class="hud-btns">
+          <button class="hbtn" id="bookBtn">📖 정책 도감</button>
+          <button class="hbtn" id="exitBtn">🏠 나가기</button>
+        </div>
+        <div class="tracker" id="tracker"></div>
+        <div class="map-banner" id="mapBanner"></div>
+        <div class="toast" id="toast"></div>
+        <div class="keys-help" id="keysHelp">← → 이동 · Space 점프 · Z 공격 · X 스킬 · ↑ 대화/포탈/사다리 · ↓+Space 내려가기</div>
+      </div>
+
+      <!-- Touch controls -->
+      <div class="touch" id="touch">
+        <div class="pad left">
+          <div class="tb up" data-k="up">▲</div>
+          <div class="tb l" data-k="left">◀</div>
+          <div class="tb r" data-k="right">▶</div>
+          <div class="tb down" data-k="down">▼</div>
+        </div>
+        <div class="pad right">
+          <div class="rb skill" data-k="skill" id="skillBtn"><span class="i">✨</span>스킬</div>
+          <div></div>
+          <div class="rb" data-k="attack"><span class="i">⭐</span>공격</div>
+          <div class="rb jump" data-k="jump"><span class="i">⤴</span>점프</div>
+        </div>
+      </div>
+
+      <!-- Dialog -->
+      <div class="dialog" id="dialog">
+        <img class="dlg-face" id="dlgFace" alt="">
+        <div class="dlg-body">
+          <div class="dlg-name" id="dlgName"></div>
+          <div class="dlg-text" id="dlgText"></div>
+          <div class="dlg-hint" id="dlgHint"></div>
+          <div class="dlg-btns" id="dlgBtns"></div>
+        </div>
+      </div>
+
+      <!-- Card reward popup -->
+      <div class="card-pop" id="cardPop"></div>
+
+      <!-- Loading -->
+      <div class="screen on" id="scrLoading" style="background:#1e2a44">
+        <div class="loading">모험 준비 중…<div class="bar exp"><i id="loadFill" style="width:0"></i></div></div>
+      </div>
+
+      <!-- Title -->
+      <div class="screen bg dim" id="scrTitle">
+        <h1 class="logo">자립 어드벤처<small>~ 홀로서기 월드 ~</small></h1>
+        <p class="sub">점프하고, 모험하고, 마을 사람들을 도우면서<br>나한테 필요한 자립 지원 정책을 하나씩 알아가 봐요!</p>
+        <div class="title-btns">
+          <button class="btn" id="newBtn">▶ 새로 시작하기</button>
+          <button class="btn ghost" id="contBtn" style="display:none">이어하기</button>
+        </div>
+        <a class="back-link" href="game.html">← 게임 모드 선택으로</a>
+      </div>
+
+      <!-- Character select -->
+      <div class="screen bg dim" id="scrSelect">
+        <div class="panel">
+          <h2>함께 모험할 캐릭터를 골라줘</h2>
+          <p class="lead">누구를 골라도 스토리는 똑같아요. 마음에 드는 친구로 골라봐요!</p>
+          <div class="chars" id="chars"></div>
+          <div class="name-row">
+            <input id="nameInput" maxlength="8" placeholder="이름 (최대 8자)">
+            <button class="btn" id="startBtn">모험 시작!</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Policy book -->
+      <div class="screen dim" id="scrBook" style="background:rgba(0,0,0,.25)">
+        <div class="panel">
+          <h2>📖 정책 도감</h2>
+          <p class="lead">퀘스트를 깨면서 모은 자립 지원 정책이에요. 모두 모아봐요!</p>
+          <div class="cards" id="bookCards"></div>
+          <div class="btn-row"><button class="btn" id="bookClose">닫기</button></div>
+        </div>
+      </div>
+
+      <!-- Ending -->
+      <div class="screen bg dim" id="scrEnding">
+        <div class="panel">
+          <h2>🎉 홀로서기 월드 완주!</h2>
+          <p class="lead" id="endLead"></p>
+          <div class="stats" id="endStats"></div>
+          <div class="cards" id="endCards"></div>
+          <div class="btn-row">
+            <a class="btn" href="/" style="text-decoration:none">🔎 대시보드에서 진짜 정책 찾아보기</a>
+            <button class="btn ghost" id="againBtn">처음부터 다시</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const cv = $('cv'), mainCtx = cv.getContext('2d', { alpha: false });
+  let ctx = mainCtx;
+  const VW = 960, VH = 540, GROUND = 480;
+  const A = 'assets/adventure/';
+
+  /* ================= DATA ================= */
+  const CHARS = [
+    { id: 'char_a', name: '하람', desc: '씩씩한 후디 소년' },
+    { id: 'char_b', name: '서윤', desc: '포니테일 행동파' },
+    { id: 'char_c', name: '도현', desc: '꼼꼼한 메모왕' },
+    { id: 'char_d', name: '지우', desc: '장화 신은 장난꾸러기' },
+  ];
+
+  const NPCS = {
+    director:  { img: 'npc_director',  name: '원장님' },
+    clerk:     { img: 'npc_clerk',     name: '주민센터 민지 주무관' },
+    banker:    { img: 'npc_banker',    name: '씨앗은행 김 대리' },
+    house:     { img: 'npc_house',     name: '집 상담사 오 선생님' },
+    counselor: { img: 'npc_counselor', name: '마음쉼터 상담 선생님' },
+    mentor:    { img: 'npc_mentor',    name: '자립 선배 태오' },
+  };
+
+  const MOBS = {
+    worry:  { img: 'mob_worry',  name: '걱정 구름',     h: 56,  hp: 30,  dmg: 8,  exp: 12,  speed: 45, coin: [3, 8] },
+    debt:   { img: 'mob_debt',   name: '빚 코인',       h: 56,  hp: 50,  dmg: 11, exp: 18,  speed: 58, coin: [6, 14] },
+    lonely: { img: 'mob_lonely', name: '외로움 그림자', h: 60,  hp: 80,  dmg: 14, exp: 26,  speed: 40, coin: [8, 18] },
+    boss:   { img: 'mob_boss',   name: '불안 대왕',     h: 170, hp: 750, dmg: 20, exp: 260, speed: 55, coin: [150, 200], boss: true },
+  };
+
+  const CARDS = {
+    extend:  { em: '🏡', title: '보호기간 연장',   desc: '원하면 만 24세까지 시설이나 위탁가정에서 더 지낼 수 있어요. 아직 준비가 덜 됐다면 서두르지 않아도 돼요.' },
+    allow:   { em: '💸', title: '자립수당',         desc: '보호가 끝난 뒤 5년 동안 매달 50만원씩 들어와요. 매달 생활비 걱정을 조금 덜어줘요.' },
+    settle:  { em: '💰', title: '자립정착금',       desc: '독립할 때 한 번에 받는 목돈이에요. 금액은 지역마다 달라요(서울은 2,000만원). 쓰기 전에 꼭 계획부터 세워요!' },
+    didim:   { em: '🌱', title: '디딤씨앗통장',     desc: '내가 저축한 돈의 2배를 나라가 더 넣어주는 통장이에요. 적은 돈이라도 꾸준히 넣으면 든든한 씨앗돈이 돼요.' },
+    lh:      { em: '🏠', title: 'LH 전세임대주택',  desc: '전세금은 LH가 대부분 내주고, 나는 보증금 100만원만 내면 돼요. 2년마다 재계약하면서 오래 살 수 있어요.' },
+    mind:    { em: '💜', title: '심리상담·정서지원', desc: '마음이 지칠 땐 전문 상담을 받을 수 있어요. 도움을 청하는 것도 용기예요. 혼자 버티지 않아도 괜찮아요.' },
+    mentor:  { em: '🎐', title: '바람개비서포터즈', desc: '먼저 자립한 선배들이 후배를 챙겨주는 모임이에요. 궁금한 건 선배한테 편하게 물어봐요.' },
+  };
+
+  const QUESTS = {
+    q1: {
+      npc: 'director', title: '걱정 구름 쫓아내기',
+      goal: { type: 'kill', mob: 'worry', n: 3 }, goalLabel: '걱정 구름',
+      intro: [
+        '{name}, 드디어 오늘이구나. 설레기도 하고 좀 무섭기도 하지?',
+        '그런데 요즘 마을에 <span class="hi">걱정 구름</span>이 자꾸 몰려와. 떠나기 전에 딱 3마리만 쫓아내 줄래? <span class="hi">Z키(모바일은 공격 버튼)</span>로 톡톡 치면 돼.',
+      ],
+      active: '천천히 해도 괜찮아. 다치면 잠깐 쉬면 체력이 다시 차.',
+      ready: ['잘했어! 걱정은 그렇게 하나씩 쫓아내면 되는 거야.', '참, 떠나기 전에 꼭 알려주고 싶은 게 있어.'],
+      quizzes: [{
+        q: '혹시 아직 준비가 덜 된 것 같으면, 여기서 좀 더 지내도 돼. 보호기간은 <span class="hi">최대 만 몇 살까지</span> 늘릴 수 있을까?',
+        choices: ['만 20세', '만 24세', '만 30세'], answer: 1,
+        hint: '생각보다 넉넉해. 20대 중반까지야.',
+        explain: '맞아! 원하면 <span class="hi">만 24세까지</span> 보호기간을 늘릴 수 있어. 서두르지 않아도 된다는 거야.',
+      }],
+      cards: ['extend'], exp: 60, coins: 50,
+      after: '오른쪽 끝 포탈을 타면 마을 거리가 나와. 주민센터에 꼭 들러봐! 언제든 놀러 오고.',
+    },
+    q2: {
+      npc: 'clerk', title: '흩어진 서류 찾기', requires: 'q1',
+      goal: { type: 'collect', item: 'paper', n: 3, from: ['worry', 'debt'], rate: 0.6 }, goalLabel: '서류 조각',
+      intro: [
+        '어서 와요! 자립 지원 신청하러 왔죠? 잘 찾아왔어요.',
+        '그런데 아까 몬스터들이 서류를 몽땅 흩어놨어요… 😢 <span class="hi">서류 조각 3장</span>만 찾아다 줄래요? 몬스터를 물리치면 떨어뜨릴 거예요.',
+      ],
+      active: '서류 조각은 걱정 구름이랑 빚 코인이 갖고 있어요!',
+      ready: ['다 찾아왔네요! 고마워요.', '서류 정리하는 동안, 받을 수 있는 돈 얘기 좀 해볼게요.'],
+      quizzes: [{
+        q: '보호가 끝난 뒤 5년 동안 매달 들어오는 <span class="hi">자립수당</span>. 한 달에 얼마일까요?',
+        choices: ['월 30만원', '월 50만원', '월 100만원'], answer: 1,
+        hint: '2024년에 올랐어요. 딱 반백만원!',
+        explain: '정답! 매달 <span class="hi">50만원</span>씩, 최대 5년(60번) 받을 수 있어요.',
+      }, {
+        q: '시설을 나올 때 <span class="hi">한 번에 받는 목돈</span>은 뭐라고 부를까요?',
+        choices: ['자립정착금', '청년도약금', '생활안정금'], answer: 0,
+        hint: '자립해서 새 곳에 "정착"할 때 쓰는 돈이에요.',
+        explain: '맞아요, <span class="hi">자립정착금</span>! 금액은 지역마다 달라요. 서울은 2,000만원이에요.',
+      }],
+      cards: ['allow', 'settle'], exp: 90, coins: 80,
+      after: '오른쪽으로 가면 희망 광장이에요. 씨앗은행에서 저축 꿀팁도 들어봐요!',
+    },
+    q3: {
+      npc: 'banker', title: '광장의 빚 코인 소탕', requires: 'q2',
+      goal: { type: 'kill', mob: 'debt', n: 5 }, goalLabel: '빚 코인',
+      intro: [
+        '씨앗은행에 온 걸 환영해요! 그런데 요즘 <span class="hi">빚 코인</span>들이 광장을 휘젓고 다녀서 큰일이에요.',
+        '<span class="hi">빚 코인 5마리</span>만 혼내줄래요? 그러면 돈이 불어나는 통장 얘기를 해드릴게요.',
+      ],
+      active: '빚 코인은 작아 보여도 계속 불어나요. 얼른 정리해줘요!',
+      ready: ['와, 광장이 조용해졌어요! 약속대로 알려드릴게요.'],
+      quizzes: [{
+        q: '<span class="hi">디딤씨앗통장</span>은 내가 저축한 돈의 2배를 나라가 더 넣어줘요(1:2 매칭). 매달 5만원을 넣으면 통장에 <span class="hi">매달 얼마</span>가 쌓일까요?',
+        choices: ['5만원', '10만원', '15만원'], answer: 2,
+        hint: '내 돈 5만원 + 나라가 넣어주는 돈(5만원의 2배)!',
+        explain: '정답! 내 돈 5만원에 나라가 10만원을 더 넣어줘서 <span class="hi">매달 15만원</span>이 쌓여요.',
+      }],
+      cards: ['didim'], exp: 120, coins: 100,
+      after: '오른쪽으로 쭉 가면 첫 집 골목이 나와요. 집 구하는 것도 도와줄 거예요!',
+    },
+    q4: {
+      npc: 'house', title: '옥상 위의 열쇠', requires: 'q3',
+      goal: { type: 'fetch', item: 'key', n: 1 }, goalLabel: '새 집 열쇠',
+      intro: [
+        '새 집 보러 왔구나! 그런데 어쩌지… 바람이 불어서 <span class="hi">열쇠가 저 위 옥상까지</span> 날아가 버렸어.',
+        '발판을 밟고 사다리도 타고 올라가서 🔑 열쇠 좀 찾아다 줄래? 사다리 앞에서 <span class="hi">↑</span>를 누르면 올라갈 수 있어.',
+      ],
+      active: '열쇠는 제일 높은 옥상에 있어! 사다리 앞에서 ↑를 눌러봐.',
+      ready: ['찾았구나! 이제 계약 얘기를 해볼까?'],
+      quizzes: [{
+        q: '<span class="hi">LH 전세임대주택</span>은 전세금 대부분을 LH가 내줘. 자립준비청년이 내는 <span class="hi">임대보증금</span>은 얼마일까?',
+        choices: ['100만원', '500만원', '1,000만원'], answer: 0,
+        hint: '생각보다 훨씬 적어. 세 자리 숫자(만원)야.',
+        explain: '맞아! 보증금 <span class="hi">100만원</span>이면 내 집을 구할 수 있어.',
+      }],
+      cards: ['lh'], exp: 150, coins: 120,
+      after: '오른쪽 끝은 마음 숲이야. 새 생활이 익숙해지면 마음도 꼭 챙겨야 해.',
+    },
+    q5: {
+      npc: 'counselor', title: '외로움 달래기', requires: 'q4',
+      goal: { type: 'kill', mob: 'lonely', n: 4 }, goalLabel: '외로움 그림자',
+      intro: [
+        '마음 숲에 온 걸 환영해요. 이 숲에는 <span class="hi">외로움 그림자</span>가 살아요. 혼자 있는 밤이면 더 커지죠.',
+        '그림자 <span class="hi">4마리</span>만 달래줄래요? 톡톡 두드리면 조용히 사라질 거예요.',
+      ],
+      active: '외로움 그림자는 조금 단단해요. 필요하면 스킬(X)도 써봐요.',
+      ready: ['고생 많았어요. 마음이 좀 가벼워졌나요?'],
+      quizzes: [{
+        q: '혼자 사는 게 버겁고 <span class="hi">마음이 지칠 때</span>, 가장 좋은 방법은 뭘까요?',
+        choices: ['혼자 꾹 참는다', '심리상담·정서지원을 신청한다', '아무한테도 말하지 않는다'], answer: 1,
+        hint: '혼자 버티지 않아도 괜찮아요.',
+        explain: '맞아요. 자립준비청년은 <span class="hi">전문 심리상담</span>을 받을 수 있어요. 도와달라고 말하는 것도 용기예요.',
+      }],
+      cards: ['mind'], exp: 150, coins: 100,
+      after: '저기 태오 선배가 기다리고 있어요. 한번 가서 얘기해봐요.',
+    },
+    q6: {
+      npc: 'mentor', title: '불안 대왕 무찌르기', requires: 'q5',
+      goal: { type: 'kill', mob: 'boss', n: 1 }, goalLabel: '불안 대왕',
+      intro: [
+        '안녕! 나도 너처럼 자립준비청년이었어. 지금은 후배들 챙기는 중이야.',
+        '숲 오른쪽 끝에 <span class="hi">불안 대왕</span>이 나타났대. 크고 무서워 보여도, 지금까지 해온 너라면 이길 수 있어. 같이 가보자!',
+      ],
+      active: '불안 대왕은 점프하고 내려찍을 때 땅이 흔들려. 그때는 같이 점프해서 피해!',
+      ready: ['해냈다!! 불안은 아예 없어지진 않지만, 이렇게 이겨낼 수 있어.'],
+      quizzes: [{
+        q: '나처럼 <span class="hi">먼저 자립한 선배</span>들이 후배를 챙겨주는 모임, 이름이 뭘까?',
+        choices: ['바람개비서포터즈', '새싹응원단', '희망날개단'], answer: 0,
+        hint: '바람이 불면 빙글빙글 도는 장난감 이름이야.',
+        explain: '정답! <span class="hi">바람개비서포터즈</span>에서 선배들을 만날 수 있어. 막힐 땐 언제든 물어봐!',
+      }],
+      cards: ['mentor'], exp: 300, coins: 200,
+      after: '네 모험은 이제 시작이야. 응원할게!',
+    },
+  };
+
+  // 맵: 플랫폼 y는 발판 윗면, ladders는 y1(윗면)~y2(아랫면)
+  const MAPS = {
+    home: {
+      title: '보금자리 언덕', area: '햇살 마을', bg: 'bg_home', w: 2000,
+      plats: [[330, 392, 220], [620, 302, 200], [980, 385, 260], [1320, 300, 220], [1560, 215, 170]],
+      ladders: [],
+      npcs: [['director', 230]],
+      spawns: [['worry', -1, 520, 1750, 3], ['worry', 2, 0, 0, 1], ['worry', 3, 0, 0, 1]],
+      portals: [{ x: 1930, to: 'town', at: 0, need: 'q1' }],
+      start: 110,
+    },
+    town: {
+      title: '주민센터 거리', area: '햇살 마을', bg: 'bg_town', w: 2400,
+      plats: [[420, 392, 240], [720, 302, 220], [1000, 212, 220], [1420, 385, 300], [1820, 300, 260]],
+      ladders: [[1180, 212, 480]],
+      npcs: [['clerk', 260]],
+      spawns: [['worry', -1, 520, 2200, 3], ['debt', -1, 900, 2200, 2], ['debt', 3, 0, 0, 1], ['worry', 4, 0, 0, 1], ['debt', 2, 0, 0, 1]],
+      portals: [{ x: 60, to: 'home', at: 0 }, { x: 2340, to: 'bank', at: 0, need: 'q2' }],
+      start: 140,
+    },
+    bank: {
+      title: '씨앗은행 광장', area: '희망 광장', bg: 'bg_bank', w: 2400,
+      plats: [[380, 390, 260], [700, 300, 240], [1040, 390, 280], [1380, 300, 240], [1700, 215, 240], [1980, 380, 260]],
+      ladders: [[1880, 215, 480]],
+      npcs: [['banker', 240]],
+      spawns: [['debt', -1, 480, 2250, 4], ['debt', 1, 0, 0, 1], ['debt', 3, 0, 0, 1], ['debt', 4, 0, 0, 1], ['worry', 5, 0, 0, 1]],
+      portals: [{ x: 60, to: 'town', at: 1 }, { x: 2340, to: 'house', at: 0, need: 'q3' }],
+      start: 140,
+    },
+    house: {
+      title: '첫 집 골목', area: '새싹 동네', bg: 'bg_house', w: 2000,
+      // 사다리 1: 땅 → 발판(850~1050, y212) / 사다리 2: 그 발판 → 옥상(990~1380, y120)
+      plats: [[360, 392, 200], [600, 302, 180], [850, 212, 200], [990, 120, 390], [1420, 300, 220], [1680, 390, 200]],
+      ladders: [[890, 212, 480], [1020, 120, 212]],
+      npcs: [['house', 220]],
+      spawns: [['worry', -1, 500, 1850, 3], ['debt', 4, 0, 0, 1], ['lonely', 5, 0, 0, 1]],
+      portals: [{ x: 60, to: 'bank', at: 1 }, { x: 1940, to: 'forest', at: 0, need: 'q4' }],
+      items: [{ item: 'key', x: 1300, y: 120, quest: 'q4' }],
+      start: 140,
+    },
+    forest: {
+      title: '쉼터 오솔길', area: '마음 숲', bg: 'bg_forest', w: 2600,
+      plats: [[640, 392, 240], [930, 302, 220], [1230, 390, 260], [1560, 300, 220]],
+      ladders: [],
+      npcs: [['counselor', 240], ['mentor', 420]],
+      spawns: [['lonely', -1, 620, 1700, 3], ['lonely', 1, 0, 0, 1], ['lonely', 3, 0, 0, 1], ['boss', -1, 1850, 2500, 1, 'q6']],
+      portals: [{ x: 60, to: 'house', at: 1 }],
+      start: 140,
+    },
+  };
+
+  /* ================= IMAGES ================= */
+  const IMG = {};
+  const IMG_LIST = [
+    ...CHARS.map(c => c.id + '.png'),
+    ...Object.values(NPCS).map(n => n.img + '.png'),
+    ...Object.values(MOBS).map(m => m.img + '.png'),
+    ...Object.values(MAPS).map(m => m.bg + '.jpg'), 'bg_title.jpg',
+  ];
+  function loadImages() {
+    let done = 0;
+    return Promise.all(IMG_LIST.map(f => new Promise(res => {
+      const im = new Image();
+      im.onload = () => { IMG[f.replace(/\.\w+$/, '')] = im; tick(); };
+      im.onerror = tick;
+      function tick() { done++; $('loadFill').style.width = (done / IMG_LIST.length * 100) + '%'; res(); }
+      im.src = A + f;
+    })));
+  }
+
+  /* ================= SAVE ================= */
+  const SAVE_KEY = 'jarip_adventure_v1';
+  let S = null; // save state
+  function newSave(charId, name) {
+    const q = {}; Object.keys(QUESTS).forEach(k => q[k] = { state: 'none', n: 0 });
+    return { char: charId, name, lv: 1, exp: 0, hp: 100, coins: 0, map: 'home', quests: q, cards: [], started: Date.now(), kills: 0 };
+  }
+  function persist() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
+  function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); return s && s.quests ? s : null; } catch (e) { return null; } }
+  function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
+  const maxHp = () => 100 + (S.lv - 1) * 15;
+  const needExp = () => 40 + S.lv * 30;
+  const qs = (id) => S.quests[id].state;
+
+  /* ================= INPUT ================= */
+  const keys = {}, pressed = {};
+  const KEYMAP = {
+    ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down',
+    ' ': 'jump', Alt: 'jump', KeyC: 'jump', KeyZ: 'attack', Control: 'attack', KeyX: 'skill', Shift: 'skill',
+  };
+  function kname(e) { return KEYMAP[e.key] || KEYMAP[e.code]; }
+  addEventListener('keydown', e => {
+    if (e.target && e.target.tagName === 'INPUT') return;
+    const k = kname(e);
+    if (e.key === 'Enter' && mode === 'dialog') { const b = $('dlgBtns').querySelector('.btn:not(.choice)'); if (b) { b.click(); e.preventDefault(); } return; }
+    if (!k) return;
+    e.preventDefault();
+    if (!keys[k]) pressed[k] = true;
+    keys[k] = true;
+  });
+  addEventListener('keyup', e => { const k = kname(e); if (k) { keys[k] = false; e.preventDefault(); } });
+  addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
+
+  document.querySelectorAll('[data-k]').forEach(b => {
+    const k = b.dataset.k;
+    const on = (e) => { e.preventDefault(); if (!keys[k]) pressed[k] = true; keys[k] = true; b.classList.add('on'); };
+    const off = (e) => { e.preventDefault(); keys[k] = false; b.classList.remove('on'); };
+    b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off);
+    b.addEventListener('pointercancel', off); b.addEventListener('pointerleave', off);
+  });
+  const isTouch = matchMedia('(pointer: coarse)').matches;
+
+  /* ================= WORLD STATE ================= */
+  let mode = 'loading';
+  let map = null, mapId = null;
+  let P = null;           // player
+  let mobs = [], drops = [], fx = [], texts = [], items = [];
+  let cam = 0, t = 0;
+
+  function makePlayer(x) {
+    return { x, y: GROUND, vx: 0, vy: 0, face: 1, ground: true, climb: null, inv: 0, atk: 0, atkCd: 0, skillCd: 0, dropT: 0, lastHit: 99, walkT: 0 };
+  }
+
+  function enterMap(id, atPortal) {
+    mapId = id; map = MAPS[id]; S.map = id;
+    let x = map.start;
+    if (atPortal != null && map.portals[atPortal]) x = map.portals[atPortal].x + (map.portals[atPortal].x < map.w / 2 ? 70 : -70);
+    P = makePlayer(x);
+    buildLayers();
+    mobs = []; drops = []; fx = []; texts = [];
+    map.spawns.forEach((sp, i) => {
+      const [type, plat, x1, x2, count, needQ] = sp;
+      for (let c = 0; c < count; c++) mobs.push(spawnMob(type, plat, x1, x2, i, needQ));
+    });
+    items = (map.items || []).map(it => ({ ...it, got: false }));
+    cam = clamp(P.x - VW / 2, 0, map.w - VW);
+    showBanner(map.area, map.title);
+    updateHud(); updateTracker(); persist();
+  }
+
+  function mobRange(plat, x1, x2) {
+    if (plat >= 0) { const p = map.plats[plat]; return [p[0] + 20, p[0] + p[2] - 20, p[1]]; }
+    return [x1, x2, GROUND];
+  }
+  function spawnMob(type, plat, x1, x2, slot, needQ) {
+    const [a, b, y] = mobRange(plat, x1, x2);
+    const def = MOBS[type];
+    return {
+      type, def, slot, plat, x1: a, x2: b, needQ,
+      x: a + Math.random() * (b - a), y, baseY: y, vy: 0, dir: Math.random() < .5 ? -1 : 1,
+      hp: def.hp, alive: true, dead: 0, respawn: 0, hit: 0, turnT: 1 + Math.random() * 3,
+      phase: Math.random() * 6, bossT: 3, showHp: 0,
+    };
+  }
+
+  /* ================= UPDATE ================= */
+  function update(dt) {
+    t += dt;
+    if (mode !== 'play') { for (const k in pressed) pressed[k] = false; return; }
+    updatePlayer(dt);
+    updateMobs(dt);
+    updateDrops(dt);
+    fx = fx.filter(f => (f.t += dt) < f.life);
+    texts = texts.filter(tx => (tx.t += dt) < 1.1);
+    const target = clamp(P.x - VW / 2, 0, map.w - VW);
+    cam += (target - cam) * Math.min(1, dt * 8);
+    for (const k in pressed) pressed[k] = false;
+  }
+
+  function platsAll() { return map.plats; }
+
+  function updatePlayer(dt) {
+    const SPEED = 230, JUMP = 570, G = 1500;
+    P.inv = Math.max(0, P.inv - dt); P.atkCd = Math.max(0, P.atkCd - dt);
+    P.skillCd = Math.max(0, P.skillCd - dt); P.atk = Math.max(0, P.atk - dt);
+    P.dropT = Math.max(0, P.dropT - dt); P.lastHit += dt;
+    if (P.lastHit > 4 && S.hp < maxHp()) { S.hp = Math.min(maxHp(), S.hp + dt * 4); updateHud(); }
+    const cd = P.skillCd > 0;
+    if (cd !== skillCdShown) { skillCdShown = cd; $('skillBtn').classList.toggle('cd', cd); }
+
+    // 상호작용 (↑)
+    if (pressed.up && !P.climb) {
+      const portal = map.portals.find(p => Math.abs(p.x - P.x) < 40 && P.y >= GROUND - 2);
+      if (portal) { usePortal(portal); return; }
+      const npc = nearNpc();
+      if (npc) { talk(npc); return; }
+    }
+
+    // 사다리
+    const lad = map.ladders.find(l => Math.abs(l[0] - P.x) < 18 && P.y >= l[1] - 2 && P.y <= l[2] + 2);
+    if (!P.climb && lad && ((keys.up && P.y > lad[1] + 2) || (keys.down && P.ground && P.y < lad[2] - 2))) {
+      P.climb = lad; P.x = lad[0]; P.vx = 0; P.vy = 0; P.ground = false;
+    }
+    if (P.climb) {
+      const l = P.climb;
+      if (keys.up) P.y -= 150 * dt; else if (keys.down) P.y += 150 * dt;
+      P.walkT += (keys.up || keys.down) ? dt : 0;
+      if (P.y <= l[1]) { P.y = l[1]; P.climb = null; P.ground = true; }
+      else if (P.y >= l[2]) { P.y = l[2]; P.climb = null; P.ground = true; }
+      else if (pressed.jump && (keys.left || keys.right)) {
+        P.climb = null; P.vy = -JUMP * .6; P.vx = (keys.left ? -1 : 1) * SPEED; P.face = keys.left ? -1 : 1;
+      }
+      return;
+    }
+
+    // 이동
+    let ax = 0;
+    if (keys.left) ax -= 1;
+    if (keys.right) ax += 1;
+    if (P.atk > 0.12 && P.ground) ax = 0; // 공격 중엔 잠깐 멈춤
+    if (ax) P.face = ax;
+    const kb = P.inv > 0.9; // 넉백 중
+    if (!kb) P.vx = ax * SPEED;
+    if (pressed.jump && P.ground) {
+      if (keys.down && P.y < GROUND - 1) { P.dropT = 0.28; P.ground = false; P.y += 2; }
+      else { P.vy = -JUMP; P.ground = false; }
+    }
+    if (pressed.attack && P.atkCd <= 0) attack(false);
+    if (pressed.skill && P.skillCd <= 0) attack(true);
+
+    const prevY = P.y;
+    P.vy += G * dt; P.y += P.vy * dt; P.x += P.vx * dt;
+    P.x = clamp(P.x, 20, map.w - 20);
+    P.ground = false;
+    if (P.vy >= 0) {
+      if (P.y >= GROUND) { P.y = GROUND; P.vy = 0; P.ground = true; }
+      else if (P.dropT <= 0) {
+        for (const p of platsAll()) {
+          if (P.x >= p[0] - 6 && P.x <= p[0] + p[2] + 6 && prevY <= p[1] && P.y >= p[1]) {
+            P.y = p[1]; P.vy = 0; P.ground = true; break;
+          }
+        }
+      }
+    }
+    if (P.ground && ax) P.walkT += dt; else if (P.ground) P.walkT = 0;
+
+    // 아이템 줍기
+    items.forEach(it => {
+      if (!itemVisible(it)) return;
+      if (Math.abs(it.x - P.x) < 34 && Math.abs(it.y - P.y) < 40) {
+        it.got = true; progress(it.quest, 1);
+        burst(it.x, it.y - 30, '#ffd23f', 18);
+      }
+    });
+  }
+
+  function attack(skill) {
+    const dmgBase = 12 + S.lv * 4;
+    if (skill) {
+      P.skillCd = 6; P.atk = 0.35; P.atkCd = 0.35;
+      fx.push({ kind: 'wave', x: P.x, y: P.y - 34, face: P.face, t: 0, life: 0.5 });
+      const hits = mobs.filter(m => m.alive && m.dead <= 0 && inFront(m, 270, 90)).slice(0, 6);
+      hits.forEach(m => hitMob(m, Math.round(dmgBase * 1.6 * rnd(.9, 1.15))));
+    } else {
+      P.atkCd = 0.42; P.atk = 0.28;
+      fx.push({ kind: 'slash', x: P.x + P.face * 40, y: P.y - 36, face: P.face, t: 0, life: 0.25 });
+      const cand = mobs.filter(m => m.alive && m.dead <= 0 && inFront(m, 95, 60)).sort((a, b) => Math.abs(a.x - P.x) - Math.abs(b.x - P.x));
+      if (cand[0]) hitMob(cand[0], Math.round(dmgBase * rnd(.85, 1.15)));
+    }
+  }
+  function inFront(m, range, vr) {
+    const dx = (m.x - P.x) * P.face;
+    const reach = m.def.boss ? range + 60 : range;
+    return dx > -20 && dx < reach && Math.abs((m.y - m.def.h / 2) - (P.y - 34)) < vr + m.def.h / 2;
+  }
+  function hitMob(m, dmg) {
+    const crit = Math.random() < .15; if (crit) dmg = Math.round(dmg * 1.5);
+    m.hp -= dmg; m.hit = 0.18; m.showHp = 3;
+    if (!m.def.boss) m.x = clamp(m.x + P.face * 14, m.x1, m.x2);
+    texts.push({ x: m.x, y: m.y - m.def.h - 6, v: dmg, crit, t: 0 });
+    burst(m.x, m.y - m.def.h / 2, crit ? '#ff8a00' : '#fff3b0', crit ? 10 : 6);
+    if (m.hp <= 0) killMob(m);
+  }
+  function killMob(m) {
+    m.dead = 0.5; m.alive = false; S.kills++;
+    gainExp(m.def.exp);
+    const n = m.def.boss ? 8 : 1 + (Math.random() < .35 ? 1 : 0);
+    for (let i = 0; i < n; i++) drops.push({ kind: 'coin', v: Math.round(rnd(...m.def.coin) / n), x: m.x, y: m.y, vx: rnd(-80, 80), vy: -rnd(250, 380), base: m.y, t: 0 });
+    // 퀘스트
+    for (const id in QUESTS) {
+      const q = QUESTS[id];
+      if (!countable(id)) continue;
+      if (q.goal.type === 'kill' && q.goal.mob === m.type) progress(id, 1);
+      if (q.goal.type === 'collect' && q.goal.from.includes(m.type) && Math.random() < q.goal.rate)
+        drops.push({ kind: 'item', item: q.goal.item, quest: id, x: m.x, y: m.y, vx: rnd(-40, 40), vy: -300, base: m.y, t: 0 });
+    }
+    m.respawn = m.def.boss ? 1e9 : 6;
+  }
+
+  function updateMobs(dt) {
+    for (const m of mobs) {
+      if (m.needQ && qs(m.needQ) !== 'active') { m.hidden = true; continue; }
+      m.hidden = false;
+      if (!m.alive) {
+        if (m.dead > 0) m.dead -= dt;
+        else if ((m.respawn -= dt) <= 0) Object.assign(m, spawnMob(m.type, m.plat, ...(m.plat >= 0 ? [0, 0] : [m.x1, m.x2]), m.slot, m.needQ), { x1: m.x1, x2: m.x2 });
+        continue;
+      }
+      m.hit = Math.max(0, m.hit - dt); m.showHp = Math.max(0, m.showHp - dt);
+      if (m.def.boss) bossAI(m, dt);
+      else {
+        // 가까우면 플레이어 쪽으로
+        const near = Math.abs(P.x - m.x) < 220 && Math.abs(P.y - m.y) < 30;
+        if (near) m.dir = P.x > m.x ? 1 : -1;
+        else if ((m.turnT -= dt) <= 0) { m.dir = Math.random() < .5 ? -1 : 1; m.turnT = 1.5 + Math.random() * 3; }
+        if (m.hit <= 0) m.x += m.dir * m.def.speed * dt;
+        if (m.x < m.x1) { m.x = m.x1; m.dir = 1; } if (m.x > m.x2) { m.x = m.x2; m.dir = -1; }
+      }
+      // 충돌 데미지
+      const w = m.def.boss ? 110 : 34, h = m.def.h * 0.8;
+      if (P.inv <= 0 && Math.abs(P.x - m.x) < w / 2 + 14 && P.y > m.y - h && P.y - 60 < m.y) hurt(m.def.dmg, m.x);
+    }
+  }
+  function bossAI(m, dt) {
+    const G = 1400;
+    if (m.y < m.baseY || m.vy < 0) {
+      m.vy += G * dt; m.y += m.vy * dt; m.x += m.dir * 120 * dt;
+      if (m.y >= m.baseY) {
+        m.y = m.baseY; m.vy = 0;
+        fx.push({ kind: 'quake', x: m.x, y: m.y, t: 0, life: 0.6 });
+        shake = 0.35;
+        if (P.ground && Math.abs(P.x - m.x) < 260 && P.inv <= 0) hurt(Math.round(m.def.dmg * .8), m.x);
+      }
+    } else {
+      m.dir = P.x > m.x ? 1 : -1;
+      if (m.hit <= 0) m.x += m.dir * m.def.speed * dt;
+      if ((m.bossT -= dt) <= 0) { m.vy = -520; m.y -= 1; m.bossT = rnd(2.8, 4.2); }
+    }
+    m.x = clamp(m.x, m.x1, m.x2);
+  }
+
+  let shake = 0, skillCdShown = false;
+  function hurt(dmg, fromX) {
+    S.hp -= dmg; P.inv = 1.3; P.lastHit = 0;
+    P.vx = (P.x < fromX ? -1 : 1) * 260; P.vy = -300; P.ground = false; P.climb = null;
+    texts.push({ x: P.x, y: P.y - 80, v: dmg, hurt: true, t: 0 });
+    if (S.hp <= 0) {
+      S.hp = maxHp();
+      toast('괜찮아, 넘어져도 다시 일어나면 돼! 💪');
+      enterMap(mapId, null);
+    }
+    updateHud();
+  }
+
+  function updateDrops(dt) {
+    for (const d of drops) {
+      d.t += dt;
+      if (d.vy !== 0 || d.y < d.base) { d.vy += 1200 * dt; d.y += d.vy * dt; d.x += d.vx * dt; if (d.y >= d.base) { d.y = d.base; d.vy = 0; d.vx = 0; } }
+      if (d.t > 0.4 && Math.abs(d.x - P.x) < 30 && Math.abs(d.y - P.y) < 50) {
+        d.gone = true;
+        if (d.kind === 'coin') { S.coins += d.v; updateHud(); }
+        else if (countable(d.quest)) progress(d.quest, 1);
+      }
+    }
+    drops = drops.filter(d => !d.gone && d.t < 30);
+  }
+
+  function gainExp(v) {
+    S.exp += v;
+    texts.push({ x: P.x, y: P.y - 96, v: '+' + v + ' EXP', exp: true, t: 0 });
+    while (S.exp >= needExp()) {
+      S.exp -= needExp(); S.lv++; S.hp = maxHp();
+      fx.push({ kind: 'lvup', x: P.x, y: P.y, t: 0, life: 1.6 });
+      toast('🎉 LEVEL UP! 레벨 ' + S.lv + '이 됐어요');
+    }
+    updateHud(); persist();
+  }
+
+  // 퀘스트를 수락하기 전(받을 수 있는 상태)에 한 일도 인정해준다
+  function available(id) { const q = QUESTS[id]; return qs(id) === 'none' && (!q.requires || qs(q.requires) === 'done'); }
+  function countable(id) { return qs(id) === 'active' || available(id); }
+  function itemVisible(it) { return !it.got && countable(it.quest) && S.quests[it.quest].n < QUESTS[it.quest].goal.n; }
+  function progress(id, n) {
+    const q = QUESTS[id], st = S.quests[id];
+    st.n = Math.min(q.goal.n, st.n + n);
+    if (st.state === 'active' && st.n >= q.goal.n) {
+      st.state = 'ready';
+      toast(`✅ 목표 달성! ${NPCS[q.npc].name}한테 돌아가서 ↑ 눌러 보고하자`, 4200);
+    } else if (st.state === 'none' && st.n >= q.goal.n) {
+      toast(`👍 ${q.goalLabel} 준비 완료! ${NPCS[q.npc].name}한테 말 걸어서 퀘스트를 받아봐`, 4200);
+    }
+    updateTracker(); persist();
+  }
+
+  function usePortal(p) {
+    if (p.need && qs(p.need) !== 'done') {
+      toast('🔒 ' + NPCS[QUESTS[p.need].npc].name + '의 퀘스트를 먼저 끝내줘!');
+      return;
+    }
+    fadeTo(() => enterMap(p.to, p.at));
+  }
+
+  /* ================= NPC / DIALOG ================= */
+  function npcList() { return map.npcs.map(([id, x]) => ({ id, x, def: NPCS[id] })); }
+  function nearNpc() { return npcList().find(n => Math.abs(n.x - P.x) < 70 && P.y > GROUND - 30); }
+  function questOf(npcId) { return Object.keys(QUESTS).find(k => QUESTS[k].npc === npcId); }
+  function npcMark(npcId) {
+    const id = questOf(npcId); if (!id) return '';
+    const st = qs(id), q = QUESTS[id];
+    if (st === 'none') return (!q.requires || qs(q.requires) === 'done') ? '!' : '';
+    if (st === 'ready') return '?';
+    if (st === 'active') return '…';
+    return '';
+  }
+
+  const dlg = { steps: [], i: 0, npc: null };
+  function fill(s) { return s.replace(/\{name\}/g, S.name); }
+
+  function talk(npc) {
+    const id = questOf(npc.id), q = QUESTS[id], st = qs(id);
+    const steps = [];
+    if (st === 'none') {
+      if (q.requires && qs(q.requires) !== 'done') {
+        steps.push({ say: npc.id === 'mentor' ? '먼저 상담 선생님 얘기부터 들어봐. 그다음에 나랑 얘기하자!' : '지금은 좀 바빠요. 조금 이따 다시 와줄래요?' });
+      } else {
+        q.intro.slice(0, -1).forEach(s => steps.push({ say: s }));
+        steps.push({ accept: q.intro[q.intro.length - 1], id });
+      }
+    } else if (st === 'active') {
+      steps.push({ say: `<b>[${q.title}]</b> ${q.goalLabel} ${S.quests[id].n}/${q.goal.n}<br>${q.active}` });
+    } else if (st === 'ready') {
+      q.ready.forEach(s => steps.push({ say: s }));
+      q.quizzes.forEach(z => steps.push({ quiz: z }));
+      steps.push({ reward: id });
+    } else {
+      steps.push({ say: q.after });
+    }
+    openDialog(npc, steps);
+  }
+
+  function openDialog(npc, steps) {
+    mode = 'dialog'; dlg.steps = steps; dlg.i = 0; dlg.npc = npc;
+    $('dlgFace').src = A + npc.def.img + '.png';
+    $('dlgName').textContent = npc.def.name;
+    $('dialog').classList.add('on');
+    for (const k in keys) keys[k] = false;
+    showStep();
+  }
+  function closeDialog() { $('dialog').classList.remove('on'); if (mode === 'dialog') mode = 'play'; }
+  function nextStep() { dlg.i++; showStep(); }
+  function btn(label, cls, fn) { const b = document.createElement('button'); b.className = 'btn ' + (cls || ''); b.innerHTML = label; b.onclick = fn; return b; }
+
+  function showStep() {
+    const s = dlg.steps[dlg.i];
+    const T = $('dlgText'), H = $('dlgHint'), B = $('dlgBtns');
+    H.textContent = ''; B.innerHTML = ''; B.classList.remove('quiz');
+    if (!s) { closeDialog(); return; }
+    if (s.say != null) {
+      T.innerHTML = fill(s.say);
+      B.append(btn(dlg.i < dlg.steps.length - 1 ? '다음 ▶' : '닫기', '', nextStep));
+    } else if (s.accept) {
+      T.innerHTML = fill(s.accept);
+      B.append(btn('나중에', 'ghost', closeDialog), btn('좋아, 할게! ✔', '', () => {
+        const st = S.quests[s.id], q = QUESTS[s.id], npc = dlg.npc;
+        st.state = 'active';
+        closeDialog();
+        if (st.n >= q.goal.n) {
+          // 미리 해둔 몫으로 이미 목표 달성 → 바로 보고 대화로
+          S.quests[s.id].state = 'ready';
+          setTimeout(() => { if (mode === 'play') talk(npc); }, 300);
+        } else {
+          toast('📜 퀘스트 시작: ' + q.title + (st.n ? ` (벌써 ${st.n}/${q.goal.n}!)` : ''));
+        }
+        updateTracker(); persist();
+      }));
+    } else if (s.quiz) {
+      const z = s.quiz;
+      T.innerHTML = '🧩 ' + z.q;
+      B.classList.add('quiz');
+      z.choices.forEach((c, i) => {
+        const b = btn((i + 1) + '. ' + c, 'choice', () => {
+          if (i === z.answer) {
+            T.innerHTML = '⭕ ' + z.explain; H.textContent = ''; B.innerHTML = ''; B.classList.remove('quiz');
+            B.append(btn('다음 ▶', '', nextStep));
+          } else {
+            b.classList.remove('wrong'); void b.offsetWidth; b.classList.add('wrong');
+            H.textContent = '💡 힌트: ' + z.hint;
+          }
+        });
+        B.append(b);
+      });
+    } else if (s.reward) {
+      const q = QUESTS[s.reward];
+      S.quests[s.reward].state = 'done';
+      q.cards.forEach(c => { if (!S.cards.includes(c)) S.cards.push(c); });
+      S.coins += q.coins;
+      closeDialog();
+      gainExp(q.exp);
+      updateTracker(); persist();
+      showCards(q.cards.slice(), () => {
+        if (s.reward === 'q6') { setTimeout(showEnding, 500); return; }
+        openDialog(dlg.npc, [{ say: q.after }]);
+      });
+    }
+  }
+
+  function showCards(list, done) {
+    const pop = $('cardPop');
+    if (!list.length) { pop.classList.remove('on'); mode = 'play'; done && done(); return; }
+    mode = 'card';
+    const c = CARDS[list.shift()];
+    pop.innerHTML = `<div class="pcard"><div class="got">✨ 정책 카드 획득! ✨</div><div class="em">${c.em}</div><b>${c.title}</b><p>${c.desc}</p><div class="btn-row" style="margin-top:12px"><button class="btn">좋아!</button></div></div>`;
+    pop.classList.add('on');
+    pop.querySelector('.btn').onclick = () => showCards(list, done);
+  }
+
+  /* ================= UI ================= */
+  let hudSig = '';
+  function updateHud() {
+    if (!S) return;
+    const mh = maxHp(); S.hp = Math.min(S.hp, mh);
+    // 값이 실제로 바뀐 경우에만 DOM을 건드린다 (회복 중 매 프레임 레이아웃 방지)
+    const sig = [S.lv, S.name, Math.ceil(S.hp), mh, S.exp, S.coins].join('|');
+    if (sig === hudSig) return;
+    hudSig = sig;
+    $('hudLv').textContent = 'Lv.' + S.lv;
+    $('hudName').textContent = S.name;
+    $('hpFill').style.width = Math.max(0, S.hp / mh * 100) + '%';
+    $('hpTxt').textContent = `HP ${Math.max(0, Math.ceil(S.hp))} / ${mh}`;
+    $('expFill').style.width = (S.exp / needExp() * 100) + '%';
+    $('expTxt').textContent = `EXP ${S.exp} / ${needExp()}`;
+    $('coinTxt').textContent = S.coins.toLocaleString();
+  }
+  function updateTracker() {
+    const el = $('tracker');
+    const act = Object.keys(QUESTS).filter(k => ['active', 'ready'].includes(qs(k)));
+    const nextQ = Object.keys(QUESTS).find(k => qs(k) === 'none' && (!QUESTS[k].requires || qs(QUESTS[k].requires) === 'done'));
+    let html = '<h4>📜 퀘스트</h4>';
+    act.forEach(k => {
+      const q = QUESTS[k], st = S.quests[k];
+      html += st.state === 'ready'
+        ? `<div class="ready">✔ ${q.title} 완료!<br>→ ${NPCS[q.npc].name}한테 가서 ↑ 눌러 보고하기</div>`
+        : `<div>• ${q.title} (${q.goalLabel} ${st.n}/${q.goal.n})</div>`;
+    });
+    if (!act.length && nextQ) {
+      const who = NPCS[QUESTS[nextQ].npc].name;
+      const here = map && map.npcs.some(n => n[0] === QUESTS[nextQ].npc);
+      html += here
+        ? `<div>💬 ${who}한테 말 걸어봐! (머리 위 <b style="color:#ffd23f">!</b>)</div>` +
+          (S.quests[nextQ].n ? `<div style="opacity:.8">미리 모은 ${QUESTS[nextQ].goalLabel} ${S.quests[nextQ].n}/${QUESTS[nextQ].goal.n}</div>` : '')
+        : `<div>🌀 오른쪽 끝 포탈을 타고 ${who} 만나러 가자!</div>`;
+    }
+    el.innerHTML = html;
+    el.classList.toggle('on', act.length > 0 || !!nextQ);
+  }
+  let toastT;
+  function toast(msg, ms = 2600) {
+    const el = $('toast'); el.textContent = msg; el.classList.add('on');
+    clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), ms);
+  }
+  let bannerT;
+  function showBanner(area, title) {
+    const el = $('mapBanner'); el.innerHTML = `<small>${area}</small>${title}`; el.classList.add('on');
+    clearTimeout(bannerT); bannerT = setTimeout(() => el.classList.remove('on'), 2600);
+  }
+  let fade = 0, fadeCb = null;
+  function fadeTo(cb) { fade = 0.001; fadeCb = cb; mode = 'fade'; }
+
+  function renderBook(target, onlyGot) {
+    target.innerHTML = Object.entries(CARDS).map(([k, c]) => {
+      const got = S && S.cards.includes(k);
+      if (onlyGot && !got) return '';
+      return got
+        ? `<div class="pcard"><div class="em">${c.em}</div><b>${c.title}</b><p>${c.desc}</p></div>`
+        : `<div class="pcard locked"><div class="em">❔</div><b>???</b><p>퀘스트를 깨면 열려요</p></div>`;
+    }).join('');
+  }
+
+  function screen(id) {
+    ['scrLoading', 'scrTitle', 'scrSelect', 'scrBook', 'scrEnding'].forEach(s => $(s).classList.toggle('on', s === id));
+  }
+
+  function showEnding() {
+    mode = 'ending';
+    const mins = Math.max(1, Math.round((Date.now() - S.started) / 60000));
+    $('endLead').innerHTML = `${S.name}, 정말 멋졌어! 마을 사람들을 도우면서 자립할 때 기댈 수 있는 제도를 ${S.cards.length}개나 알게 됐어.<br>게임은 끝났지만, 진짜 정책은 대시보드에서 더 자세히 찾아볼 수 있어.`;
+    $('endStats').innerHTML = `<div><b>Lv.${S.lv}</b>레벨</div><div><b>${S.cards.length}/${Object.keys(CARDS).length}</b>정책 카드</div><div><b>${S.kills}</b>물리친 몬스터</div><div><b>${mins}분</b>플레이 시간</div>`;
+    renderBook($('endCards'), true);
+    $('hud').classList.remove('on'); $('touch').classList.remove('on');
+    screen('scrEnding');
+    clearSave();
+  }
+
+  /* ================= RENDER ================= */
+  function draw() {
+    ctx.clearRect(0, 0, VW, VH);
+    if (!map) { if (IMG.bg_title) drawCover(IMG.bg_title, 0); return; }
+    let sx = 0, sy = 0;
+    if (shake > 0) { shake -= 1 / 60; sx = rnd(-5, 5); sy = rnd(-4, 4); }
+    ctx.save(); ctx.translate(sx, sy);
+
+    // 배경 (패럴랙스) — 미리 축소해 둔 캔버스를 정수 좌표로 그린다
+    if (layers.bg) {
+      const bw = layers.bg.width, range = Math.max(0, bw - VW), ratio = map.w > VW ? cam / (map.w - VW) : 0;
+      ctx.drawImage(layers.bg, -Math.round(range * ratio), -30);
+    } else { ctx.fillStyle = '#9fd3ff'; ctx.fillRect(0, 0, VW, VH); }
+
+    const cx = Math.round(cam);
+    // 땅·발판·사다리 (맵 진입 때 한 번 그려둔 레이어에서 화면 부분만 복사)
+    if (layers.world) ctx.drawImage(layers.world, cx, 0, VW, VH, 0, 0, VW, VH);
+    ctx.save(); ctx.translate(-cx, 0);
+    map.portals.forEach(drawPortal);
+    items.forEach(drawItem);
+    npcList().forEach(drawNpc);
+    mobs.forEach(drawMob);
+    drops.forEach(drawDrop);
+    drawPlayer();
+    fx.forEach(drawFx);
+    texts.forEach(drawText);
+    ctx.restore();
+    ctx.restore();
+
+    // 근처 NPC/포탈 안내
+    if (mode === 'play') {
+      const n = nearNpc(), p = map.portals.find(p => Math.abs(p.x - P.x) < 40);
+      const tip = n ? `↑ ${n.def.name}와 대화하기` : p ? '↑ 포탈 타기' : '';
+      if (tip) {
+        ctx.font = '18px Jua, sans-serif'; ctx.textAlign = 'center';
+        const tw = ctx.measureText(tip).width + 24, tx = P.x - cam, ty = P.y - 118;
+        roundRect(tx - tw / 2, ty - 18, tw, 28, 14, 'rgba(255,159,28,.92)');
+        ctx.fillStyle = '#fff'; ctx.fillText(tip, tx, ty + 2);
+      }
+    }
+    if (fade > 0) { ctx.fillStyle = `rgba(0,0,0,${Math.min(1, fade)})`; ctx.fillRect(0, 0, VW, VH); }
+  }
+
+  function drawCover(img, off) {
+    const s = Math.max(VW / img.width, VH / img.height);
+    ctx.drawImage(img, (VW - img.width * s) / 2 - off, (VH - img.height * s) / 2, img.width * s, img.height * s);
+  }
+
+  const THEME = {
+    home:   ['#7cc95a', '#b77b47', '#8a5a33'],
+    town:   ['#8fd16a', '#c99a6b', '#9a6d44'],
+    bank:   ['#79c7a0', '#c2a27a', '#8f7050'],
+    house:  ['#9ad168', '#d09461', '#9b6436'],
+    forest: ['#6bbf7a', '#7e6a9a', '#5a4a75'],
+  };
+  // 맵 진입 시 정적 레이어(배경 축소본 + 땅/발판/사다리)를 미리 그려둔다
+  const layers = { bg: null, world: null };
+  function buildLayers() {
+    layers.bg = null;
+    const bg = IMG[map.bg];
+    if (bg) {
+      // 원본 하단 1/4은 빈 땅이라 지면(GROUND) 아래로 밀어 넣는다
+      const h = Math.round((GROUND + 60) / 0.75), w = Math.round(bg.width * (h / bg.height));
+      layers.bg = scaleTo(bg, w, h);
+    }
+    const c = document.createElement('canvas'); c.width = map.w; c.height = VH;
+    ctx = c.getContext('2d');
+    drawGround(0, map.w);
+    map.plats.forEach(p => drawPlat(p[0], p[1], p[2], 22));
+    map.ladders.forEach(drawLadder);
+    ctx = mainCtx;
+    layers.world = c;
+  }
+  function scaleTo(img, w, h) {
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const x = c.getContext('2d'); x.imageSmoothingQuality = 'high';
+    x.drawImage(img, 0, 0, w, h);
+    return c;
+  }
+  // 스프라이트를 그릴 높이로 한 번만 축소해 캐시 (매 프레임 큰 PNG를 리샘플링하지 않도록)
+  const spriteCache = new Map();
+  function sized(img, h) {
+    const key = img.src + '|' + h;
+    let c = spriteCache.get(key);
+    if (!c) { c = scaleTo(img, Math.max(1, Math.round(img.width * (h / img.height))), h); spriteCache.set(key, c); }
+    return c;
+  }
+
+  function drawGround(x0, w) {
+    const [g, d1, d2] = THEME[mapId];
+    const grd = ctx.createLinearGradient(0, GROUND, 0, VH);
+    grd.addColorStop(0, d1); grd.addColorStop(1, d2);
+    ctx.fillStyle = grd; ctx.fillRect(x0, GROUND, w, VH - GROUND);
+    // 흙 무늬
+    ctx.fillStyle = 'rgba(0,0,0,.08)';
+    for (let x = Math.floor(x0 / 60) * 60; x < x0 + w; x += 60) {
+      ctx.beginPath(); ctx.ellipse(x + 20, GROUND + 34, 10, 5, 0, 0, 7); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(x + 48, GROUND + 50, 6, 3, 0, 0, 7); ctx.fill();
+    }
+    grassTop(x0, GROUND, w, g);
+  }
+  function grassTop(x, y, w, g) {
+    ctx.fillStyle = g;
+    ctx.fillRect(x, y - 4, w, 12);
+    ctx.beginPath();
+    for (let i = x; i <= x + w; i += 14) ctx.arc(i, y + 7, 6, 0, Math.PI);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(x, y - 4, w, 3);
+  }
+  function drawPlat(x, y, w, h) {
+    const [g, d1, d2] = THEME[mapId];
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,.15)';
+    ctx.beginPath(); ctx.ellipse(x + w / 2, y + h + 10, w / 2 - 10, 6, 0, 0, 7); ctx.fill();
+    const grd = ctx.createLinearGradient(0, y, 0, y + h);
+    grd.addColorStop(0, d1); grd.addColorStop(1, d2);
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.moveTo(x, y); ctx.lineTo(x + w, y); ctx.lineTo(x + w - 8, y + h - 6);
+    ctx.quadraticCurveTo(x + w / 2, y + h + 8, x + 8, y + h - 6); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = 'rgba(60,30,10,.35)'; ctx.lineWidth = 2; ctx.stroke();
+    grassTop(x - 3, y, w + 6, g);
+    ctx.restore();
+  }
+  function drawLadder(l) {
+    const [x, y1, y2] = l;
+    ctx.save();
+    ctx.strokeStyle = '#8b5a2b'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(x - 11, y1 - 6); ctx.lineTo(x - 11, y2); ctx.moveTo(x + 11, y1 - 6); ctx.lineTo(x + 11, y2); ctx.stroke();
+    ctx.strokeStyle = '#c28a4e'; ctx.lineWidth = 4;
+    for (let y = y1 + 8; y < y2; y += 18) { ctx.beginPath(); ctx.moveTo(x - 11, y); ctx.lineTo(x + 11, y); ctx.stroke(); }
+    ctx.restore();
+  }
+  function drawPortal(p) {
+    const locked = p.need && qs(p.need) !== 'done';
+    const y = GROUND - 50;
+    ctx.save();
+    for (let i = 0; i < 3; i++) {
+      const r = 1 - i * 0.25;
+      ctx.strokeStyle = locked ? `rgba(160,160,170,${.7 - i * .15})` : `hsla(${(t * 90 + i * 40) % 360},90%,65%,${.85 - i * .2})`;
+      ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.ellipse(p.x, y, 26 * r, 48 * r, 0, t * (2 + i) , t * (2 + i) + Math.PI * 1.6); ctx.stroke();
+    }
+    ctx.fillStyle = locked ? 'rgba(120,120,130,.25)' : 'rgba(170,230,255,.28)';
+    ctx.beginPath(); ctx.ellipse(p.x, y, 24, 46, 0, 0, 7); ctx.fill();
+    ctx.font = '15px Jua, sans-serif'; ctx.textAlign = 'center';
+    const label = (locked ? '🔒 ' : '') + MAPS[p.to].title;
+    const tw = ctx.measureText(label).width + 16;
+    roundRect(p.x - tw / 2, y - 80, tw, 22, 11, 'rgba(30,20,10,.65)');
+    ctx.fillStyle = '#fff'; ctx.fillText(label, p.x, y - 64);
+    ctx.restore();
+  }
+  function drawItem(it) {
+    if (!itemVisible(it)) return;
+    const bob = Math.sin(t * 3) * 5;
+    ctx.save();
+    ctx.fillStyle = 'rgba(255,230,120,.35)';
+    ctx.beginPath(); ctx.arc(it.x, it.y - 26 + bob, 22 + Math.sin(t * 5) * 3, 0, 7); ctx.fill();
+    ctx.font = '30px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('🔑', it.x, it.y - 26 + bob);
+    ctx.restore();
+  }
+
+  function drawSprite(img, x, y, h, flip, opts = {}) {
+    if (!img) { ctx.fillStyle = '#f9a'; ctx.beginPath(); ctx.arc(x, y - h / 2, h / 3, 0, 7); ctx.fill(); return; }
+    img = sized(img, h);
+    const w = img.width;
+    ctx.save();
+    ctx.translate(x, y);
+    // 그림자
+    if (!opts.noShadow) { ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(0, 0, w * .32, 5, 0, 0, 7); ctx.fill(); }
+    ctx.translate(0, opts.oy || 0);
+    ctx.scale((flip ? -1 : 1) * (opts.sx || 1), opts.sy || 1);
+    if (opts.rot) ctx.rotate(opts.rot);
+    if (opts.alpha != null) ctx.globalAlpha = opts.alpha;
+    ctx.drawImage(img, -w / 2, -h, w, h);
+    if (opts.flash) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .5; ctx.drawImage(img, -w / 2, -h, w, h); }
+    ctx.restore();
+  }
+  function nameTag(x, y, text, color) {
+    ctx.font = '14px Jua, sans-serif'; ctx.textAlign = 'center';
+    const tw = ctx.measureText(text).width + 12;
+    roundRect(x - tw / 2, y + 4, tw, 19, 6, 'rgba(0,0,0,.55)');
+    ctx.fillStyle = color || '#fff'; ctx.fillText(text, x, y + 18);
+  }
+
+  function drawNpc(n) {
+    const img = IMG[n.def.img];
+    const breathe = 1 + Math.sin(t * 2.4 + n.x) * 0.012;
+    const faceLeft = P.x < n.x;
+    drawSprite(img, n.x, GROUND, 84, !faceLeft, { sy: breathe }); // NPC 원본은 왼쪽을 봄
+    nameTag(n.x, GROUND, n.def.name, '#ffe08a');
+    const mark = npcMark(n.id);
+    if (mark) {
+      const y = GROUND - 104 + Math.sin(t * 4) * 4;
+      ctx.save();
+      ctx.font = '30px Jua, sans-serif'; ctx.textAlign = 'center';
+      ctx.lineWidth = 5; ctx.strokeStyle = '#7a3e06';
+      ctx.fillStyle = mark === '?' ? '#6ee06e' : mark === '!' ? '#ffd23f' : '#ddd';
+      ctx.strokeText(mark, n.x, y); ctx.fillText(mark, n.x, y);
+      ctx.restore();
+    }
+  }
+
+  function drawMob(m) {
+    if (m.hidden) return;
+    const img = IMG[m.def.img];
+    if (!m.alive) {
+      if (m.dead > 0) drawSprite(img, m.x, m.y, m.def.h, m.dir > 0, { alpha: m.dead / 0.5, sy: m.dead / 0.5 + .2, noShadow: true });
+      return;
+    }
+    const hop = m.def.boss ? 0 : -Math.abs(Math.sin(t * 6 + m.phase)) * 5;
+    const sq = m.def.boss ? 1 + Math.sin(t * 3) * .02 : 1 + Math.sin(t * 12 + m.phase) * .04;
+    // 원본은 왼쪽을 봄 → 오른쪽으로 갈 때 뒤집기
+    if (m.y < m.baseY) { ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(m.x, m.baseY, 50, 8, 0, 0, 7); ctx.fill(); }
+    drawSprite(img, m.x, m.y, m.def.h, m.dir > 0, { oy: hop, sy: sq, sx: 2 - sq, flash: m.hit > 0, noShadow: m.y < m.baseY });
+    if (m.def.boss) {
+      nameTag(m.x, m.y, '👑 ' + m.def.name, '#ffb3b3');
+      // 보스 HP 바(화면 상단)
+      const w = 420, x = cam + VW / 2 - w / 2;
+      roundRect(x - 4, 76, w + 8, 26, 8, 'rgba(0,0,0,.6)');
+      ctx.fillStyle = '#ff5a5f'; ctx.fillRect(x, 80, w * Math.max(0, m.hp / m.def.hp), 18);
+      ctx.font = '14px Jua'; ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText(m.def.name + '  ' + Math.max(0, m.hp) + ' / ' + m.def.hp, x + w / 2, 94);
+    } else if (m.showHp > 0) {
+      const w = 46;
+      ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(m.x - w / 2 - 1, m.y - m.def.h - 12, w + 2, 7);
+      ctx.fillStyle = '#ff5a5f'; ctx.fillRect(m.x - w / 2, m.y - m.def.h - 11, w * Math.max(0, m.hp / m.def.hp), 5);
+    }
+  }
+
+  function drawPlayer() {
+    const img = IMG[S.char];
+    const walking = P.ground && Math.abs(P.vx) > 1;
+    const bob = walking ? -Math.abs(Math.sin(P.walkT * 14)) * 4 : 0;
+    const breathe = walking ? 1 : 1 + Math.sin(t * 3) * 0.015;
+    let rot = walking ? Math.sin(P.walkT * 14) * 0.04 : 0;
+    if (!P.ground && !P.climb) rot = P.vy < 0 ? -0.06 : 0.04;
+    if (P.atk > 0) rot = (P.atk / 0.28) * -0.15;
+    const blink = P.inv > 0 && Math.floor(t * 20) % 2 === 0;
+    // 캐릭터 원본은 오른쪽을 봄
+    if (P.climb) {
+      drawSprite(img, P.x, P.y + 10, 80, Math.floor(P.walkT * 6) % 2 === 0, { alpha: blink ? .35 : 1, noShadow: true });
+    } else {
+      drawSprite(img, P.x, P.y, 80, P.face < 0, { oy: bob, sy: breathe, rot: rot * P.face, alpha: blink ? .35 : 1 });
+    }
+    nameTag(P.x, P.y, S.name);
+  }
+
+  function drawDrop(d) {
+    const bob = d.vy === 0 ? Math.sin(t * 4 + d.x) * 3 : 0;
+    ctx.save();
+    if (d.kind === 'coin') {
+      ctx.translate(d.x, d.y - 12 + bob);
+      ctx.scale(Math.abs(Math.cos(t * 4 + d.x)) * .8 + .2, 1);
+      ctx.fillStyle = '#ffcf33'; ctx.strokeStyle = '#b77b00'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(0, 0, 9, 0, 7); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fff6c2'; ctx.beginPath(); ctx.arc(-3, -3, 3, 0, 7); ctx.fill();
+    } else {
+      ctx.font = '24px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('📄', d.x, d.y - 16 + bob);
+    }
+    ctx.restore();
+  }
+
+  function drawFx(f) {
+    const k = f.t / f.life;
+    ctx.save();
+    if (f.kind === 'slash') {
+      ctx.strokeStyle = `rgba(255,240,150,${1 - k})`; ctx.lineWidth = 8 * (1 - k) + 2; ctx.lineCap = 'round';
+      ctx.beginPath();
+      const a0 = f.face > 0 ? -1.2 : Math.PI + 1.2, a1 = f.face > 0 ? 1.0 : Math.PI - 1.0;
+      ctx.arc(f.x - f.face * 20, f.y, 38 + k * 8, Math.min(a0, a1), Math.max(a0, a1)); ctx.stroke();
+      ctx.font = `${22 + k * 10}px sans-serif`; ctx.globalAlpha = 1 - k; ctx.textAlign = 'center';
+      ctx.fillText('⭐', f.x + f.face * k * 20, f.y + 8);
+    } else if (f.kind === 'wave') {
+      for (let i = 0; i < 3; i++) {
+        const r = 30 + (k * 250) - i * 26; if (r < 10) continue;
+        ctx.strokeStyle = `hsla(${270 + i * 30},90%,70%,${(1 - k) * .9})`; ctx.lineWidth = 7;
+        ctx.beginPath();
+        const c = f.face > 0 ? 0 : Math.PI;
+        ctx.arc(f.x, f.y, r, c - .7, c + .7); ctx.stroke();
+      }
+    } else if (f.kind === 'quake') {
+      ctx.strokeStyle = `rgba(160,90,255,${1 - k})`; ctx.lineWidth = 6;
+      ctx.beginPath(); ctx.ellipse(f.x, f.y, 40 + k * 240, 10 + k * 18, 0, 0, 7); ctx.stroke();
+    } else if (f.kind === 'lvup') {
+      ctx.globalAlpha = 1 - k;
+      const g = ctx.createLinearGradient(0, f.y - 200, 0, f.y);
+      g.addColorStop(0, 'rgba(255,230,120,0)'); g.addColorStop(1, 'rgba(255,230,120,.7)');
+      ctx.fillStyle = g; ctx.fillRect(P.x - 40, P.y - 200, 80, 200);
+      ctx.font = '34px Jua, sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 6; ctx.strokeStyle = '#7a3e06';
+      ctx.fillStyle = '#ffd23f';
+      ctx.strokeText('LEVEL UP!', P.x, P.y - 110 - k * 40); ctx.fillText('LEVEL UP!', P.x, P.y - 110 - k * 40);
+    } else if (f.kind === 'spark') {
+      ctx.fillStyle = f.c; ctx.globalAlpha = 1 - k;
+      ctx.beginPath(); ctx.arc(f.x + f.vx * f.t, f.y + f.vy * f.t + 200 * f.t * f.t, 4 * (1 - k) + 1, 0, 7); ctx.fill();
+    }
+    ctx.restore();
+  }
+  function burst(x, y, c, n) { for (let i = 0; i < n; i++) { const a = Math.random() * 7, s = rnd(60, 200); fx.push({ kind: 'spark', x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 60, c, t: 0, life: rnd(.35, .6) }); } }
+
+  function drawText(tx) {
+    const k = tx.t / 1.1, y = tx.y - k * 40;
+    ctx.save();
+    ctx.globalAlpha = k < .7 ? 1 : 1 - (k - .7) / .3;
+    ctx.textAlign = 'center'; ctx.lineWidth = 5;
+    if (tx.exp) { ctx.font = '16px Jua, sans-serif'; ctx.strokeStyle = '#5a3a00'; ctx.fillStyle = '#ffe08a'; }
+    else if (tx.hurt) { ctx.font = '26px Jua, sans-serif'; ctx.strokeStyle = '#4a0060'; ctx.fillStyle = '#e28bff'; }
+    else { ctx.font = (tx.crit ? '34px' : '28px') + ' Jua, sans-serif'; ctx.strokeStyle = '#6b2a00'; ctx.fillStyle = tx.crit ? '#ff7a1a' : '#ffb347'; }
+    const s = String(tx.v);
+    ctx.strokeText(s, tx.x, y); ctx.fillText(s, tx.x, y);
+    ctx.restore();
+  }
+
+  function roundRect(x, y, w, h, r, fill) {
+    ctx.fillStyle = fill; ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); ctx.fill();
+  }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+
+  /* ================= LOOP ================= */
+  let last = performance.now();
+  function loop(now) {
+    const dt = Math.min(0.033, (now - last) / 1000); last = now;
+    if (mode === 'fade') {
+      fade += dt * 3;
+      if (fade >= 1 && fadeCb) { const cb = fadeCb; fadeCb = null; cb(); mode = 'fadein'; }
+    } else if (mode === 'fadein') {
+      fade -= dt * 3; if (fade <= 0) { fade = 0; mode = 'play'; }
+    }
+    const w0 = performance.now();
+    update(dt);
+    draw();
+    const cost = performance.now() - w0;
+    perf.frames++; perf.work += cost; perf.maxWork = Math.max(perf.maxWork, cost);
+    if (now - perf.t0 >= 1000) {
+      perf.fps = Math.round(perf.frames * 1000 / (now - perf.t0));
+      perf.avgWork = perf.work / perf.frames; perf.lastMax = perf.maxWork;
+      perf.frames = 0; perf.work = 0; perf.maxWork = 0; perf.t0 = now;
+    }
+    if (SHOW_FPS) {
+      ctx.font = '14px sans-serif'; ctx.textAlign = 'left';
+      roundRect(VW - 150, VH - 30, 144, 24, 6, 'rgba(0,0,0,.6)');
+      ctx.fillStyle = perf.fps >= 55 ? '#7CFC7C' : perf.fps >= 30 ? '#ffd23f' : '#ff6b6b';
+      ctx.fillText(`FPS ${perf.fps} · ${perf.avgWork.toFixed(1)}ms`, VW - 142, VH - 13);
+    }
+    requestAnimationFrame(loop);
+  }
+  const perf = { t0: performance.now(), frames: 0, work: 0, maxWork: 0, fps: 0, avgWork: 0, lastMax: 0 };
+  const params = new URLSearchParams(location.search);
+  let SHOW_FPS = params.has('fps') || params.has('debug');
+  addEventListener('keydown', e => { if (e.key === 'F2') SHOW_FPS = !SHOW_FPS; });
+  if (params.has('debug')) {
+    // 자동 테스트용 내부 상태 접근
+    window.__adv = {
+      get S() { return S; }, get P() { return P; }, get mobs() { return mobs; }, get drops() { return drops; },
+      get items() { return items; }, get mapId() { return mapId; }, get mode() { return mode; }, perf,
+      hitMob: (m, d) => hitMob(m, d), enterMap: (id, at) => enterMap(id, at), QUESTS, MAPS,
+    };
+  }
+
+  /* ================= FLOW ================= */
+  let pickChar = CHARS[0].id;
+  function buildSelect() {
+    $('chars').innerHTML = CHARS.map(c => `<div class="char${c.id === pickChar ? ' sel' : ''}" data-id="${c.id}"><img src="${A + c.id}.png" alt="${c.name}"><span>${c.name}</span><em>${c.desc}</em></div>`).join('');
+    $('chars').querySelectorAll('.char').forEach(el => el.onclick = () => {
+      pickChar = el.dataset.id; buildSelect();
+      const c = CHARS.find(c => c.id === pickChar);
+      if (!$('nameInput').dataset.touched) $('nameInput').value = c.name;
+    });
+  }
+  $('nameInput').addEventListener('input', () => $('nameInput').dataset.touched = '1');
+
+  function startGame() {
+    screen(null);
+    $('hud').classList.add('on');
+    $('touch').classList.toggle('on', isTouch);
+    $('keysHelp').style.display = isTouch ? 'none' : '';
+    $('hudFace').src = A + S.char + '.png';
+    P = null;
+    enterMap(S.map || 'home', null);
+    mode = 'play';
+    const first = Object.values(S.quests).every(q => q.state === 'none');
+    if (first) setTimeout(() => toast('머리 위에 ! 가 뜬 원장님한테 가서 ↑ 를 눌러봐!'), 2800);
+  }
+
+  $('newBtn').onclick = () => {
+    if (loadSave() && !confirm('저장된 모험이 있어요. 처음부터 새로 시작할까요?')) return;
+    buildSelect(); $('nameInput').value = CHARS.find(c => c.id === pickChar).name; screen('scrSelect');
+  };
+  $('contBtn').onclick = () => { S = loadSave(); if (S) startGame(); };
+  $('startBtn').onclick = () => {
+    const name = ($('nameInput').value || '').trim().slice(0, 8) || CHARS.find(c => c.id === pickChar).name;
+    S = newSave(pickChar, name);
+    persist(); startGame();
+  };
+  $('bookBtn').onclick = () => { if (mode !== 'play') return; mode = 'book'; renderBook($('bookCards')); screen('scrBook'); };
+  $('bookClose').onclick = () => { screen(null); mode = 'play'; };
+  $('exitBtn').onclick = () => { persist(); location.href = 'game.html'; };
+  $('againBtn').onclick = () => { map = null; S = null; $('contBtn').style.display = 'none'; screen('scrTitle'); mode = 'title'; };
+
+  loadImages().then(() => {
+    const tb = IMG.bg_title ? `url(${A}bg_title.jpg)` : 'none';
+    ['scrTitle', 'scrSelect', 'scrEnding'].forEach(id => $(id).style.backgroundImage = tb);
+    if (loadSave()) $('contBtn').style.display = '';
+    screen('scrTitle'); mode = 'title';
+  });
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

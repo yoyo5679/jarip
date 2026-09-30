@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jariphaebom-cache-v19';
+const CACHE_NAME = 'jariphaebom-cache-v20';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -7,6 +7,7 @@ const STATIC_ASSETS = [
   '/game.html',
   '/game_story.html',
   '/game_arcade.html',
+  '/game_adventure.html',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
