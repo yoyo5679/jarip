@@ -247,6 +247,9 @@
     .rb.jump { background: rgba(80, 170, 255, .5); }
     .rb.skill { background: rgba(190, 110, 255, .5); width: clamp(40px, 11vh, 50px); }
     .rb.skill.cd { filter: grayscale(1); }
+    .rb.talk { display: none; background: rgba(255, 196, 0, .8); opacity: 1; animation: talkPulse 1.2s ease-in-out infinite; }
+    .rb.talk.show { display: flex; }
+    @keyframes talkPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
     .rb.on { opacity: .95; background-color: rgba(255,255,255,.55); }
 
     .keys-help {
@@ -294,6 +297,8 @@
         <div class="stick" id="stick"><div class="knob" id="knob"></div></div>
       </div>
       <div class="btns">
+        <!-- NPC·포탈 근처에서만 나타나는 대화 버튼 (↑ 키와 같은 역할) -->
+        <div class="rb talk" data-k="up" id="talkBtn"><span class="i">💬</span>대화</div>
         <div class="rb skill" data-k="skill" id="skillBtn"><span class="i">✨</span>스킬</div>
         <div class="rb jump" data-k="jump"><span class="i">⤴</span>점프</div>
         <div class="rb attack" data-k="attack"><span class="i">⭐</span>공격</div>
@@ -421,6 +426,16 @@
   let ctx = mainCtx;
   const VW = 960, VH = 540, GROUND = 480;
   const A = 'assets/adventure/';
+  // 기기별 안내 문구: 폰에는 ↑ 키가 없으니 '대화 버튼'/'다이얼'로 안내한다
+  const IS_TOUCH = matchMedia('(pointer: coarse)').matches;
+  const UP = IS_TOUCH ? '💬 대화 버튼' : '↑';
+  const CLIMB = IS_TOUCH ? '다이얼을 위로 밀면' : '↑를 누르면';
+  // 받침에 따라 와/과, 을/를 등을 고른다
+  function josa(word, withB, noB) {
+    const c = word.charCodeAt(word.length - 1);
+    const has = c >= 0xAC00 && c <= 0xD7A3 && (c - 0xAC00) % 28 > 0;
+    return word + (has ? withB : noB);
+  }
 
   /* ================= DATA ================= */
   const CHARS = [
@@ -541,9 +556,9 @@
       goal: { type: 'fetch', item: 'key', n: 1 }, goalLabel: '새 집 열쇠',
       intro: [
         '새 집 보러 왔구나! 그런데 어쩌지… 바람이 불어서 <span class="hi">열쇠가 저 위 옥상까지</span> 날아가 버렸어.',
-        '발판을 밟고 사다리도 타고 올라가서 🔑 열쇠 좀 찾아다 줄래? 사다리 앞에서 <span class="hi">↑</span>를 누르면 올라갈 수 있어.',
+        '발판을 밟고 사다리도 타고 올라가서 🔑 열쇠 좀 찾아다 줄래? 사다리 앞에서 <span class="hi">{climb}</span> 올라갈 수 있어.',
       ],
-      active: '열쇠는 제일 높은 옥상에 있어! 사다리 앞에서 ↑를 눌러봐.',
+      active: '열쇠는 제일 높은 옥상에 있어! 사다리 앞에서 {climb} 올라갈 수 있어.',
       ready: ['찾았구나! 이제 계약 얘기를 해볼까?'],
       quizzes: [{
         q: '<span class="hi">LH 전세임대주택</span>은 전세금 대부분을 LH가 내줘. 자립준비청년이 내는 <span class="hi">임대보증금</span>은 얼마일까?',
@@ -723,7 +738,7 @@
   // 플로팅 조이스틱(다이얼): 누른 자리에 생기고, 기울인 방향을 방향키 입력으로 바꾼다
   (() => {
     const zone = $('stickZone'), stick = $('stick'), knob = $('knob');
-    let id = null, cx = 0, cy = 0;
+    let id = null, cx = 0, cy = 0, t0 = 0, moved = 0;
     const setDir = (k, v) => { if (v && !keys[k]) pressed[k] = true; keys[k] = v; };
     const release = () => {
       id = null; stick.classList.remove('active');
@@ -734,7 +749,7 @@
       if (id !== null) return;
       e.preventDefault(); id = e.pointerId; zone.setPointerCapture(id);
       const zr = zone.getBoundingClientRect(), r = stick.offsetWidth / 2;
-      cx = e.clientX; cy = e.clientY;
+      cx = e.clientX; cy = e.clientY; t0 = performance.now(); moved = 0;
       stick.style.left = (cx - zr.left - r) + 'px'; stick.style.top = (cy - zr.top - r) + 'px'; stick.style.bottom = 'auto';
       stick.classList.add('active');
     });
@@ -744,13 +759,20 @@
       const r = stick.offsetWidth / 2;
       let dx = e.clientX - cx, dy = e.clientY - cy;
       const d = Math.hypot(dx, dy);
+      moved = Math.max(moved, d);
       if (d > r) { dx = dx / d * r; dy = dy / d * r; }
       knob.style.transform = `translate(${dx}px, ${dy}px)`;
       const nx = dx / r, ny = dy / r;
       setDir('left', nx < -0.35); setDir('right', nx > 0.35);
       setDir('up', ny < -0.6); setDir('down', ny > 0.6);
     });
-    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => zone.addEventListener(ev, e => { if (e.pointerId === id) release(); }));
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => zone.addEventListener(ev, e => {
+      if (e.pointerId !== id) return;
+      // 거의 안 움직인 짧은 탭이면 다이얼 아래에 있는 NPC를 누른 것으로 본다
+      const tap = ev === 'pointerup' && moved < 12 && performance.now() - t0 < 350;
+      release();
+      if (tap) tapNpcAt(e.clientX, e.clientY);
+    }));
   })();
 
   /* ================= WORLD STATE ================= */
@@ -820,6 +842,8 @@
     if (P.lastHit > 4 && S.hp < maxHp()) { S.hp = Math.min(maxHp(), S.hp + dt * 4); updateHud(); }
     const cd = P.skillCd > 0;
     if (cd !== skillCdShown) { skillCdShown = cd; $('skillBtn').classList.toggle('cd', cd); }
+    const canTalk = !!(nearNpc() || map.portals.some(p => Math.abs(p.x - P.x) < 40 && P.y >= GROUND - 2));
+    if (canTalk !== talkShown) { talkShown = canTalk; $('talkBtn').classList.toggle('show', canTalk); }
 
     // 상호작용 (↑)
     if (pressed.up && !P.climb) {
@@ -974,7 +998,20 @@
     m.x = clamp(m.x, m.x1, m.x2);
   }
 
-  let shake = 0, skillCdShown = false;
+  let shake = 0, skillCdShown = false, talkShown = false;
+
+  // NPC를 직접 터치/클릭해도 대화 (가까이 있을 때)
+  function tapNpcAt(clientX, clientY) {
+    if (mode !== 'play' || !map) return false;
+    const r = cv.getBoundingClientRect();
+    const wx = (clientX - r.left) / r.width * VW + cam, wy = (clientY - r.top) / r.height * VH;
+    const n = npcList().find(n => Math.abs(n.x - wx) < 45 && wy > GROUND - 100 && wy < GROUND + 15);
+    if (!n) return false;
+    if (Math.abs(n.x - P.x) < 80 && P.y > GROUND - 30) talk(n);
+    else toast(`${n.def.name}한테 조금 더 가까이 가봐!`);
+    return true;
+  }
+  cv.addEventListener('pointerdown', e => tapNpcAt(e.clientX, e.clientY));
   function hurt(dmg, fromX) {
     S.hp -= dmg; P.inv = 1.3; P.lastHit = 0;
     P.vx = (P.x < fromX ? -1 : 1) * 260; P.vy = -300; P.ground = false; P.climb = null;
@@ -1020,7 +1057,7 @@
     st.n = Math.min(q.goal.n, st.n + n);
     if (st.state === 'active' && st.n >= q.goal.n) {
       st.state = 'ready';
-      toast(`✅ 목표 달성! ${NPCS[q.npc].name}한테 돌아가서 ↑ 눌러 보고하자`, 4200);
+      toast(`✅ 목표 달성! ${NPCS[q.npc].name}한테 돌아가서 ${UP} 눌러 보고하자`, 4200);
     } else if (st.state === 'none' && st.n >= q.goal.n) {
       toast(`👍 ${q.goalLabel} 준비 완료! ${NPCS[q.npc].name}한테 말 걸어서 퀘스트를 받아봐`, 4200);
     }
@@ -1120,7 +1157,7 @@
 
   /* ================= NPC / DIALOG ================= */
   function npcList() { return map.npcs.map(([id, x]) => ({ id, x, def: NPCS[id] })); }
-  function nearNpc() { return npcList().find(n => Math.abs(n.x - P.x) < 70 && P.y > GROUND - 30); }
+  function nearNpc() { return npcList().find(n => Math.abs(n.x - P.x) < 80 && P.y > GROUND - 30); }
   function questOf(npcId) { return Object.keys(QUESTS).find(k => QUESTS[k].npc === npcId); }
   function npcMark(npcId) {
     if (npcId === 'shop') return '$';
@@ -1134,7 +1171,7 @@
   }
 
   const dlg = { steps: [], i: 0, npc: null };
-  function fill(s) { return s.replace(/\{name\}/g, S.name); }
+  function fill(s) { return s.replace(/\{name\}/g, S.name).replace(/\{climb\}/g, CLIMB); }
 
   function talk(npc) {
     if (npc.id === 'shop') {
@@ -1275,7 +1312,7 @@
     act.forEach(k => {
       const q = QUESTS[k], st = S.quests[k];
       html += st.state === 'ready'
-        ? `<div class="ready">✔ ${q.title} 완료!<br>→ ${NPCS[q.npc].name}한테 가서 ↑ 눌러 보고하기</div>`
+        ? `<div class="ready">✔ ${q.title} 완료!<br>→ ${NPCS[q.npc].name}한테 가서 ${UP} 눌러 보고하기</div>`
         : `<div>• ${q.title} (${q.goalLabel} ${st.n}/${q.goal.n})</div>`;
     });
     if (!act.length && nextQ) {
@@ -1396,7 +1433,8 @@
     // 근처 NPC/포탈 안내
     if (mode === 'play') {
       const n = nearNpc(), p = map.portals.find(p => Math.abs(p.x - P.x) < 40);
-      const tip = n ? `↑ ${n.def.name}와 대화하기` : p ? '↑ 포탈 타기' : '';
+      const key = IS_TOUCH ? '💬' : '↑';
+      const tip = n ? `${key} ${josa(n.def.name, '과', '와')} 대화하기` : p ? `${key} 포탈 타기` : '';
       if (tip) {
         ctx.font = '18px Jua, sans-serif'; ctx.textAlign = 'center';
         const tw = ctx.measureText(tip).width + 24, tx = P.x - cam, ty = P.y - 118;
@@ -1762,7 +1800,7 @@
     enterMap(S.map || 'home', null);
     mode = 'play';
     const first = Object.values(S.quests).every(q => q.state === 'none');
-    if (first) setTimeout(() => toast('머리 위에 ! 가 뜬 원장님한테 가서 ↑ 를 눌러봐!'), 2800);
+    if (first) setTimeout(() => toast(IS_TOUCH ? '머리 위에 ! 가 뜬 원장님한테 가서 💬 대화 버튼을 눌러봐! (원장님을 터치해도 돼)' : '머리 위에 ! 가 뜬 원장님한테 가서 ↑ 를 눌러봐!', 4200), 2800);
   }
 
   $('newBtn').onclick = () => {
