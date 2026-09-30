@@ -717,7 +717,22 @@
   addEventListener('keydown', e => {
     if (e.target && e.target.tagName === 'INPUT') return;
     const k = kname(e);
-    if (e.key === 'Enter' && mode === 'dialog') { const b = $('dlgBtns').querySelector('.btn:not(.choice)'); if (b) { b.click(); e.preventDefault(); } return; }
+    // Enter/Space로 대화 넘기기: '다음'·'수락' 같은 주 버튼만 누른다
+    // (예전엔 첫 버튼을 눌러서 수락 화면에서 '나중에'가 눌리는 버그가 있었다. 통장·상점 메뉴는 실수 방지를 위해 제외)
+    if ((e.key === 'Enter' || e.key === ' ') && mode === 'dialog') {
+      e.preventDefault();
+      if (!e.repeat && dlg.primary && dlg.primary.isConnected) dlg.primary.click();
+      return;
+    }
+    if (mode === 'dialog' && /^[1-9]$/.test(e.key)) { // 퀴즈 보기를 숫자로 고르기
+      const ch = $('dlgBtns').querySelectorAll('.btn.choice')[+e.key - 1];
+      if (ch) { e.preventDefault(); ch.click(); return; }
+    }
+    if ((e.key === 'Enter' || e.key === ' ') && mode === 'card') {
+      e.preventDefault();
+      const b = $('cardPop').querySelector('.btn'); if (!e.repeat && b) b.click();
+      return;
+    }
     if (!k) return;
     e.preventDefault();
     if (!keys[k]) pressed[k] = true;
@@ -1221,16 +1236,17 @@
     if (s && s.dyn) s = dlg.steps[dlg.i] = s.dyn(); // 열 때마다 최신 상태로 만드는 단계(통장 등)
     const T = $('dlgText'), H = $('dlgHint'), B = $('dlgBtns');
     H.textContent = ''; B.innerHTML = ''; B.classList.remove('quiz');
+    dlg.primary = null; // Enter/Space가 누를 버튼
     if (!s) { closeDialog(); return; }
     if (s.menu != null) {
       T.innerHTML = fill(s.menu);
       s.opts.forEach(o => B.append(btn(o.label, o.cls || '', o.fn)));
     } else if (s.say != null) {
       T.innerHTML = fill(s.say);
-      B.append(btn(dlg.i < dlg.steps.length - 1 ? '다음 ▶' : '닫기', '', nextStep));
+      B.append(dlg.primary = btn(dlg.i < dlg.steps.length - 1 ? '다음 ▶' : '닫기', '', nextStep));
     } else if (s.accept) {
       T.innerHTML = fill(s.accept);
-      B.append(btn('나중에', 'ghost', closeDialog), btn('좋아, 할게! ✔', '', () => {
+      B.append(btn('나중에', 'ghost', closeDialog), dlg.primary = btn('좋아, 할게! ✔', '', () => {
         const st = S.quests[s.id], q = QUESTS[s.id], npc = dlg.npc;
         st.state = 'active';
         closeDialog();
@@ -1251,7 +1267,7 @@
         const b = btn((i + 1) + '. ' + c, 'choice', () => {
           if (i === z.answer) {
             T.innerHTML = '⭕ ' + z.explain; H.textContent = ''; B.innerHTML = ''; B.classList.remove('quiz');
-            B.append(btn('다음 ▶', '', nextStep));
+            B.append(dlg.primary = btn('다음 ▶', '', nextStep));
           } else {
             b.classList.remove('wrong'); void b.offsetWidth; b.classList.add('wrong');
             H.textContent = '💡 힌트: ' + z.hint;
