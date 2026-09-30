@@ -78,6 +78,33 @@ BACKGROUNDS = {
 }
 
 
+SPRITES["npc_shop"] = "a cheerful Korean general store owner woman in her 40s, short wavy hair with a bandana, green-free striped apron in orange and cream, holding a small shopping basket, facing left"
+BACKGROUNDS["bg_myhome"] = (
+    "a cozy but EMPTY small Korean studio apartment interior seen straight from the side like a stage, "
+    "warm cream wallpaper, one big window with morning light, wooden baseboard, NO furniture at all, empty room ready to decorate"
+)
+
+FURN_STYLE = (
+    "Single original cute furniture item for a 2D side-scrolling game, drawn in side view, "
+    "clean thick dark outlines, soft cel shading, warm pastel colors, centered, whole object visible, "
+    "on a perfectly flat solid {bg} background with no shadow, no floor, no text, no wall. "
+    "Do not use any {avoid} color on the object."
+)
+# name: (설명, 배경키: g=초록 / m=자홍 — 초록이 들어가는 물건은 자홍 배경)
+FURNITURE = {
+    "furn_bed": ("a cozy single bed with a fluffy yellow blanket and two pillows", "g"),
+    "furn_desk": ("a small wooden study desk with a chair, a desk lamp and a laptop on it", "g"),
+    "furn_sofa": ("a small round two-seat sofa in soft coral pink with cushions", "g"),
+    "furn_shelf": ("a tall wooden bookshelf full of colorful books and a small plush toy", "g"),
+    "furn_plant": ("a big leafy potted monstera plant in a white ceramic pot", "m"),
+    "furn_lamp": ("a tall floor lamp with a warm glowing cream lampshade", "g"),
+    "furn_fridge": ("a cute retro mini fridge in mint-free baby blue with magnets and a note on it", "g"),
+    "furn_tv": ("a small flat TV on a low wooden TV stand with a game console", "g"),
+    "furn_frame": ("a framed picture of a sunny hill with a small house, hanging wall frame", "m"),
+    "furn_clock": ("a round wall clock with a friendly face design", "g"),
+}
+
+
 def load_key():
     with open(os.path.join(ROOT, ".env"), encoding="utf-8") as f:
         for line in f:
@@ -114,21 +141,28 @@ def call_gemini(key, prompt, aspect):
     return None, None
 
 
-def chroma_key(img):
-    """초록 배경 제거 + 초록 번짐(despill) 정리 + 여백 자르기."""
+def chroma_key(img, key="g"):
+    """단색 배경(초록 g / 자홍 m) 제거 + 색 번짐(despill) 정리 + 여백 자르기."""
     img = img.convert("RGBA")
     px = img.load()
     w, h = img.size
     for y in range(h):
         for x in range(w):
             r, g, b, a = px[x, y]
-            dom = g - max(r, b)
-            if dom > 70 and g > 120:
+            if key == "g":
+                dom, bright = g - max(r, b), g
+            else:
+                dom, bright = min(r, b) - g, min(r, b)
+            if dom > 70 and bright > 120:
                 px[x, y] = (0, 0, 0, 0)
             elif dom > 25:
-                # 가장자리: 반투명 + 초록기 제거
+                # 가장자리: 반투명 + 배경색 기운 제거
                 alpha = int(255 * max(0.0, min(1.0, (70 - dom) / 45)))
-                px[x, y] = (r, max(r, b), b, min(a, alpha))
+                if key == "g":
+                    px[x, y] = (r, max(r, b), b, min(a, alpha))
+                else:
+                    m = max(g, min(r, b) - dom)
+                    px[x, y] = (min(r, m + 20), g, min(b, m + 20), min(a, alpha))
     bbox = img.getbbox()
     return img.crop(bbox) if bbox else img
 
@@ -139,8 +173,13 @@ def build(key, name, force):
     if os.path.exists(out) and not force:
         print(f"[skip] {name}")
         return True
+    key_color = "g"
     if is_bg:
         prompt, aspect = f"{BG_STYLE} Scene: {BACKGROUNDS[name]}", "16:9"
+    elif name in FURNITURE:
+        desc, key_color = FURNITURE[name]
+        bgname, avoid = ("pure green (#00FF00)", "green") if key_color == "g" else ("pure magenta (#FF00FF)", "magenta or pink-purple")
+        prompt, aspect = FURN_STYLE.format(bg=bgname, avoid=avoid) + f" Object: {desc}", "1:1"
     else:
         style = MONSTER_STYLE if name.startswith("mob_") else SPRITE_STYLE
         prompt, aspect = f"{style} Subject: {SPRITES[name]}", "1:1"
@@ -158,8 +197,8 @@ def build(key, name, force):
         img.thumbnail((1600, 900), Image.LANCZOS)
         img.save(out, "JPEG", quality=84, optimize=True)
     else:
-        img = chroma_key(img)
-        target_h = 300 if name == "mob_boss" else 200
+        img = chroma_key(img, key_color)
+        target_h = 300 if name == "mob_boss" else 240 if name in FURNITURE else 200
         ratio = target_h / img.height
         img = img.resize((max(1, int(img.width * ratio)), target_h), Image.LANCZOS)
         img.save(out, "PNG", optimize=True)
@@ -170,7 +209,7 @@ def build(key, name, force):
 def main():
     args = [a for a in sys.argv[1:] if not a.startswith("--")]
     force = "--force" in sys.argv
-    names = args or list(SPRITES) + list(BACKGROUNDS)
+    names = args or list(SPRITES) + list(BACKGROUNDS) + list(FURNITURE)
     key = load_key()
     with ThreadPoolExecutor(max_workers=4) as ex:
         results = list(ex.map(lambda n: build(key, n, force or bool(args)), names))
