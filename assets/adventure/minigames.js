@@ -246,7 +246,7 @@
     for (let i = 0; i < nSeg; i++, z += 12) {
       const kinds = [];
       if (level >= 2) kinds.push('debt');
-      if (level >= 3 && i > 1) kinds.push('enemy');
+      if (i > 1) kinds.push('enemy'); // 걱정 구름 군단은 1단계부터
       if (level >= 4) kinds.push('bar');
       if (level >= 6 && i > 1) kinds.push('bridge');
       // 짝수 칸은 언제나 문, 홀수 칸은 장애물(1단계는 문만)
@@ -313,7 +313,7 @@
       kind: 'gate', level, title: '🏃 응원단 달리기',
       peek: () => ({ crowd, best, phase, X, Z, segs, step, units: units.length, FIN, t, speed, HALF }), // 테스트용
       setX: (x) => { X = Math.max(-HALF, Math.min(HALF, x)); if (phase === 'ready') phase = 'run'; }, // 테스트용
-      help: level === 1 ? '👆 화면을 좌우로 끌어서 응원단을 움직여요. 파란 문으로 사람을 모으고 끝에서 자립 계단을 높이 올라가요!'
+      help: level === 1 ? '👆 화면을 좌우로 끌어서 응원단을 움직여요. 파란 문으로 사람을 모아서 ☁️ 걱정 구름 군단을 이겨요. 끝에서는 자립 계단을 높이 올라가요!'
         : level === 2 ? '🪙 굴러다니는 빚 코인에 닿은 사람은 떨어져 나가요. 피해서 지나가요!'
         : level === 3 ? '☁️ 걱정 구름 군단과 부딪히면 1:1로 싸워요. 더 많이 모아서 지나가요!'
         : level === 4 ? '📱 빙글빙글 도는 스미싱 막대 조심! 막대 반대쪽으로 비켜 가요.'
