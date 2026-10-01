@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jariphaebom-cache-v21';
+const CACHE_NAME = 'jariphaebom-cache-v22';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -55,7 +55,9 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
 
   // Network-First strategy for core application files and dynamic data to ensure updates are displayed immediately when online
-  const isCoreFile = 
+  // 페이지 열기(/play 같은 짧은 주소 포함)는 항상 서버 먼저 → 업데이트가 바로 보이게
+  const isCoreFile =
+    event.request.mode === 'navigate' ||
     requestUrl.pathname === '/' ||
     requestUrl.pathname.endsWith('.html') ||
     requestUrl.pathname.endsWith('.js') ||

@@ -48,9 +48,12 @@
     start(make(kind, level));
     cancelAnimationFrame(raf);
     let last = performance.now();
+    // 게임 본편과 같은 고화질 배율로 그린다 (좌표는 960×540 그대로)
+    const rs = window.RENDER_SCALE || 1;
+    if (cv.width !== Math.round(W * rs)) { cv.width = Math.round(W * rs); cv.height = Math.round(H * rs); }
     const loop = (now) => {
       const dt = Math.min(0.033, (now - last) / 1000); last = now;
-      if (game) { game.update(dt); game.draw(); }
+      if (game) { ctx.setTransform(rs, 0, 0, rs, 0, 0); game.update(dt); game.draw(); }
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);

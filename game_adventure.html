@@ -174,6 +174,8 @@
       background: rgba(40, 28, 18, .6); color: #fff; font-size: clamp(11px, 1.5vw, 14px); line-height: 1.45;
     }
     .save-note small { display: block; margin-top: 2px; color: #ffd98a; font-size: .88em; }
+    .inapp-note { background: rgba(120, 40, 20, .78); border: 2px solid #ffb35c; }
+    .inapp-note a { display: inline-block; margin-top: 5px; padding: 4px 12px; border-radius: 999px; background: #ff9f1c; color: #fff; text-decoration: none; }
     .confirm-panel { width: min(92%, 420px); text-align: center; }
     /* 게임 안 한글 키보드 (폰) */
     .kbd {
@@ -511,6 +513,7 @@
           <button class="btn ghost" id="contBtn" style="display:none">이어하기</button>
         </div>
         <p class="save-note" id="saveNote"></p>
+        <p class="save-note inapp-note" id="inappNote" style="display:none"></p>
         <a class="back-link" href="game.html">← 게임 모드 선택으로</a>
       </div>
 
@@ -614,6 +617,22 @@
   const $ = (id) => document.getElementById(id);
   const cv = $('cv'), mainCtx = cv.getContext('2d', { alpha: false });
   let ctx = mainCtx;
+  /* ---------- 고화질: 화면 크기만큼 더 촘촘하게 그린다 (최대 2배) ----------
+     게임 좌표는 960×540 그대로, 캔버스 픽셀만 RS배. 느려지면 자동으로 낮추고 여유 있으면 다시 올린다 */
+  let RS = 1;
+  const RS_STEP = 0.25;
+  const wantScale = () => {
+    const css = cv.clientWidth || 960;
+    return Math.max(1, Math.min(2, Math.floor(css * (devicePixelRatio || 1) / 960 / RS_STEP) * RS_STEP));
+  };
+  function applyScale(s) {
+    s = Math.max(1, Math.min(wantScale(), s));
+    if (s === RS) return;
+    RS = s; window.RENDER_SCALE = RS;
+    cv.width = Math.round(960 * RS); cv.height = Math.round(540 * RS);
+    spriteCache.clear();
+    if (map) buildLayers();
+  }
   const VW = 960, VH = 540, GROUND = 480;
   const A = 'assets/adventure/';
   // 기기별 안내 문구: 폰에는 ↑ 키가 없으니 '대화 버튼'/'다이얼'로 안내한다
@@ -2198,6 +2217,7 @@
 
   /* ================= RENDER ================= */
   function draw() {
+    mainCtx.setTransform(RS, 0, 0, RS, 0, 0);
     ctx.clearRect(0, 0, VW, VH);
     if (!map) { if (IMG.bg_title) drawCover(IMG.bg_title, 0); return; }
     let sx = 0, sy = 0;
@@ -2206,13 +2226,13 @@
 
     // 배경 (패럴랙스) — 미리 축소해 둔 캔버스를 정수 좌표로 그린다
     if (layers.bg) {
-      const bw = layers.bg.width, range = Math.max(0, bw - VW), ratio = map.w > VW ? cam / (map.w - VW) : 0;
-      ctx.drawImage(layers.bg, -Math.round(range * ratio), -30);
+      const bw = layers.bg.lw, range = Math.max(0, bw - VW), ratio = map.w > VW ? cam / (map.w - VW) : 0;
+      ctx.drawImage(layers.bg, -Math.round(range * ratio), -30, layers.bg.lw, layers.bg.lh);
     } else { ctx.fillStyle = '#9fd3ff'; ctx.fillRect(0, 0, VW, VH); }
 
     const cx = Math.round(cam);
     // 땅·발판·사다리 (맵 진입 때 한 번 그려둔 레이어에서 화면 부분만 복사)
-    if (layers.world) ctx.drawImage(layers.world, cx, 0, VW, VH, 0, 0, VW, VH);
+    if (layers.world) ctx.drawImage(layers.world, cx * RS, 0, VW * RS, VH * RS, 0, 0, VW, VH);
     ctx.save(); ctx.translate(-cx, 0);
     if (map.interior) {
       drawFurniture();
@@ -2278,8 +2298,8 @@
       const h = Math.round((GROUND + 60) / 0.75), w = Math.round(bg.width * (h / bg.height));
       layers.bg = scaleTo(bg, w, h);
     }
-    const c = document.createElement('canvas'); c.width = map.w; c.height = VH;
-    ctx = c.getContext('2d');
+    const c = document.createElement('canvas'); c.width = Math.round(map.w * RS); c.height = Math.round(VH * RS);
+    ctx = c.getContext('2d'); ctx.scale(RS, RS);
     drawGround(0, map.w);
     map.plats.forEach(p => drawPlat(p[0], p[1], p[2], 22));
     map.ladders.forEach(drawLadder);
@@ -2287,9 +2307,11 @@
     layers.world = c;
   }
   function scaleTo(img, w, h) {
-    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(w * RS)); c.height = Math.max(1, Math.round(h * RS));
+    c.lw = w; c.lh = h; // 게임 좌표에서의 크기
     const x = c.getContext('2d'); x.imageSmoothingQuality = 'high';
-    x.drawImage(img, 0, 0, w, h);
+    x.drawImage(img, 0, 0, c.width, c.height);
     return c;
   }
   // 스프라이트를 그릴 높이로 한 번만 축소해 캐시 (매 프레임 큰 PNG를 리샘플링하지 않도록)
@@ -2402,7 +2424,7 @@
   function drawSprite(img, x, y, h, flip, opts = {}) {
     if (!img) { ctx.fillStyle = '#f9a'; ctx.beginPath(); ctx.arc(x, y - h / 2, h / 3, 0, 7); ctx.fill(); return; }
     img = sized(img, h);
-    const w = img.width;
+    const w = img.lw || img.width;
     ctx.save();
     ctx.translate(x, y);
     // 그림자
@@ -2582,6 +2604,7 @@
       perf.fps = Math.round(perf.frames * 1000 / (now - perf.t0));
       perf.avgWork = perf.work / perf.frames; perf.lastMax = perf.maxWork;
       perf.frames = 0; perf.work = 0; perf.maxWork = 0; perf.t0 = now;
+      tuneScale();
     }
     if (SHOW_FPS) {
       ctx.font = '14px sans-serif'; ctx.textAlign = 'left';
@@ -2592,6 +2615,20 @@
     requestAnimationFrame(loop);
   }
   const perf = { t0: performance.now(), frames: 0, work: 0, maxWork: 0, fps: 0, avgWork: 0, lastMax: 0 };
+  const tune = { slow: 0, fast: 0, best: 0 };
+  function tuneScale() {
+    if (document.hidden || mode === 'loading') return;
+    tune.best = Math.max(tune.best, perf.fps);                 // 이 기기 화면이 낼 수 있는 프레임(60·120Hz 등)
+    const target = tune.best >= 100 ? 100 : 54;               // 120Hz 화면은 100fps 이상을 지킨다
+    const heavy = perf.fps < target || perf.avgWork > (target > 60 ? 6 : 9);
+    const light = perf.fps >= target && perf.avgWork < (target > 60 ? 2.5 : 4);
+    tune.slow = heavy ? tune.slow + 1 : 0;
+    tune.fast = light ? tune.fast + 1 : 0;
+    if (tune.slow >= 2 && RS > 1) { applyScale(RS - RS_STEP); tune.slow = 0; tune.cool = 8; }
+    else if (tune.fast >= 4 && RS < wantScale() && !(tune.cool > 0)) { applyScale(RS + RS_STEP); tune.fast = 0; }
+    if (tune.cool > 0) tune.cool--; // 막 낮췄으면 8초는 다시 올리지 않는다(왔다 갔다 방지)
+  }
+  addEventListener('resize', () => { if (RS > wantScale()) applyScale(wantScale()); });
   const params = new URLSearchParams(location.search);
   let SHOW_FPS = params.has('fps') || params.has('debug');
   addEventListener('keydown', e => { if (e.key === 'F2') SHOW_FPS = !SHOW_FPS; });
@@ -2719,7 +2756,28 @@
   /* ---------- 제목 화면: 이 기기에만 저장된다는 안내 + 이어하기에 진행 상황 ---------- */
   const DEVICE = IS_TOUCH ? '이 폰' : '이 컴퓨터';
   const escHtml = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // 인스타·카카오톡·페이스북 앱 안에서 열렸는지 (그 안 브라우저 기록은 따로 저장된다)
+  const INAPP = (() => {
+    const ua = navigator.userAgent || '';
+    if (/Instagram/i.test(ua)) return '인스타그램';
+    if (/KAKAOTALK/i.test(ua)) return '카카오톡';
+    if (/FBAN|FBAV|FB_IAB/i.test(ua)) return '페이스북';
+    return '';
+  })();
+  function inappNote() {
+    if (!INAPP) return;
+    const android = /Android/i.test(navigator.userAgent);
+    const url = location.href.replace(/^https?:\/\//, '');
+    // 안드로이드는 버튼으로 크롬을 바로 열 수 있다. 카카오톡은 자체 '외부 브라우저로 열기' 주소가 있다
+    const open = INAPP === '카카오톡' ? `kakaotalk://web/openExternal?url=${encodeURIComponent(location.href)}`
+      : android ? `intent://${url}#Intent;scheme=https;package=com.android.chrome;end` : '';
+    $('inappNote').innerHTML = `📱 지금 <b>${INAPP} 앱 안</b>에서 열었어요. 여기서 한 모험 기록은 ${INAPP} 안에만 남아요.`
+      + (open ? `<br><a href="${open}">🌐 ${INAPP === '카카오톡' ? '다른 브라우저' : '크롬'}으로 열기</a>`
+        : `<small>기록을 오래 남기려면 오른쪽 위 <b>⋯</b> → <b>외부 브라우저(Safari)로 열기</b>를 눌러요.</small>`);
+    $('inappNote').style.display = '';
+  }
   function refreshTitle() {
+    inappNote();
     const sv = loadSave();
     $('saveNote').innerHTML = `💾 모험 기록은 <b>지금 ${DEVICE}(브라우저)에만</b> 저장돼요. ${IS_TOUCH ? '다른 폰이나 PC' : '다른 컴퓨터나 폰'}에서는 처음부터 시작해요.`
       + '<small>인터넷 기록을 지우면 모험 기록도 같이 지워져요.</small>';
@@ -2772,6 +2830,7 @@
   document.querySelectorAll('.qs[data-pot]').forEach(b => b.addEventListener('pointerdown', e => { e.preventDefault(); usePotion(b.dataset.pot); }));
   document.querySelectorAll('.qs[data-act]').forEach(b => b.addEventListener('pointerdown', e => { e.preventDefault(); pressed[b.dataset.act] = true; }));
 
+  applyScale(IS_TOUCH ? Math.min(1.5, wantScale()) : wantScale());
   loadImages().then(() => {
     const tb = IMG.bg_title ? `url(${A}bg_title.jpg)` : 'none';
     ['scrTitle', 'scrConfirm', 'scrSelect', 'scrEnding'].forEach(id => $(id).style.backgroundImage = tb);

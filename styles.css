@@ -2049,6 +2049,19 @@ select:focus-visible {
   background: rgba(255, 255, 255, 0.22);
   letter-spacing: 0.03em;
 }
+/* 새로 나온 게임 알림 줄: 폰에서도 보이게(설명 줄은 좁은 화면에서 숨김) */
+.game-banner-news {
+  align-self: flex-start;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #4a2a00;
+  background: #ffd84a;
+  padding: 3px 10px;
+  border-radius: 999px;
+  animation: gameNewsPulse 2s ease-in-out infinite;
+}
+@keyframes gameNewsPulse { 50% { box-shadow: 0 0 0 4px rgba(255, 216, 74, 0.35); } }
+@media (prefers-reduced-motion: reduce) { .game-banner-news { animation: none; } }
 .game-banner-desc {
   font-size: 0.86rem;
   opacity: 0.92;
@@ -2079,6 +2092,7 @@ select:focus-visible {
   .game-banner-icon { font-size: 1.9rem; }
   .game-banner-title { font-size: 1.02rem; }
   .game-banner-desc { font-size: 0.78rem; }
+  .game-banner-news { font-size: 0.74rem; }
   .game-banner-cta { padding: 0.5rem 0.7rem; font-size: 0.8rem; }
   .game-banner-cta span { display: none; }
 }
