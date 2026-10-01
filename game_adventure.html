@@ -78,6 +78,13 @@
       border-radius: 12px; padding: 6px 10px;
     }
     .hbtn:hover { background: rgba(70, 48, 28, .85); }
+    .hbtn { position: relative; }
+    .hbtn.new { border-color: #ffd84a; animation: hbtnGlow 1.4s ease-in-out infinite; }
+    .hbtn.new::after {
+      content: 'NEW'; position: absolute; top: -8px; right: -8px; padding: 2px 5px; border-radius: 8px;
+      background: #ff5a3c; color: #fff; font-size: 10px; line-height: 1.1;
+    }
+    @keyframes hbtnGlow { 50% { box-shadow: 0 0 12px 2px rgba(255, 216, 74, .8); } }
 
     .tracker {
       position: absolute; right: 1.2%; top: 13%; width: clamp(150px, 24vw, 250px);
@@ -589,6 +596,7 @@
           <div id="endHome"></div>
           <div class="btn-row" style="margin:0 0 14px">
             <button class="btn" id="keepBtn">🌳 계속 모험하기</button>
+            <button class="btn" id="arcadeEndBtn">🕹️ 모은 코인으로 오락실 가기</button>
             <a class="btn ghost" href="/" style="text-decoration:none">🔎 대시보드에서 진짜 정책 찾아보기</a>
             <button class="btn ghost" id="againBtn">처음부터 다시</button>
           </div>
@@ -931,7 +939,7 @@
       npc: 'center', title: '원장님 반찬통 찾기', requires: 'q1',
       goal: { type: 'fetch', item: 'lunch', n: 1 }, goalLabel: '반찬통',
       intro: [
-        '안녕, {name}! 나는 <span class="hi">서아공</span>이야. <span class="hi">서울시 아동공동생활가정 지원센터</span>, 줄여서 서아공! 그룹홈을 나서는 친구들을 계속 챙기는 게 내 일이야.',
+        '안녕! 나는 <span class="hi">서아공</span>이야. <span class="hi">서울시 아동공동생활가정 지원센터</span>, 줄여서 서아공! 그룹홈을 나서는 친구들을 계속 챙기는 게 내 일이야.',
         '그런데 동생들이 장난으로 원장님이 싸 둔 🍱 <span class="hi">반찬통</span>을 언덕 꼭대기 발판에 숨겨놨대. 가져와 줄래?',
       ],
       active: '반찬통은 언덕 오른쪽 제일 높은 발판 위에 있어. 발판을 차례로 밟고 올라가 봐!',
@@ -1261,6 +1269,13 @@
   addEventListener('keyup', e => { const k = kname(e); if (k) { keys[k] = false; e.preventDefault(); } });
   addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
 
+  // 터치 입력 초기화 목록: 손가락이 다 떨어졌는데 이벤트를 놓쳐 방향이 눌린 채 남는 일(iOS) 방지
+  const touchResets = [];
+  const resetTouch = () => touchResets.forEach(f => f());
+  ['touchend', 'touchcancel'].forEach(ev => document.addEventListener(ev, e => { if (!e.touches.length) resetTouch(); }, { capture: true, passive: true }));
+  document.addEventListener('visibilitychange', () => { if (document.hidden) resetTouch(); });
+  addEventListener('pagehide', resetTouch);
+
   document.querySelectorAll('[data-k]').forEach(b => {
     const k = b.dataset.k;
     // 버튼마다 손가락을 따로 붙잡아서(포인터 캡처) 여러 버튼 동시 누르기 + 손가락이 살짝 밀려도 안 떨어지게
@@ -1276,6 +1291,7 @@
     };
     b.addEventListener('pointerdown', on);
     ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => b.addEventListener(ev, off));
+    touchResets.push(() => { if (held.size) { held.clear(); keys[k] = false; b.classList.remove('on'); } });
   });
   const isTouch = matchMedia('(pointer: coarse)').matches;
 
@@ -1289,8 +1305,9 @@
       stick.style.left = stick.style.top = stick.style.bottom = ''; knob.style.transform = '';
       ['left', 'right', 'up', 'down'].forEach(k => keys[k] = false);
     };
+    touchResets.push(() => { if (id !== null) release(); });
     zone.addEventListener('pointerdown', e => {
-      if (id !== null) return;
+      if (id !== null) release(); // 이전 손가락의 '뗌'을 놓쳤으면 새 손가락으로 다시 시작
       e.preventDefault(); id = e.pointerId; zone.setPointerCapture(id);
       const zr = localRect(zone), r = stick.offsetWidth / 2, p = toLocal(e.clientX, e.clientY);
       cx = p.x; cy = p.y; t0 = performance.now(); moved = 0;
@@ -1367,6 +1384,7 @@
   function update(dt) {
     t += dt;
     if (mode !== 'play') { for (const k in pressed) pressed[k] = false; return; }
+    if ((t % 1) < dt) maybeArcadeTip(); // 1초에 한 번만 확인
     updatePlayer(dt);
     tickQuestTimers(dt);
     updateMobs(dt);
@@ -1873,8 +1891,22 @@
     }, extra || {}));
   }
   let stageTab = 'gate';
+  // 희망코인이 처음 30개 모이면 한 번 알려준다. 오락실에 들어가 보기 전까지 버튼에 NEW
+  function arcadeBadge() { $('stageBtn').classList.toggle('new', !!(S && !S.arcadeVisited)); }
+  function maybeArcadeTip() {
+    if (S.arcadeTip || S.coins < 30 || mode !== 'play') return;
+    S.arcadeTip = true; persist();
+    openDialog({ id: 'shop', def: NPCS.shop }, [
+      { say: '어머, 희망코인이 꽤 모였네요! 혹시 <span class="hi">🕹️ 희망 오락실</span> 알아요?' },
+      { menu: '화면 오른쪽 위 <span class="hi">🕹️ 오락실</span> 버튼을 누르면 돼요. 한 판에 🪙10코인이고 별을 새로 따면 코인을 돌려받아요. 모험하다 쉬고 싶을 때 들러 봐요 😊', opts: [
+        { label: '🕹️ 지금 가 볼래요', fn: () => { closeDialog(); openStages(); } },
+        { label: '나중에 갈게요', cls: 'ghost', fn: closeDialog },
+      ] },
+    ]);
+  }
   function openStages(tab) {
     stageTab = tab || stageTab; mode = 'stage';
+    if (!S.arcadeVisited) { S.arcadeVisited = true; persist(); arcadeBadge(); }
     const list = $('stageList');
     const total = ['gate', 'pin'].reduce((a, k) => a + Object.values(S.mini[k]).reduce((x, y) => x + y, 0), 0);
     $('stageStars').textContent = `모은 별 ⭐ ${total} / ${(STAGE_MAX.gate + STAGE_MAX.pin) * 3}`;
@@ -2141,6 +2173,7 @@
       (S.furn.length ? '' : '<p class="lead">아직 텅 빈 내 첫 집 — 잡화점에서 가구를 사서 채워봐!</p>');
     renderBook($('endCards'), true);
     $('hud').classList.remove('on'); $('touch').classList.remove('on');
+    $('arcadeEndBtn').textContent = `🕹️ 모은 코인(🪙 ${S.coins.toLocaleString()})으로 오락실 가기`;
     screen('scrEnding');
     S.cleared = true; persist(); // 엔딩 뒤에도 저장 유지
   }
@@ -2675,7 +2708,7 @@
     $('touch').classList.toggle('on', isTouch);
     $('keysHelp').style.display = isTouch ? 'none' : '';
     $('hudFace').src = A + S.char + '.png';
-    updateSkillUi();
+    updateSkillUi(); arcadeBadge();
     P = null;
     enterMap(S.map || 'home', null);
     mode = 'play';
@@ -2733,6 +2766,7 @@
     clearSave(); map = null; S = null; refreshTitle(); screen('scrTitle'); mode = 'title';
   };
   $('keepBtn').onclick = () => startGame();
+  $('arcadeEndBtn').onclick = () => { startGame(); setTimeout(() => { if (mode === 'play') openStages(); }, 400); };
   $('shopClose').onclick = $('shopX').onclick = () => { screen(null); mode = 'play'; };
   document.querySelectorAll('.shop-tabs .btn').forEach(b => b.onclick = () => { shopTab = b.dataset.tab; renderShop(); });
   document.querySelectorAll('.qs[data-pot]').forEach(b => b.addEventListener('pointerdown', e => { e.preventDefault(); usePotion(b.dataset.pot); }));
