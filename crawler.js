@@ -826,8 +826,37 @@ async function crawlGrouphome() {
 }
 
 // 5. 수집 데이터를 data.js에 업데이트하는 메인 함수
+/* ---------- 수동 등록 지원사업 ----------
+ * 크롤링 대상 사이트에 없지만 직접 넣고 싶은 사업. content는 원문 요약을 넣으면 Gemini가 친근한 말투로 다시 쓴다.
+ * keepContent: true 면 Gemini를 거치지 않고 content를 그대로 쓴다 (날짜·장소처럼 틀리면 안 되는 정보가 많을 때)
+ * 이미 data.js에 있으면 중복 검사로 건너뛰고, 마감일이 지나면 자동으로 빠진다.
+ * 이것만 반영: node crawler.js --manual-only
+ */
+const MANUAL_POLICIES = [
+  {
+    title: '[양천 청년 일자리카페] 청년성장프로젝트 이력서 증명사진 무료 촬영',
+    category: 'job',
+    type: '공공·지자체',
+    provider: '양천 청년 일자리카페',
+    region: '서울',
+    target: '19~39세 미취업 청년 (의무복무 제대군인은 복무기간에 따라 최대 3년 연장 / 양천구 거주자 등 우대)',
+    content: "면접 보려는데 이력서 사진이 없다면? 📸 양천구 청년성장프로젝트에서 이력서 증명사진을 무료로 찍어줘. 남녀 정장도 빌릴 수 있고 사진 파일은 이메일로 받아. 19~39세 미취업 청년이면 신청할 수 있고 정원은 40명이야. 촬영은 10월 19일 이후 크림포토 목동점에서 하고 날짜는 개별로 안내해 줘!",
+    keepContent: true,
+    tip: "10월 15일까지 구글폼으로 신청해요. 일찍 마감될 수 있으니 서두르세요! 신청하려면 카카오톡 채널 '양천청년일자리카페'를 친구 추가해야 하고 촬영 뒤 만족도 조사에도 참여해야 해요. 양천구에 살거나 일자리카페 취업특강을 들은 청년은 우대해요. 문의: 02-2062-2418",
+    link: 'https://youth.seoul.go.kr/infoData/sprtInfo/view.do?sprtInfoId=74482&key=2309130006',
+    date: '2026-10-01 ~ 2026-10-15',
+    status: '모집중',
+    source: '서울청년몽땅정보통',
+  },
+];
+
 async function main() {
   try {
+      if (process.argv.includes('--manual-only')) {
+        // 크롤링 없이 수동 등록 목록만 반영
+        console.log(`--- 수동 등록 사업만 반영 (${MANUAL_POLICIES.length}건) ---`);
+        return await mergeAndSave(MANUAL_POLICIES.map(p => ({ ...p })));
+      }
       // 크롤링 사이트 통합 수집 (최신 정렬 시 높은 ID가 위로 오게 하기 위해 우선순위 역순으로 추가: 스마일센터 -> 부산 -> 경기 -> 서울 -> 자립정보ON)
       const jariponData = await crawlJaripon();
       const seoulData = await crawlSeoul();
@@ -838,7 +867,16 @@ async function main() {
       const chungnamData = await crawlChungnam();
       const jeonbukData = await crawlJeonbuk();
       const grouphomeData = await crawlGrouphome();
-      const scraped = [...grouphomeData, ...smycData, ...jeonbukData, ...chungnamData, ...incheonData, ...busanData, ...ggData, ...seoulData, ...jariponData];
+      const scraped = [...MANUAL_POLICIES.map(p => ({ ...p })), ...grouphomeData, ...smycData, ...jeonbukData, ...chungnamData, ...incheonData, ...busanData, ...ggData, ...seoulData, ...jariponData];
+      return await mergeAndSave(scraped);
+  } catch (error) {
+    console.error('메인 실행 오류:', error);
+  }
+}
+
+// 수집한 사업을 data.js에 합친다 (중복 제거 → Gemini 재작성 → 정렬 → 버전 올리기)
+async function mergeAndSave(scraped) {
+  try {
 
     if (scraped.length === 0) {
       console.log('수집된 신규 정책이 없습니다.');
@@ -994,8 +1032,10 @@ async function main() {
       } else {
         newItem.id = nextId++;
         // Gemini로 content 친근하게 재작성
-        console.log(`  [Gemini] "${newItem.title.slice(0, 30)}..." content 재작성 중...`);
-        newItem.content = await rewriteWithGemini(newItem);
+        if (!newItem.keepContent) console.log(`  [Gemini] "${newItem.title.slice(0, 30)}..." content 재작성 중...`);
+        if (newItem.keepContent) console.log('  (수동 등록: 소개글 그대로 사용)');
+        else newItem.content = await rewriteWithGemini(newItem);
+        delete newItem.keepContent;
         existingPolicies.push(newItem);
         addedCount++;
       }
