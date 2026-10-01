@@ -1,15 +1,15 @@
-/* 자립 어드벤처 미니게임: 핀 뽑기 퍼즐 + 게이트 달리기
- * MiniGames.open(kind, level, { charImg, onDone(result) })
- *   kind: 'pin' | 'gate',  result: { win, stars }
- * 필요: pin_logic.js, pin_levels.js (window.PinLogic, window.PIN_LEVELS)
+/* 자립 어드벤처 오락실 미니게임
+ *  - 'gate': 응원단 달리기 (카운트 마스터즈 방식) — 응원단이 한 덩어리로 뛰고, 장애물에 닿은 사람만 떨어져 나간다
+ *  - 'pin' : 핀 뽑기 (Hero Rescue 방식) — 금화·용암·물이 알갱이 물리로 흐른다 (규칙·레벨은 pin_physics.js)
+ * MiniGames.open(kind, level, { charImg, onDone(result), cost, payRetry })  →  result: { win, stars, bonus }
  */
 (function () {
   'use strict';
   const W = 960, H = 540;
   const A = 'assets/adventure/';
   const img = (src) => { const i = new Image(); i.src = A + src; return i; };
-  const IMG = { mon: img('mob_worry.png'), boss: img('mob_boss.png'), scam: img('mob_scam.png') };
-  const EMO = { coin: '💰', fire: '🔥', water: '💧', rock: '🪨' };
+  const IMG = { worry: img('mob_worry.png'), scam: img('mob_scam.png'), debt: img('mob_debt.png') };
+  const IS_TOUCH = matchMedia('(pointer: coarse)').matches;
 
   let root, cv, ctx, raf = 0, game = null, opts = null, keys = {};
 
@@ -26,9 +26,10 @@
     document.getElementById('stage').appendChild(root);
     cv = root.querySelector('canvas'); ctx = cv.getContext('2d');
     root.querySelector('.mini-x').onclick = () => finish({ win: false, stars: 0, quit: true });
-    cv.addEventListener('pointerdown', e => game && game.down && game.down(pt(e), e));
+    cv.addEventListener('pointerdown', e => { if (game && game.down) { game.down(pt(e), e); try { cv.setPointerCapture(e.pointerId); } catch (_) {} } });
     cv.addEventListener('pointermove', e => game && game.move && game.move(pt(e), e));
-    addEventListener('keydown', e => { if (!game) return; keys[e.key] = true; if (['ArrowLeft', 'ArrowRight', 'a', 'd'].includes(e.key)) e.preventDefault(); }, true);
+    cv.addEventListener('pointerup', e => game && game.up && game.up(pt(e), e));
+    addEventListener('keydown', e => { if (!game) return; keys[e.key] = true; if (['ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault(); game.key && game.key(e.key); }, true);
     addEventListener('keyup', e => { keys[e.key] = false; }, true);
   }
   function pt(e) {
@@ -37,17 +38,14 @@
     const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H };
   }
 
+  function make(kind, level) { return kind === 'pin' ? pinGame(level) : runGame(level); }
   function open(kind, level, o) {
     ensureDom();
     opts = o || {};
     keys = {};
     root.classList.add('on');
     root.querySelector('.mini-result').classList.remove('on');
-    game = kind === 'pin' ? pinGame(level) : gateGame(level);
-    root.querySelector('.mini-title').textContent = game.title;
-    root.querySelector('.mini-sub').textContent = `${level}단계`;
-    const help = root.querySelector('.mini-help');
-    help.innerHTML = game.help || ''; help.style.display = game.help ? '' : 'none';
+    start(make(kind, level));
     cancelAnimationFrame(raf);
     let last = performance.now();
     const loop = (now) => {
@@ -57,6 +55,13 @@
     };
     raf = requestAnimationFrame(loop);
   }
+  function start(g) {
+    game = g;
+    root.querySelector('.mini-title').textContent = g.title;
+    root.querySelector('.mini-sub').textContent = `${g.level}단계`;
+    const help = root.querySelector('.mini-help');
+    help.innerHTML = g.help || ''; help.style.display = g.help ? '' : 'none';
+  }
 
   function finish(res) {
     cancelAnimationFrame(raf); game = null;
@@ -64,23 +69,23 @@
     opts.onDone && opts.onDone(res);
   }
 
-  /** 결과 패널: 이기면 별, 지면 다시하기(+선택적으로 건너뛰기) */
-  function showResult(win, stars, msg) {
+  /** 결과 패널: 이기면 별, 지면 다시하기 */
+  function showResult(win, stars, msg, bonus) {
     const el = root.querySelector('.mini-result');
     const starHtml = win ? '⭐'.repeat(stars) + '<span style="opacity:.25">' + '⭐'.repeat(3 - stars) + '</span>' : '';
     el.innerHTML = `<div class="mini-card"><h3>${win ? '클리어!' : '아쉬워요!'}</h3>
       <div class="mini-stars">${starHtml}</div><p>${msg}</p>
       <div class="mini-btns">${win ? '<button class="btn" data-a="ok">좋아!</button>'
-        : `<button class="btn" data-a="retry">다시 하기${opts.cost ? ` (🪙${opts.cost})` : ''}</button>${opts.canSkip ? '<button class="btn ghost" data-a="skip">건너뛰기</button>' : '<button class="btn ghost" data-a="quit">나가기</button>'}`}</div></div>`;
+        : `<button class="btn" data-a="retry">다시 하기${opts.cost ? ` (🪙${opts.cost})` : ''}</button><button class="btn ghost" data-a="quit">나가기</button>`}</div></div>`;
     el.classList.add('on');
     el.querySelectorAll('[data-a]').forEach(b => b.onclick = () => {
       const a = b.dataset.a;
       // 오락실처럼 다시 하기도 코인을 낸다. 모자라면 버튼만 바꾸고 결과창은 그대로
       if (a === 'retry' && opts.payRetry && !opts.payRetry()) { b.textContent = '🪙 코인이 모자라요'; b.disabled = true; return; }
       el.classList.remove('on');
-      if (a === 'ok') finish({ win: true, stars });
-      else if (a === 'retry') { opts.attempts = (opts.attempts || 1) + 1; const k = game.kind, lv = game.level; game = k === 'pin' ? pinGame(lv) : gateGame(lv); }
-      else finish({ win: false, stars: 0, skip: a === 'skip' });
+      if (a === 'ok') finish({ win: true, stars, bonus: bonus || 0 });
+      else if (a === 'retry') { opts.attempts = (opts.attempts || 1) + 1; start(make(game.kind, game.level)); }
+      else finish({ win: false, stars: 0 });
     });
   }
 
@@ -93,299 +98,419 @@
     ctx.lineWidth = Math.max(3, size / 6); ctx.strokeStyle = stroke || 'rgba(0,0,0,.6)'; ctx.strokeText(text, x, y);
     ctx.fillStyle = fill || '#fff'; ctx.fillText(text, x, y);
   }
+  function seeded(n) { let s = n * 9301 + 49297; return () => ((s = (s * 9301 + 49297) % 233280) / 233280); }
 
-  /* ======================= 핀 뽑기 퍼즐 ======================= */
+  /* ======================= 핀 뽑기 (Hero Rescue 방식) ======================= */
+  const PART = { gold: ['#ffd84a', '#b98a00'], lava: ['#ff6a1f', '#c22a00'], water: ['#56b8ff', '#1f6fc4'], stone: ['#9aa0a8', '#5d636b'] };
   function pinGame(level) {
-    const L = window.PIN_LEVELS[Math.min(level, window.PIN_LEVELS.length) - 1];
-    const PL = window.PinLogic;
-    const BX = 180, BY = 78;
-    let state = PL.initState(L);
-    let shown = PL.initState(L);     // 애니메이션 중 화면에 보이는 상태
-    let anim = null;                 // { moves, i, t, final }
-    let pinAnim = {};                // 뽑히는 핀 애니메이션
-    const fxs = [];
-    let over = false, t = 0;
-    const ch = (id) => L.chambers.find(c => c.id === id);
-    const center = (c) => ({ x: BX + c.x + c.w / 2, y: BY + c.y + c.h / 2 });
-    // 한 방에서 핀이 둘 나가면 바닥을 반씩 나눠 쓴다 (왼쪽 목적지 → 왼쪽 반, 손잡이도 바깥쪽)
-    const geom = L.pins.map((pin, i) => {
-      const c = ch(pin[0]);
-      const sib = L.pins.map((p2, j) => [p2, j]).filter(([p2]) => p2[0] === pin[0])
-        .sort((a, b) => ch(a[0][1]).x - ch(b[0][1]).x).map(([, j]) => j);
-      const y = BY + c.y + c.h - 12;
-      if (sib.length < 2) return { x: BX + c.x - 6, y, w: c.w + 12, h: 22, hx: BX + c.x + c.w + 9, dir: 1, sx: BX + c.x + c.w / 2 };
-      const left = sib.indexOf(i) === 0;
-      return left
-        ? { x: BX + c.x - 6, y, w: c.w / 2 + 2, h: 22, hx: BX + c.x - 9, dir: -1, sx: BX + c.x + c.w / 4 }
-        : { x: BX + c.x + c.w / 2 + 4, y, w: c.w / 2 + 2, h: 22, hx: BX + c.x + c.w + 9, dir: 1, sx: BX + c.x + c.w * 3 / 4 };
-    });
-    const pinRect = (i) => geom[i];
-
-    function pull(i) {
-      if (over || anim || state.open[i]) return;
-      const r = PL.pull(state, i, L);
-      pinAnim[i] = 0;
-      state = r.state;
-      anim = { moves: r.moves, i: 0, t: 0, result: r.result };
-      shown.open[i] = true;
+    const PP = window.PinPhysics;
+    const S = PP.init(PP.LEVELS[Math.min(level, PP.LEVELS.length) - 1]);
+    const pinOut = S.pins.map(() => 0);      // 뽑히는 애니메이션 0→1
+    let t = 0, ended = false;
+    // 핀 손잡이: 왼쪽/오른쪽 끝 바깥
+    const handle = (p) => (p.side === 'l' ? { x: p.x1 - 22, y: p.y1, dir: -1 } : { x: p.x2 + 22, y: p.y2, dir: 1 });
+    function hitPin(q) {
+      let best = -1, bd = 26;
+      S.pins.forEach((p, i) => {
+        if (p.out) return;
+        const h = handle(p), x1 = Math.min(p.x1, h.x), x2 = Math.max(p.x2, h.x);
+        const d = q.x < x1 ? Math.hypot(q.x - x1, q.y - p.y1) : q.x > x2 ? Math.hypot(q.x - x2, q.y - p.y1) : Math.abs(q.y - p.y1);
+        if (d < bd) { bd = d; best = i; }
+      });
+      return best;
     }
+    const helps = {
+      1: '👆 핀을 눌러서 뽑아요. 💰 금화가 캐릭터한테 가면 성공!',
+      2: '🔥 용암이 캐릭터한테 닿으면 실패! 💧 물을 부으면 용암이 돌로 굳어요.',
+      3: '🪨 돌을 떨어뜨려서 걱정 괴물을 없애요. 살아 있는 괴물이 내려가면 캐릭터를 덮쳐요!',
+      5: '괴물은 🔥 용암에 닿아도 사라져요. 남은 용암은 💧 물로 꼭 식히기!',
+      6: '용암이 금화 위로 떨어지면 금화가 녹아요. 안 뽑는 게 나은 핀도 있어요!',
+    };
     return {
-      kind: 'pin', level, title: '🧷 핀 뽑기 퍼즐', pinRect,
-      help: level <= 3 ? '핀을 눌러 뽑으면 위 칸의 물건이 아래로 떨어져요. 💰를 나한테 보내고 🔥·☁️는 피하기! &nbsp;💧+🔥=🪨 · 🪨는 ☁️를 눌러요'
-        : '💧+🔥=🪨 · 🪨가 떨어지면 ☁️가 사라져요 · 🔥·☁️를 만난 💰는 사라져요',
-      down(p) {
-        for (let i = 0; i < L.pins.length; i++) {
-          if (state.open[i]) continue;
-          const r = pinRect(i);
-          const x0 = Math.min(r.x, r.hx - 11), x1 = Math.max(r.x + r.w, r.hx + 11);
-          if (p.x >= x0 && p.x <= x1 && p.y >= r.y - 14 && p.y <= r.y + r.h + 14) { pull(i); return; }
-        }
-      },
+      kind: 'pin', level, title: '🧷 핀 뽑기', S, // S: 테스트용
+      help: helps[level] || '',
+      down(p) { if (S.result !== 'play') return; const i = hitPin(p); if (i >= 0) PP.pull(S, i); },
       update(dt) {
         t += dt;
-        for (const k in pinAnim) pinAnim[k] = Math.min(1, pinAnim[k] + dt * 3);
-        for (let i = fxs.length - 1; i >= 0; i--) if ((fxs[i].t += dt) > 0.7) fxs.splice(i, 1);
-        if (anim && Object.values(pinAnim).every(v => v >= 1 || v === undefined)) {
-          const m = anim.moves[anim.i];
-          if (!m) {
-            // 모든 이동이 끝남
-            shown = { items: JSON.parse(JSON.stringify(state.items)), open: state.open.slice() };
-            const res = anim.result; anim = null;
-            if (res !== 'play') {
-              over = true;
-              const tries = opts.attempts || 1;
-              const stars = res === 'win' ? (tries === 1 ? 3 : tries === 2 ? 2 : 1) : 0;
-              setTimeout(() => showResult(res === 'win', stars,
-                res === 'win' ? '희망코인이 무사히 도착했어요!' : '앗, 순서가 틀렸어요. 어떤 핀부터 뽑아야 할까요?'), 450);
-            }
-            return;
-          }
-          if (anim.t === 0) shown.items[m.from] = [];
-          anim.t += dt / 0.4;
-          if (anim.t >= 1) {
-            const before = shown.items[m.to].concat(m.items);
-            const after = PL.resolve(before);
-            if (after.length !== before.length || after.join() !== before.join()) {
-              const c = center(ch(m.to));
-              fxs.push({ x: c.x, y: c.y, t: 0, text: before.includes('water') && before.includes('fire') ? '💨' : '💥' });
-            }
-            shown.items[m.to] = after;
-            anim.i++; anim.t = 0;
-          }
+        PP.step(S, dt);
+        S.pins.forEach((p, i) => { if (p.out) pinOut[i] = Math.min(1, pinOut[i] + dt * 3.5); });
+        if (S.result !== 'play' && !ended) {
+          ended = true;
+          const tries = opts.attempts || 1, win = S.result === 'win';
+          const stars = !win ? 0 : tries === 1 ? (S.got >= S.gold0 * 0.8 ? 3 : 2) : 1;
+          setTimeout(() => showResult(win, stars, win ? `금화 ${S.got}개가 무사히 도착했어요!` : S.hero.why || '앗, 순서가 틀렸어요.'), 900);
         }
       },
       draw() {
+        // 배경: 지하 창고
         const g = ctx.createLinearGradient(0, 0, 0, H);
-        g.addColorStop(0, '#fbe7c6'); g.addColorStop(1, '#e7c28f');
+        g.addColorStop(0, '#2b3550'); g.addColorStop(1, '#151a2b');
         ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-        // 파이프
-        L.pins.forEach(([a, b], i) => {
-          const A_ = ch(a), B_ = ch(b);
-          ctx.strokeStyle = 'rgba(120,80,40,.25)'; ctx.lineWidth = 30; ctx.lineCap = 'round';
-          ctx.beginPath(); ctx.moveTo(geom[i].sx, BY + A_.y + A_.h - 4); ctx.lineTo(BX + B_.x + B_.w / 2, BY + B_.y + 6); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,.03)';
+        for (let y = 60; y < H; y += 36) for (let x = (y / 36 % 2) * 40; x < W; x += 80) ctx.fillRect(x, y, 76, 32);
+        const [rl, rr] = S.L.room;
+        ctx.fillStyle = 'rgba(255,220,150,.10)'; ctx.fillRect(rl, 412, rr - rl, PP.FLOOR - 412);
+        // 벽
+        ctx.lineCap = 'round';
+        S.L.walls.forEach(w => {
+          ctx.strokeStyle = '#3a2a16'; ctx.lineWidth = 18; ctx.beginPath(); ctx.moveTo(w[0], w[1]); ctx.lineTo(w[2], w[3]); ctx.stroke();
+          ctx.strokeStyle = '#8a6a3c'; ctx.lineWidth = 12; ctx.beginPath(); ctx.moveTo(w[0], w[1]); ctx.lineTo(w[2], w[3]); ctx.stroke();
         });
-        // 방
-        L.chambers.forEach(c => {
-          const x = BX + c.x, y = BY + c.y;
-          roundRect(x, y, c.w, c.h, 16);
-          ctx.fillStyle = c.id === 'p' ? 'rgba(255,255,255,.75)' : 'rgba(210,240,255,.55)'; ctx.fill();
-          ctx.lineWidth = 4; ctx.strokeStyle = c.id === 'p' ? '#d9822b' : '#7aa7c7'; ctx.stroke();
-          const its = shown.items[c.id] || [];
-          if (c.id === 'p' && opts.charImg && opts.charImg.complete) {
-            const ih = 84, iw = opts.charImg.width * ih / opts.charImg.height;
-            ctx.drawImage(opts.charImg, x + 16, y + c.h - ih - 4, iw, ih);
-          }
-          its.forEach((it, k) => {
-            const cols = Math.min(its.length, 3), col = k % cols, row = Math.floor(k / cols);
-            const ix = x + (c.id === 'p' ? 110 : c.w / 2) + (col - (cols - 1) / 2) * 44, iy = y + c.h / 2 + row * 30 - 4;
-            if (it === 'mon') { if (IMG.mon.complete) ctx.drawImage(IMG.mon, ix - 24, iy - 24 + Math.sin(t * 5 + k) * 2, 48, 48); }
-            else { ctx.font = '34px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(EMO[it], ix, iy + Math.sin(t * 4 + k) * 2); }
-          });
-        });
-        // 떨어지는 물건
-        if (anim && anim.moves[anim.i] && anim.t > 0) {
-          const m = anim.moves[anim.i], a = center(ch(m.from)), b = center(ch(m.to));
-          const k = anim.t * anim.t;
-          m.items.forEach((it, j) => {
-            const x = a.x + (b.x - a.x) * k + (j - (m.items.length - 1) / 2) * 30, y = a.y + (b.y - a.y) * k;
-            if (it === 'mon') { if (IMG.mon.complete) ctx.drawImage(IMG.mon, x - 22, y - 22, 44, 44); }
-            else { ctx.font = '32px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(EMO[it], x, y); }
-          });
+        // 알갱이
+        for (const type in PART) {
+          const [c1, c2] = PART[type];
+          ctx.fillStyle = c2; ctx.beginPath();
+          for (const p of S.parts) if (p.t === type) { ctx.moveTo(p.x + PP.R, p.y); ctx.arc(p.x, p.y, PP.R, 0, 7); }
+          ctx.fill();
+          ctx.fillStyle = c1; ctx.beginPath();
+          for (const p of S.parts) if (p.t === type) { ctx.moveTo(p.x + PP.R - 2, p.y - 1); ctx.arc(p.x - 1, p.y - 1, PP.R - 2, 0, 7); }
+          ctx.fill();
         }
-        // 핀
-        L.pins.forEach((pin, i) => {
-          const r = pinRect(i), k = pinAnim[i] || 0;
-          if (k >= 1) return;
-          ctx.save(); ctx.globalAlpha = 1 - k; ctx.translate(k * 160 * r.dir, 0);
-          // 막대 + 바깥쪽 손잡이
-          const bx0 = Math.min(r.x, r.hx), bx1 = Math.max(r.x + r.w, r.hx);
-          roundRect(bx0, r.y, bx1 - bx0, r.h - 8, 7);
-          const gg = ctx.createLinearGradient(0, r.y, 0, r.y + r.h);
-          gg.addColorStop(0, '#ffe38a'); gg.addColorStop(1, '#d99a1a');
-          ctx.fillStyle = gg; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#8a5a00'; ctx.stroke();
-          ctx.beginPath(); ctx.arc(r.hx, r.y + 7, 11, 0, 7); ctx.fillStyle = '#ffd24a'; ctx.fill(); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,120,40,.12)'; ctx.beginPath();
+        for (const p of S.parts) if (p.t === 'lava') { ctx.moveTo(p.x + 13, p.y); ctx.arc(p.x, p.y, 13, 0, 7); }
+        ctx.fill();
+        // 괴물
+        S.mons.forEach(m => {
+          if (!m.alive && m.dead > 0.6) return;
+          ctx.save(); ctx.globalAlpha = m.alive ? 1 : 1 - m.dead / 0.6;
+          const s = 58 * (m.alive ? 1 + Math.sin(t * 6) * 0.03 : 1 + m.dead);
+          if (IMG.worry.complete) ctx.drawImage(IMG.worry, m.x - s / 2, m.y - s / 2 - 4, s, s);
           ctx.restore();
-          if (!state.open[i] && !anim && !over) { // 누를 수 있다는 표시
-            ctx.globalAlpha = 0.5 + Math.sin(t * 5 + i) * 0.3;
-            label('👆', r.hx + r.dir * 10, r.y + 30, 22);
-            ctx.globalAlpha = 1;
-          }
         });
-        fxs.forEach(f => { ctx.globalAlpha = 1 - f.t / 0.7; label(f.text, f.x, f.y - f.t * 30, 44); ctx.globalAlpha = 1; });
+        // 캐릭터
+        const hero = S.hero, ci = opts.charImg;
+        const jump = S.result === 'win' ? Math.abs(Math.sin(t * 8)) * 16 : 0;
+        if (ci && ci.complete) {
+          const hh = 86, ww = ci.width * hh / ci.height;
+          ctx.save();
+          if (hero.dead) ctx.filter = 'grayscale(1) brightness(.7)';
+          ctx.drawImage(ci, hero.x - ww / 2, PP.FLOOR - hh - 4 - jump, ww, hh);
+          ctx.restore();
+        }
+        if (hero.dead) label('😱', hero.x + 34, PP.FLOOR - 92, 34);
+        if (S.result === 'win') label('🎉', hero.x - 40, PP.FLOOR - 96 - jump, 34);
+        // 핀
+        S.pins.forEach((p, i) => {
+          const k = pinOut[i]; if (k >= 1) return;
+          const h = handle(p);
+          ctx.save(); ctx.globalAlpha = 1 - k; ctx.translate(k * 260 * h.dir, 0);
+          const x1 = Math.min(p.x1, h.x), x2 = Math.max(p.x2, h.x);
+          roundRect(x1, p.y1 - 6, x2 - x1, 12, 6);
+          const gg = ctx.createLinearGradient(0, p.y1 - 6, 0, p.y1 + 6);
+          gg.addColorStop(0, p.main ? '#ffb3a1' : '#ffe9a3'); gg.addColorStop(1, p.main ? '#c4472c' : '#d39a12');
+          ctx.fillStyle = gg; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = '#5a3a00'; ctx.stroke();
+          ctx.beginPath(); ctx.arc(h.x, h.y, 13, 0, 7); ctx.lineWidth = 6; ctx.strokeStyle = p.main ? '#e0604a' : '#f2b72a'; ctx.stroke();
+          ctx.lineWidth = 2; ctx.strokeStyle = '#5a3a00'; ctx.stroke();
+          ctx.restore();
+        });
+        // 효과
+        S.fx.forEach(f => {
+          const a = 1 - f.t / 0.6;
+          if (f.k === 'steam') { ctx.fillStyle = `rgba(230,240,255,${a * 0.6})`; ctx.beginPath(); ctx.arc(f.x, f.y - f.t * 40, 6 + f.t * 20, 0, 7); ctx.fill(); }
+          else if (f.k === 'coin') { ctx.globalAlpha = a; label('+1', f.x, f.y - f.t * 50, 18, '#ffe9a0'); ctx.globalAlpha = 1; }
+          else { ctx.globalAlpha = a; label(f.k === 'burn' ? '🔥' : '💥', f.x, f.y - f.t * 30, 44); ctx.globalAlpha = 1; }
+        });
+        label(`💰 ${S.got} / ${S.need}`, W - 110, 72, 26, S.got >= S.need ? '#b6ffb0' : '#ffe9a0');
+        if (S.result === 'play' && S.pins.every(p => !p.out) && t < 6) {
+          ctx.globalAlpha = 0.5 + Math.sin(t * 5) * 0.3;
+          const h = handle(S.pins[0]); label('👆', h.x + h.dir * 18, h.y + 30, 30);
+          ctx.globalAlpha = 1;
+        }
       },
     };
   }
 
-  /* ======================= 게이트 달리기 ======================= */
-  function seeded(n) { let s = n * 9301 + 49297; return () => ((s = (s * 9301 + 49297) % 233280) / 233280); }
-  const GOOD = [['+', 3, '선배'], ['+', 5, '친구'], ['+', 8, '상담쌤'], ['x', 2, '자조모임'], ['+', 10, '바람개비'], ['x', 3, '응원단']];
-  const BAD = [['-', 4, '사기문자'], ['-', 6, '번아웃'], ['/', 2, '과소비'], ['-', 8, '야근'], ['-', 10, '빚독촉']];
+  /* ======================= 응원단 달리기 (카운트 마스터즈 방식) =======================
+   * 세계 좌표(미터): x = 좌우(-2.5~2.5), z = 앞으로 간 거리. 응원단은 한 명 한 명 실제로 움직인다.
+   * 문(+/×는 늘고 -/÷는 줄고) · 빚 코인(좌우로 굴러다님) · 스미싱 막대(빙글빙글) · 좁은 다리(밖은 낭떠러지)
+   * · 걱정 구름 군단(부딪혀서 1:1로 싸움) · 끝은 자립 계단(한 칸 오를 때마다 몇 명씩 남는다)
+   */
+  const GOOD = [['+', 5, '선배'], ['+', 10, '친구'], ['+', 15, '상담쌤'], ['x', 2, '자조모임'], ['+', 20, '바람개비'], ['x', 3, '응원단']];
+  const BAD = [['-', 5, '사기문자'], ['-', 10, '번아웃'], ['/', 2, '과소비'], ['-', 15, '야근'], ['-', 20, '빚독촉']];
   function applyOp(n, op) {
     const [o, v] = op;
-    return Math.max(0, Math.floor(o === '+' ? n + v : o === '-' ? n - v : o === 'x' ? n * v : n / v));
+    return Math.max(0, Math.min(999, Math.floor(o === '+' ? n + v : o === '-' ? n - v : o === 'x' ? n * v : n / v))); // 최대 999명
   }
-  function opText(op) { const [o, v, name] = op; return { big: (o === 'x' ? '×' : o === '/' ? '÷' : o) + v, name, good: o === '+' || o === 'x' }; }
+  const opText = (op) => ({ big: (op[0] === 'x' ? '×' : op[0] === '/' ? '÷' : op[0]) + op[1], name: op[2], good: op[0] === '+' || op[0] === 'x' });
+  const HALF = 2.5, MAXU = 140, SP = 0.13; // SP: 대형 간격(작을수록 촘촘)
 
-  function gateGame(level) {
-    const rnd = seeded(level * 7 + 3);
-    const rows = [];
-    const nRows = Math.min(16, 5 + Math.floor(level * 0.75));
-    let best = 1;
-    for (let i = 0; i < nRows; i++) {
-      const mobK = 2 + Math.floor(rnd() * (3 + level));
-      // 방해 무리: 최선으로 골랐을 때도 3명 이상 남을 때만 (항상 이길 수 있게)
-      if (i > 1 && rnd() < 0.18 + level * 0.01 && best - mobK >= 3) {
-        rows.push({ type: 'mob', k: mobK, z: -i * 0.42 - 0.3 });
-        best -= mobK;
-        continue;
-      }
-      const g = GOOD[Math.floor(rnd() * Math.min(GOOD.length, 3 + Math.floor(level / 3)))];
-      // 어려울수록 양쪽 다 나쁜 문(덜 나쁜 쪽 고르기)이 섞인다
-      const b = BAD[Math.floor(rnd() * Math.min(BAD.length, 2 + Math.floor(level / 3)))];
-      const b2 = BAD[Math.floor(rnd() * BAD.length)];
-      const both = level >= 4 && rnd() < 0.12 + level * 0.015 && Math.max(applyOp(best, b), applyOp(best, b2)) >= 3;
-      const other = both ? b2 : b;
-      const pair = both ? [b, other] : (rnd() < .5 ? [g, other] : [other, g]);
-      rows.push({ type: 'gate', ops: pair, z: -i * 0.42 - 0.3 });
-      best = Math.max(applyOp(best, pair[0]), applyOp(best, pair[1]));
+  function runGame(level) {
+    const rnd = seeded(level * 13 + 5);
+    const segs = [];
+    // best: 한 명도 안 잃었을 때 최대 인원 · est: 장애물에서 조금씩 잃는 걸 감안한 예상 인원(군단·계단 크기 기준)
+    let z = 14, best = 1, est = 1;
+    const nSeg = 6 + level;
+    for (let i = 0; i < nSeg; i++, z += 12) {
+      const kinds = [];
+      if (level >= 2) kinds.push('debt');
+      if (level >= 3 && i > 1) kinds.push('enemy');
+      if (level >= 4) kinds.push('bar');
+      if (level >= 6 && i > 1) kinds.push('bridge');
+      // 짝수 칸은 언제나 문, 홀수 칸은 장애물(1단계는 문만)
+      const kind = i % 2 === 0 || !kinds.length ? 'gate' : kinds[Math.floor(rnd() * kinds.length)];
+      if (kind === 'gate') {
+        const g = GOOD[Math.floor(rnd() * Math.min(GOOD.length, 3 + Math.floor(level / 2)))];
+        const b = BAD[Math.floor(rnd() * Math.min(BAD.length, 2 + Math.floor(level / 3)))];
+        const g2 = GOOD[Math.floor(rnd() * GOOD.length)];
+        // 레벨이 오르면 둘 다 좋은 문(더 좋은 쪽 고르기)도 나온다
+        const pair = level >= 5 && rnd() < 0.3 ? [g, g2] : rnd() < 0.5 ? [g, b] : [b, g];
+        segs.push({ type: 'gate', z, ops: pair });
+        best = Math.max(applyOp(best, pair[0]), applyOp(best, pair[1]));
+        est = Math.max(applyOp(est, pair[0]), applyOp(est, pair[1]));
+      } else if (kind === 'enemy') {
+        const n = Math.max(3, Math.floor(est * (0.25 + rnd() * 0.2 + level * 0.012)));
+        segs.push({ type: 'enemy', z, n, left: n, units: [] });
+        best -= n; est -= n;
+      } else if ((est = Math.floor(est * 0.8)) >= 0 && kind === 'debt') segs.push({ type: 'debt', z, ph: rnd() * 6, w: 1.5 + level * 0.06, r: 0.55 });
+      // 스미싱 막대는 길 한쪽에서만 돈다 → 반대쪽으로 비켜 가면 안전
+      else if (kind === 'bar') segs.push({ type: 'bar', z, cx: (rnd() < .5 ? -1 : 1) * 1.25, ph: rnd() * 6, w: (rnd() < .5 ? -1 : 1) * (1.6 + level * 0.06), len: 1.05 });
+      else segs.push({ type: 'bridge', z, len: 7, cx: (rnd() - 0.5) * 2.4, half: Math.max(0.6, 1.15 - level * 0.03) });
     }
-    const boss = Math.max(4, Math.floor(best * Math.min(0.8, 0.4 + level * 0.03)));
-    let crowd = 1, px = 0, targetPx = 0, speed = 0.36 + level * 0.012, t = 0;
-    let phase = 'run', fight = 0, enemy = boss, over = false, bossZ = rows[rows.length - 1].z - 0.6;
-    const pops = [];
-    const PZ = 0.86;
-    const yOf = (z) => 120 + 420 * Math.max(0, Math.min(1.1, z));
-    const half = (z) => 60 + 300 * Math.max(0, z);
-    const xOf = (lane, z) => W / 2 + lane * half(z) * 0.62;
-    function pop(text, good) { pops.push({ text, good, t: 0, x: xOf(px, PZ), y: yOf(PZ) - 90 }); }
+    const FIN = z + 2, STEPS = 20;
+    // 계단 한 칸에 남는 인원: 최선으로 모았을 때 인원 기준. 20칸을 다 오르려면 거의 다 모아야 한다
+    const stepNeed = (k) => Math.max(1, Math.ceil(est * 0.05 * (0.6 + k * 0.04)));
+    // 적 군단 그림용 배치
+    segs.filter(s => s.type === 'enemy').forEach(s => { for (let i = 0; i < Math.min(s.n, 60); i++) { const r = SP * 1.1 * Math.sqrt(i), a = i * 2.39996; s.units.push({ x: r * Math.cos(a), z: r * Math.sin(a) * 0.7 }); } });
+
+    let crowd = 1, X = 0, Z = 0, t = 0, phase = 'ready';
+    const speed = 6 + level * 0.15;
+    let units = [], dragX = null, dragCX = 0, fight = null, step = -1, shake = 0;
+    const stood = [], falls = [], sparks = [], pops = [];
+    const target = (i) => { const r = SP * Math.sqrt(i), a = i * 2.39996; return { x: r * Math.cos(a), z: r * Math.sin(a) * 0.75 }; };
+    function sync() {
+      const want = Math.min(crowd, MAXU);
+      while (units.length < want) units.push({ x: (Math.random() - .5) * 0.2, z: (Math.random() - .5) * 0.2, b: Math.random() * 6 });
+      while (units.length > want) units.pop();
+    }
+    sync();
+    // 그려진 한 명이 실제 몇 명을 뜻하는지 (사람이 많으면 140명까지만 그린다)
+    const per = () => Math.max(1, crowd / Math.max(1, units.length));
+    function killUnit(i, how) {
+      const u = units[i];
+      falls.push({ x: X + u.x, z: Z + u.z, t: 0, how });
+      units.splice(i, 1);
+      crowd = Math.max(0, Math.round(crowd - per()));
+      if (crowd < units.length) units.length = crowd;
+    }
+    const pop = (text, good, big) => pops.push({ text, good, big, t: 0 });
+    const burst = (x, y, color, n) => { for (let i = 0; i < n; i++) sparks.push({ x, y, vx: (Math.random() - .5) * 360, vy: -Math.random() * 320, t: 0, color }); };
+    function end(win, msg) {
+      phase = 'end';
+      const stars = !win ? 0 : step >= 11 ? 3 : step >= 4 ? 2 : 1;
+      const bonus = win ? Math.max(0, step + 1) : 0;
+      setTimeout(() => showResult(win, stars, msg + (bonus ? ` · 🪙 계단 보너스 ${bonus}` : ''), bonus), 800);
+    }
+
+    // ----- 화면 투영 (카메라는 응원단 뒤 위쪽) -----
+    const F = 600, CAMH = 3.0, CAMD = 6, HOR = 150;
+    const camZ = () => Z - CAMD;
+    const proj = (x, zz, y = 0) => { const d = Math.max(0.6, zz - camZ()); return { x: W / 2 + x * F / d, y: HOR + (CAMH - y) * F / d, s: F / d / 100 }; };
 
     return {
-      kind: 'gate', level, title: '🏃 게이트 달리기',
-      peek: () => ({ rows, crowd, phase, enemy, boss, best, px, PZ }), // 테스트용
-      help: level <= 2 ? '좌우로 끌거나 ←→ 키로 움직여서 좋은 문(파란색)을 지나가요. 응원단을 모아 끝에서 걱정 군단을 이겨요!' : '',
-      down(p) { targetPx = Math.max(-1, Math.min(1, (p.x - W / 2) / (half(PZ) * 0.62))); },
-      move(p, e) { if (e.buttons || e.pointerType === 'touch') targetPx = Math.max(-1, Math.min(1, (p.x - W / 2) / (half(PZ) * 0.62))); },
+      kind: 'gate', level, title: '🏃 응원단 달리기',
+      peek: () => ({ crowd, best, phase, X, Z, segs, step, units: units.length, FIN, t, speed, HALF }), // 테스트용
+      setX: (x) => { X = Math.max(-HALF, Math.min(HALF, x)); if (phase === 'ready') phase = 'run'; }, // 테스트용
+      help: level === 1 ? '👆 화면을 좌우로 끌어서 응원단을 움직여요. 파란 문으로 사람을 모으고 끝에서 자립 계단을 높이 올라가요!'
+        : level === 2 ? '🪙 굴러다니는 빚 코인에 닿은 사람은 떨어져 나가요. 피해서 지나가요!'
+        : level === 3 ? '☁️ 걱정 구름 군단과 부딪히면 1:1로 싸워요. 더 많이 모아서 지나가요!'
+        : level === 4 ? '📱 빙글빙글 도는 스미싱 막대 조심! 막대 반대쪽으로 비켜 가요.'
+        : level === 6 ? '🌉 좁은 다리 밖은 낭떠러지예요. 응원단을 다리 가운데로 모아요!' : '',
+      down(p) { if (phase === 'ready') phase = 'run'; dragX = p.x; dragCX = X; },
+      move(p, e) { if (dragX != null && (e.buttons || e.pointerType === 'touch')) X = Math.max(-HALF, Math.min(HALF, dragCX + (p.x - dragX) / 95)); },
+      up() { dragX = null; },
+      key(k) { if (phase === 'ready' && ['ArrowLeft', 'ArrowRight', ' ', 'ArrowUp'].includes(k)) phase = 'run'; },
       update(dt) {
-        t += dt;
-        if (keys.ArrowLeft || keys.a) targetPx = Math.max(-1, targetPx - dt * 2.6);
-        if (keys.ArrowRight || keys.d) targetPx = Math.min(1, targetPx + dt * 2.6);
-        px += (targetPx - px) * Math.min(1, dt * 10);
-        for (let i = pops.length - 1; i >= 0; i--) if ((pops[i].t += dt) > 1) pops.splice(i, 1);
-        if (phase === 'run') {
-          rows.forEach(r => {
-            const before = r.z; r.z += speed * dt;
-            if (before < PZ && r.z >= PZ && !r.done) {
-              r.done = true;
-              if (r.type === 'gate') {
-                const op = r.ops[px < 0 ? 0 : 1], o = opText(op);
-                crowd = applyOp(crowd, op); pop(`${o.big} ${o.name}`, o.good);
-              } else { crowd = Math.max(0, crowd - r.k); pop(`-${r.k} 걱정 구름`, false); }
-              if (crowd <= 0) { phase = 'end'; over = true; setTimeout(() => showResult(false, 0, '응원단이 모두 흩어졌어요. 파란 문을 노려봐요!'), 500); }
+        t += dt; shake = Math.max(0, shake - dt);
+        if (keys.ArrowLeft || keys.a) X = Math.max(-HALF, X - dt * 4);
+        if (keys.ArrowRight || keys.d) X = Math.min(HALF, X + dt * 4);
+        // 대형 유지: 한 명씩 자기 자리로, 길 밖으로는 못 나간다(다리 낭떠러지는 아래에서 따로 판정)
+        units.forEach((u, i) => {
+          const tg = target(i), fz = fight ? 0.6 : 0;
+          u.x += (tg.x - u.x) * Math.min(1, dt * 8); u.z += (tg.z + fz - u.z) * Math.min(1, dt * 8);
+          const wx = X + u.x; if (Math.abs(wx) > HALF - 0.1) u.x = Math.sign(wx) * (HALF - 0.1) - X;
+        });
+        for (let i = falls.length - 1; i >= 0; i--) if ((falls[i].t += dt) > 1) falls.splice(i, 1);
+        for (let i = sparks.length - 1; i >= 0; i--) { const s = sparks[i]; s.t += dt; s.x += s.vx * dt; s.y += s.vy * dt; s.vy += 800 * dt; if (s.t > 0.7) sparks.splice(i, 1); }
+        for (let i = pops.length - 1; i >= 0; i--) if ((pops[i].t += dt) > 1.1) pops.splice(i, 1);
+        if (phase === 'ready' || phase === 'end') return;
+
+        if (phase === 'fight') {
+          // 1:1로 한 명씩 사라진다. 사람이 많을수록 빨리
+          const s = fight, rate = Math.max(12, (crowd + s.left) * 0.9);
+          s.acc = (s.acc || 0) + rate * dt;
+          while (s.acc >= 1 && s.left > 0 && crowd > 0) {
+            s.acc -= 1; s.left--;
+            if (s.units.length > Math.ceil(s.left * Math.min(1, 60 / s.n))) s.units.pop();
+            crowd--;
+            if (units.length > crowd) { const u = units.pop(); if (u) falls.push({ x: X + u.x, z: Z + u.z, t: 0, how: 'fight' }); }
+            if (Math.random() < 0.5) { const q = proj(X + (Math.random() - .5) * 1.5, s.z - 0.6); burst(q.x, q.y - 20, '#ffd84a', 2); }
+          }
+          if (crowd <= 0) { end(false, '걱정 구름 군단이 더 많았어요. 파란 문으로 더 모아 봐요!'); return; }
+          if (s.left <= 0) { phase = 'run'; fight = null; pop('군단을 물리쳤다!', true, true); }
+          return;
+        }
+        if (phase === 'climb') {
+          Z += dt * 4.5;
+          const k = Math.floor(Z - FIN);
+          if (k > step && k < STEPS) {
+            const need = stepNeed(k);
+            if (crowd < need) { Z = FIN + step + 0.99; end(true, step >= 0 ? `자립 계단 ${step + 1}칸까지 올랐어요!` : '계단 앞까지 왔어요!'); return; }
+            step = k;
+            for (let j = 0; j < need; j++) { const u = units.pop(); stood.push({ k, x: X + (u ? u.x : 0) * 0.6, b: Math.random() * 6 }); }
+            crowd -= need; sync();
+            if (crowd <= 0) { end(true, `자립 계단 ${step + 1}칸! 다 같이 올라갔어요!`); return; }
+          }
+          if (k >= STEPS) end(true, '자립 계단 꼭대기까지! 대단해요!');
+          return;
+        }
+        // 달리기
+        const prevZ = Z;
+        Z += speed * dt;
+        for (const s of segs) {
+          if (s.type === 'gate' && !s.done && prevZ < s.z && Z >= s.z) {
+            s.done = true;
+            const op = s.ops[X < 0 ? 0 : 1], o = opText(op), before = crowd;
+            crowd = applyOp(crowd, op); sync();
+            pop(`${o.big} ${o.name}`, o.good, true);
+            if (crowd < before) shake = 0.2;
+            if (crowd <= 0) { end(false, '응원단이 모두 흩어졌어요. 파란 문을 노려 봐요!'); return; }
+          } else if (s.type === 'enemy' && !s.done && Z + 1.2 >= s.z - SP * Math.sqrt(s.n)) {
+            s.done = true; fight = s; phase = 'fight'; pop('부딪혀라!', false, true); return;
+          } else if ((s.type === 'debt' || s.type === 'bar') && Math.abs(s.z - Z) < 3) {
+            for (let i = units.length - 1; i >= 0; i--) {
+              const u = units[i]; if (!u) continue; // 앞에서 여러 명이 한꺼번에 빠졌을 수 있다
+              const ux = X + u.x, uz = Z + u.z;
+              let hit = false;
+              if (s.type === 'debt') { const ox = Math.sin(t * s.w + s.ph) * (HALF - 0.4); hit = Math.hypot(ux - ox, uz - s.z) < s.r; }
+              else {
+                const ang = t * s.w + s.ph, dx = Math.cos(ang) * s.len, dz = Math.sin(ang) * s.len * 0.6;
+                const px = ux - s.cx, pz = uz - s.z, l2 = dx * dx + dz * dz;
+                const k = Math.max(-1, Math.min(1, (px * dx + pz * dz) / l2));
+                hit = Math.hypot(px - dx * k, pz - dz * k) < 0.13;
+              }
+              if (hit) { killUnit(i, s.type); shake = 0.15; }
             }
-          });
-          bossZ += speed * dt;
-          if (bossZ >= PZ - 0.12) { phase = 'fight'; }
-        } else if (phase === 'fight') {
-          fight += dt;
-          // 둘이 동시에 줄어든다
-          const rate = Math.max(8, (crowd + enemy) / 1.6);
-          const d = Math.min(enemy, crowd, rate * dt);
-          crowd -= d; enemy -= d;
-          if (enemy <= 0.001 || crowd <= 0.001) {
-            phase = 'end'; over = true;
-            const win = enemy <= 0.001 && crowd > 0.001;
-            const left = Math.ceil(crowd), ratio = left / boss;
-            const stars = !win ? 0 : ratio >= 0.5 ? 3 : ratio >= 0.2 ? 2 : 1;
-            setTimeout(() => showResult(win, stars, win ? `걱정 군단을 이겼어요! 남은 응원단 ${left}명` : '걱정 군단이 더 많았어요. 더 많이 모아봐요!'), 600);
+            if (crowd <= 0) { end(false, s.type === 'debt' ? '빚 코인에 다 휩쓸렸어요. 굴러오는 걸 보고 피해요!' : '스미싱 막대에 다 걸렸어요. 막대 반대쪽으로 비켜 가요!'); return; }
+          } else if (s.type === 'bridge' && Z + 1 > s.z && Z - 1 < s.z + s.len) {
+            for (let i = units.length - 1; i >= 0; i--) {
+              const u = units[i]; if (!u) continue;
+              const uz = Z + u.z;
+              if (uz > s.z && uz < s.z + s.len && Math.abs(X + u.x - s.cx) > s.half) killUnit(i, 'fall');
+            }
+            if (crowd <= 0) { end(false, '다리 밖으로 다 떨어졌어요. 다리 가운데로 모아요!'); return; }
           }
         }
+        if (Z >= FIN) { phase = 'climb'; pop('자립 계단!', true, true); }
       },
       draw() {
+        ctx.save();
+        if (shake > 0) ctx.translate((Math.random() - .5) * 10, (Math.random() - .5) * 8);
         // 하늘·바다
-        const sky = ctx.createLinearGradient(0, 0, 0, 140);
-        sky.addColorStop(0, '#8fd3ff'); sky.addColorStop(1, '#dff3ff');
-        ctx.fillStyle = sky; ctx.fillRect(0, 0, W, 140);
-        const sea = ctx.createLinearGradient(0, 120, 0, H);
-        sea.addColorStop(0, '#5bb6e8'); sea.addColorStop(1, '#2a7fbf');
-        ctx.fillStyle = sea; ctx.fillRect(0, 120, W, H - 120);
-        // 도로
-        ctx.fillStyle = '#9aa3ad';
-        ctx.beginPath(); ctx.moveTo(xOf(-1.35, 0), yOf(0)); ctx.lineTo(xOf(1.35, 0), yOf(0)); ctx.lineTo(xOf(1.35, 1.1), H); ctx.lineTo(xOf(-1.35, 1.1), H); ctx.fill();
-        // 차선 (움직이는 점선)
-        ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 4;
-        for (let i = 0; i < 12; i++) {
-          const z = ((i / 12) + t * speed) % 1, z2 = z + 0.03;
-          ctx.beginPath(); ctx.moveTo(W / 2, yOf(z)); ctx.lineTo(W / 2, yOf(z2)); ctx.stroke();
+        const sky = ctx.createLinearGradient(0, 0, 0, HOR + 10);
+        sky.addColorStop(0, '#7cc8ff'); sky.addColorStop(1, '#d9f1ff');
+        ctx.fillStyle = sky; ctx.fillRect(-20, -20, W + 40, HOR + 30);
+        const sea = ctx.createLinearGradient(0, HOR, 0, H);
+        sea.addColorStop(0, '#5bb6e8'); sea.addColorStop(1, '#2275b5');
+        ctx.fillStyle = sea; ctx.fillRect(-20, HOR, W + 40, H);
+        // 길 (다리 구간은 물 위 판자만)
+        const far = Z + 70;
+        const quad = (x1, z1, x2, z2, color, y = 0) => {
+          const a = proj(x1, z1, y), b = proj(x2, z1, y), c = proj(x2, z2, y), d = proj(x1, z2, y);
+          ctx.fillStyle = color; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.lineTo(c.x, c.y); ctx.lineTo(d.x, d.y); ctx.fill();
+        };
+        const bridges = segs.filter(s => s.type === 'bridge');
+        let zc = camZ() + 0.6;
+        while (zc < Math.min(far, FIN)) {
+          const br = bridges.find(b => zc >= b.z && zc < b.z + b.len);
+          const nz = Math.min(far, FIN, br ? br.z + br.len : (bridges.find(b => b.z > zc) || { z: 1e9 }).z);
+          if (br) quad(br.cx - br.half, zc, br.cx + br.half, nz, '#b07a43');
+          else { quad(-HALF, zc, HALF, nz, '#a8b0ba'); quad(-HALF - 0.15, zc, -HALF, nz, '#e25b4a'); quad(HALF, zc, HALF + 0.15, nz, '#e25b4a'); }
+          zc = nz;
         }
-        // 난간
-        ctx.strokeStyle = '#d9534f'; ctx.lineWidth = 6;
-        [-1.35, 1.35].forEach(s => { ctx.beginPath(); ctx.moveTo(xOf(s, 0), yOf(0)); ctx.lineTo(xOf(s, 1.1), H); ctx.stroke(); });
-        // 보스 무리
-        const items = rows.filter(r => r.z > -0.05 && r.z < 1.15 && !(r.done && r.z > PZ + 0.1));
-        if (bossZ > -0.1 && enemy > 0) items.push({ type: 'boss', z: Math.min(bossZ, PZ - 0.12) });
-        items.sort((a, b) => a.z - b.z).forEach(r => {
-          const y = yOf(r.z), s = 0.25 + 0.75 * Math.max(0, r.z);
-          if (r.type === 'gate' && !r.done) {
-            r.ops.forEach((op, side) => {
-              const o = opText(op);
-              const x0 = side === 0 ? xOf(-1.3, r.z) : xOf(0.03, r.z), x1 = side === 0 ? xOf(-0.03, r.z) : xOf(1.3, r.z);
-              const h = 90 * s;
-              ctx.fillStyle = o.good ? 'rgba(60,140,255,.72)' : 'rgba(230,60,60,.72)';
-              ctx.fillRect(x0, y - h, x1 - x0, h);
-              ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = 3 * s; ctx.strokeRect(x0, y - h, x1 - x0, h);
-              label(o.big, (x0 + x1) / 2, y - h * 0.6, 46 * s);
-              label(o.name, (x0 + x1) / 2, y - h * 0.2, 20 * s);
-            });
-          } else if (r.type === 'mob' && !r.done) {
-            for (let k = 0; k < Math.min(r.k, 8); k++) {
-              const xx = xOf(-0.9 + (k % 4) * 0.6, r.z), yy = y - (k >= 4 ? 18 * s : 0);
-              if (IMG.mon.complete) ctx.drawImage(IMG.mon, xx - 22 * s, yy - 44 * s, 44 * s, 44 * s);
+        for (let i = 0; i < 30; i++) {
+          const z1 = Math.ceil(camZ() / 2.4) * 2.4 + i * 2.4;
+          if (bridges.some(b => z1 + 1 >= b.z && z1 < b.z + b.len) || z1 > FIN || z1 > far) continue;
+          quad(-0.04, z1, 0.04, z1 + 1, 'rgba(255,255,255,.75)');
+        }
+        // 결승: 자립 계단
+        for (let k = STEPS - 1; k >= 0; k--) {
+          const z1 = FIN + k, y = (k + 1) * 0.32;
+          if (z1 > far) continue;
+          const a = proj(-HALF, z1, y), b = proj(HALF, z1, y), a2 = proj(-HALF, z1, y - 0.32), b2 = proj(HALF, z1, y - 0.32);
+          ctx.fillStyle = `hsl(${(k * 18) % 360} 70% 52%)`; ctx.beginPath(); ctx.moveTo(a2.x, a2.y); ctx.lineTo(b2.x, b2.y); ctx.lineTo(b.x, b.y); ctx.lineTo(a.x, a.y); ctx.fill();
+          quad(-HALF, z1, HALF, z1 + 1, `hsl(${(k * 18) % 360} 70% 68%)`, y);
+          const m = proj(0, z1, y - 0.16);
+          label(`×${(1 + k * 0.1).toFixed(1)}`, m.x, m.y, Math.max(10, 26 * m.s), '#fff', 'rgba(0,0,0,.4)');
+        }
+        // 물체들 (먼 것부터)
+        const draws = [];
+        segs.forEach(s => { if (s.z > camZ() + 1 && s.z < far && !(s.type === 'gate' && s.done) && !(s.type === 'enemy' && s.left <= 0)) draws.push({ z: s.z, s }); });
+        stood.forEach(u => draws.push({ z: FIN + u.k + 0.5, stood: u }));
+        units.forEach(u => draws.push({ z: Z + u.z, u }));
+        falls.forEach(f => draws.push({ z: f.z, f }));
+        draws.sort((a, b) => b.z - a.z);
+        const ci = opts.charImg, climbY = (phase === 'climb' || phase === 'end') && step >= 0 ? (step + 1) * 0.32 : 0;
+        for (const d of draws) {
+          if (d.s) {
+            const s = d.s;
+            if (s.type === 'gate') {
+              s.ops.forEach((op, sd) => {
+                const o = opText(op), x1 = sd === 0 ? -HALF : 0.06, x2 = sd === 0 ? -0.06 : HALF;
+                const a = proj(x1, s.z, 1.5), b = proj(x2, s.z, 1.5), c = proj(x2, s.z);
+                ctx.fillStyle = o.good ? 'rgba(50,140,255,.55)' : 'rgba(235,60,60,.55)';
+                ctx.fillRect(a.x, a.y, b.x - a.x, c.y - a.y);
+                ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineWidth = Math.max(1, 4 * a.s); ctx.strokeRect(a.x, a.y, b.x - a.x, c.y - a.y);
+                label(o.big, (a.x + b.x) / 2, a.y + (c.y - a.y) * 0.42, Math.max(10, 70 * a.s));
+                label(o.name, (a.x + b.x) / 2, a.y + (c.y - a.y) * 0.8, Math.max(8, 26 * a.s));
+              });
+            } else if (s.type === 'enemy') {
+              s.units.slice().sort((a, b) => b.z - a.z).forEach((u, i) => {
+                const q = proj(u.x, s.z + u.z), sz = 46 * q.s * 1.1;
+                if (IMG.worry.complete) ctx.drawImage(IMG.worry, q.x - sz / 2, q.y - sz - Math.abs(Math.sin(t * 9 + i)) * 3 * q.s, sz, sz);
+              });
+              const q = proj(0, s.z, 1.3);
+              label(`${s.left}`, q.x, q.y, Math.max(12, 44 * q.s), '#ffd0d0', '#7a0000');
+            } else if (s.type === 'debt') {
+              const ox = Math.sin(t * s.w + s.ph) * (HALF - 0.4), q = proj(ox, s.z), sz = 2 * s.r * 100 * q.s * 1.3;
+              ctx.fillStyle = 'rgba(0,0,0,.2)'; ctx.beginPath(); ctx.ellipse(q.x, q.y, sz * 0.5, sz * 0.12, 0, 0, 7); ctx.fill();
+              ctx.save(); ctx.translate(q.x, q.y - sz / 2); ctx.rotate(Math.cos(t * s.w + s.ph) * 2.5);
+              if (IMG.debt.complete) ctx.drawImage(IMG.debt, -sz / 2, -sz / 2, sz, sz);
+              ctx.restore();
+            } else if (s.type === 'bar') {
+              const ang = t * s.w + s.ph, dx = Math.cos(ang) * s.len, dz = Math.sin(ang) * s.len * 0.6;
+              const a = proj(s.cx - dx, s.z - dz, 0.35), b = proj(s.cx + dx, s.z + dz, 0.35), c = proj(s.cx, s.z, 0.35), base = proj(s.cx, s.z);
+              ctx.strokeStyle = '#555'; ctx.lineWidth = Math.max(2, 10 * c.s); ctx.beginPath(); ctx.moveTo(base.x, base.y); ctx.lineTo(c.x, c.y); ctx.stroke();
+              ctx.lineCap = 'round'; ctx.strokeStyle = '#ff4d6d'; ctx.lineWidth = Math.max(3, 22 * c.s); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+              ctx.strokeStyle = '#fff'; ctx.setLineDash([10 * c.s, 10 * c.s]); ctx.lineWidth = Math.max(1, 8 * c.s); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); ctx.setLineDash([]);
+              const sz = 70 * c.s; if (IMG.scam.complete) ctx.drawImage(IMG.scam, c.x - sz / 2, c.y - sz * 0.9, sz, sz);
             }
-            label(`${r.k}`, W / 2, y - 60 * s, 30 * s, '#ffd0d0');
-          } else if (r.type === 'boss') {
-            const bs = 150 * s;
-            if (IMG.boss.complete) ctx.drawImage(IMG.boss, W / 2 - bs / 2, y - bs, bs, bs);
-            for (let k = 0; k < 6; k++) if (IMG.mon.complete) ctx.drawImage(IMG.mon, xOf(-1.1 + k * 0.44, r.z) - 20 * s, y - 40 * s, 40 * s, 40 * s);
-            label(`걱정 군단 ${Math.ceil(enemy)}`, W / 2, y - bs - 16 * s, 34 * s, '#ffd0d0', '#5a0000');
+          } else {
+            let x, zz, y = 0, alpha = 1, bob = 0, tilt = 0;
+            if (d.u) { x = X + d.u.x; zz = Z + d.u.z; y = climbY; bob = phase === 'run' || phase === 'climb' ? Math.abs(Math.sin(t * 14 + d.u.b)) * 0.06 : 0; }
+            else if (d.stood) { x = d.stood.x; zz = FIN + d.stood.k + 0.5; y = (d.stood.k + 1) * 0.32; bob = Math.abs(Math.sin(t * 6 + d.stood.b)) * 0.03; }
+            else { x = d.f.x; zz = d.f.z; alpha = Math.max(0, 1 - d.f.t); y = d.f.how === 'fall' ? -d.f.t * 3 : d.f.t * 0.8; tilt = d.f.t * 6; }
+            const q = proj(x, zz, y + bob), hh = 42 * q.s * 1.2;
+            if (ci && ci.complete) {
+              ctx.save(); ctx.globalAlpha = alpha; ctx.translate(q.x, q.y); if (tilt) ctx.rotate(tilt);
+              ctx.drawImage(ci, -hh * 0.36, -hh, hh * 0.72, hh); ctx.restore();
+            }
           }
-        });
-        // 우리 응원단
-        const cx = xOf(px, PZ), cy = yOf(PZ);
-        const n = Math.min(30, Math.ceil(crowd));
-        const ci = opts.charImg;
-        for (let k = n - 1; k >= 0; k--) {
-          const ring = Math.floor(Math.sqrt(k)), ang = k * 2.4;
-          const ox = Math.cos(ang) * ring * 14, oy = Math.sin(ang) * ring * 6 - (k === 0 ? 0 : 4);
-          const hh = k === 0 ? 70 : 40;
-          const bob = Math.abs(Math.sin(t * 12 + k)) * 3;
-          if (ci && ci.complete) ctx.drawImage(ci, cx + ox - hh * 0.35, cy + oy - hh - bob, hh * 0.7, hh);
         }
-        if (crowd > 0) label(`${Math.ceil(crowd)}명`, cx, cy - 92, 30, '#fff', '#1a4f8a');
-        pops.forEach(p => { ctx.globalAlpha = 1 - p.t; label(p.text, p.x, p.y - p.t * 50, 30, p.good ? '#bfe3ff' : '#ffc4c4'); ctx.globalAlpha = 1; });
-        if (phase === 'fight') label('⚔️', W / 2, yOf(PZ - 0.06) - 40 + Math.sin(t * 20) * 4, 48);
+        if (crowd > 0 && phase !== 'end') { const q = proj(X, Z + 0.2, 1.05 + climbY); label(`${crowd}`, q.x, q.y, 34, '#fff', '#1a4f8a'); }
+        sparks.forEach(s => { ctx.globalAlpha = 1 - s.t / 0.7; ctx.fillStyle = s.color; ctx.fillRect(s.x - 3, s.y - 3, 6, 6); });
+        ctx.globalAlpha = 1;
+        pops.forEach(p => { ctx.globalAlpha = Math.max(0, 1 - p.t); label(p.text, W / 2, 170 - p.t * 40, p.big ? 40 : 30, p.good ? '#bfe3ff' : '#ffc4c4', p.good ? '#1a4f8a' : '#7a0000'); });
+        ctx.globalAlpha = 1;
+        ctx.restore();
+        // 진행 막대
+        const prog = Math.max(0, Math.min(1, Z / FIN));
+        roundRect(W / 2 - 160, 58, 320, 12, 6); ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fill();
+        roundRect(W / 2 - 160, 58, 320 * prog, 12, 6); ctx.fillStyle = '#ffd84a'; ctx.fill();
+        label('🏁', W / 2 + 174, 64, 20);
+        if (phase === 'ready') label(IS_TOUCH ? '👆 화면을 좌우로 끌면 출발!' : '← → 키를 누르면 출발!', W / 2, H / 2 + 60, 34 + Math.sin(t * 5) * 2, '#fff', '#1a4f8a');
       },
     };
   }
 
-  window.MiniGames = { open, current: () => game, _gate: (lv) => gateGame(lv), applyOp };
+  window.MiniGames = { open, current: () => game, applyOp };
 })();

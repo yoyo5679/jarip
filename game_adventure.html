@@ -168,6 +168,28 @@
     }
     .save-note small { display: block; margin-top: 2px; color: #ffd98a; font-size: .88em; }
     .confirm-panel { width: min(92%, 420px); text-align: center; }
+    /* 게임 안 한글 키보드 (폰) */
+    .kbd {
+      position: absolute; left: 0; right: 0; bottom: 0; z-index: 5; display: none;
+      background: rgba(40, 28, 18, .94); border-top: 3px solid var(--panel-edge); padding: 6px 8px 8px;
+    }
+    .kbd.on { display: block; }
+    .kbd-top { display: flex; align-items: center; gap: 8px; color: #fff; padding: 2px 6px 6px; font-size: clamp(15px, 2.4vw, 22px); }
+    .kbd-label { font-size: .7em; color: #ffd98a; }
+    .kbd-top b { font-weight: normal; }
+    .kbd-caret { width: 2px; height: 1.1em; background: #ffd98a; animation: caret 1s steps(1) infinite; }
+    @keyframes caret { 50% { opacity: 0; } }
+    .kbd-top small { margin-left: auto; font-size: .6em; color: #c9b79c; }
+    .kbd-row { display: flex; gap: 4px; justify-content: center; margin-top: 4px; }
+    .kbd-row button {
+      flex: 1 1 0; max-width: 64px; min-height: clamp(30px, 7.2vw, 46px); padding: 0; border-radius: 8px; cursor: pointer;
+      border: 1px solid rgba(255,255,255,.25); background: #fffaf0; color: #5a3a14; font-family: inherit; font-size: clamp(15px, 2.6vw, 22px);
+    }
+    .kbd-row button.fn { background: #e8d2ad; font-size: clamp(12px, 2vw, 16px); }
+    .kbd-row button.wide { flex-grow: 2.2; max-width: 150px; }
+    .kbd-row button.ok { background: var(--accent); color: #fff; }
+    .kbd-row button.on { background: #ffd98a; }
+    .kbd-row button:active { transform: translateY(1px); filter: brightness(.92); }
     /* 가로 폰처럼 낮은 화면: 제목 화면을 한 화면에 */
     @media (max-height: 520px), (orientation: portrait) and (pointer: coarse) {
       #scrTitle .logo { font-size: 34px; }
@@ -508,6 +530,11 @@
             <button class="btn" id="startBtn">모험 시작!</button>
           </div>
         </div>
+        <!-- 폰: 시스템 키보드는 화면 회전을 못 따라오니 게임 안에 그린 한글 키보드로 이름을 쓴다 -->
+        <div class="kbd" id="kbd">
+          <div class="kbd-top"><span class="kbd-label">이름</span><b id="kbdText"></b><span class="kbd-caret"></span><small id="kbdCount"></small></div>
+          <div class="kbd-keys" id="kbdKeys"></div>
+        </div>
       </div>
 
       <!-- Stage select (미니게임) -->
@@ -515,10 +542,10 @@
         <div class="panel shop-panel stage-panel">
           <button class="panel-x" id="stageX" aria-label="닫기">✕</button>
           <h2>🕹️ 희망 오락실</h2>
-          <p class="lead">한 판에 <b>🪙 10</b> · 별을 새로 딸 때마다 코인을 돌려받아요 · 가진 코인 🪙 <b id="stageCoins">0</b> · <b id="stageStars"></b></p>
+          <p class="lead">한 판에 <b>🪙 10</b> · 별을 새로 따거나 자립 계단을 높이 오르면 코인을 돌려받아요 · 가진 코인 🪙 <b id="stageCoins">0</b> · <b id="stageStars"></b></p>
           <div class="stage-tabs">
-            <button class="btn" data-st="gate">🏃 게이트 달리기</button>
-            <button class="btn ghost" data-st="pin">🧷 핀 뽑기 퍼즐</button>
+            <button class="btn" data-st="gate">🏃 응원단 달리기</button>
+            <button class="btn ghost" data-st="pin">🧷 핀 뽑기</button>
           </div>
           <div class="stages shop-list" id="stageList"></div>
           <div class="btn-row"><button class="btn" id="stageClose">닫기</button></div>
@@ -571,8 +598,7 @@
     </div>
   </div>
 
-<script src="assets/adventure/pin_logic.js"></script>
-<script src="assets/adventure/pin_levels.js"></script>
+<script src="assets/adventure/pin_physics.js"></script>
 <script src="assets/adventure/minigames.js"></script>
 <script>
 (() => {
@@ -1837,8 +1863,8 @@
         mode = prevMode === 'mini' ? 'play' : prevMode;
         $('touch').classList.toggle('on', isTouch);
         if (res.win) {
-          const coins = stageReward(kind, lv, res.stars);
-          if (coins) { S.coins += coins; toast(`⭐ ${res.stars}개! 희망코인 +${coins}`, 3000); }
+          const coins = stageReward(kind, lv, res.stars) + (res.bonus || 0); // 별 보상 + 자립 계단 보너스
+          if (coins) { S.coins += coins; toast(`⭐ ${res.stars}개! 희망코인 +${coins}${res.bonus ? ` (계단 보너스 ${res.bonus} 포함)` : ''}`, 3000); }
           updateHud(); persist();
           onPass && onPass(res);
         } else if (res.skip) { onPass && onPass(res); }
@@ -2557,6 +2583,92 @@
   }
   $('nameInput').addEventListener('input', () => $('nameInput').dataset.touched = '1');
 
+  /* ---------- 게임 안 한글 키보드 (폰 전용) ----------
+     자모를 쌓아 두고 두벌식 규칙으로 글자를 조립한다. 지우기는 자모 하나씩 */
+  const HG = (() => {
+    const CHO = 'ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ', JUNG = 'ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ';
+    const JONG = ['', 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ', 'ㄻ', 'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+    const V2 = { 'ㅗㅏ': 'ㅘ', 'ㅗㅐ': 'ㅙ', 'ㅗㅣ': 'ㅚ', 'ㅜㅓ': 'ㅝ', 'ㅜㅔ': 'ㅞ', 'ㅜㅣ': 'ㅟ', 'ㅡㅣ': 'ㅢ' };
+    const T2 = { 'ㄱㅅ': 'ㄳ', 'ㄴㅈ': 'ㄵ', 'ㄴㅎ': 'ㄶ', 'ㄹㄱ': 'ㄺ', 'ㄹㅁ': 'ㄻ', 'ㄹㅂ': 'ㄼ', 'ㄹㅅ': 'ㄽ', 'ㄹㅌ': 'ㄾ', 'ㄹㅍ': 'ㄿ', 'ㄹㅎ': 'ㅀ', 'ㅂㅅ': 'ㅄ' };
+    const isC = (c) => CHO.includes(c), isV = (c) => JUNG.includes(c);
+    function assemble(js) {
+      let out = '', i = 0;
+      const vAt = (k) => k < js.length && isV(js[k]);
+      while (i < js.length) {
+        const c = js[i];
+        if (isC(c) && vAt(i + 1)) {
+          let v = js[i + 1]; i += 2;
+          if (vAt(i) && V2[v + js[i]]) { v = V2[v + js[i]]; i++; }
+          let t = '';
+          if (i < js.length && JONG.includes(js[i]) && !vAt(i + 1)) {
+            t = js[i]; i++;
+            if (i < js.length && T2[t + js[i]] && !vAt(i + 1)) { t = T2[t + js[i]]; i++; }
+          }
+          out += String.fromCharCode(0xAC00 + (CHO.indexOf(c) * 21 + JUNG.indexOf(v)) * 28 + JONG.indexOf(t));
+        } else if (isV(c) && vAt(i + 1) && V2[c + js[i + 1]]) { out += V2[c + js[i + 1]]; i += 2; }
+        else { out += c; i++; }
+      }
+      return out;
+    }
+    // 이미 있는 이름(완성형)을 자모로 풀어서 이어 쓸 수 있게
+    const V2R = Object.fromEntries(Object.entries(V2).map(([k, v]) => [v, k]));
+    const T2R = Object.fromEntries(Object.entries(T2).map(([k, v]) => [v, k]));
+    function split(str) {
+      const js = [];
+      for (const ch of str) {
+        const code = ch.charCodeAt(0) - 0xAC00;
+        if (code < 0 || code > 11171) { js.push(...(V2R[ch] || ch)); continue; }
+        const t = code % 28, v = Math.floor(code / 28) % 21, c = Math.floor(code / 588);
+        js.push(CHO[c], ...(V2R[JUNG[v]] || JUNG[v]));
+        if (t) js.push(...(T2R[JONG[t]] || JONG[t]));
+      }
+      return js;
+    }
+    return { assemble, split };
+  })();
+  const KBD_ROWS = {
+    ko: [['ㅂ', 'ㅈ', 'ㄷ', 'ㄱ', 'ㅅ', 'ㅛ', 'ㅕ', 'ㅑ', 'ㅐ', 'ㅔ'], ['ㅁ', 'ㄴ', 'ㅇ', 'ㄹ', 'ㅎ', 'ㅗ', 'ㅓ', 'ㅏ', 'ㅣ'], ['ㅋ', 'ㅌ', 'ㅊ', 'ㅍ', 'ㅠ', 'ㅜ', 'ㅡ']],
+    koS: [['ㅃ', 'ㅉ', 'ㄸ', 'ㄲ', 'ㅆ', 'ㅛ', 'ㅕ', 'ㅑ', 'ㅒ', 'ㅖ'], ['ㅁ', 'ㄴ', 'ㅇ', 'ㄹ', 'ㅎ', 'ㅗ', 'ㅓ', 'ㅏ', 'ㅣ'], ['ㅋ', 'ㅌ', 'ㅊ', 'ㅍ', 'ㅠ', 'ㅜ', 'ㅡ']],
+    en: [['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'], ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'], ['z', 'x', 'c', 'v', 'b', 'n', 'm']],
+    enS: [['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'], ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'], ['Z', 'X', 'C', 'V', 'B', 'N', 'M']],
+  };
+  const kbd = { js: [], lang: 'ko', shift: false };
+  function kbdRender() {
+    const name = HG.assemble(kbd.js);
+    $('kbdText').textContent = name; $('kbdCount').textContent = `${name.length}/8`;
+    $('nameInput').value = name;
+    const rows = KBD_ROWS[kbd.lang + (kbd.shift ? 'S' : '')];
+    let html = rows.map((r, i) => `<div class="kbd-row">${i === 2 ? `<button class="fn${kbd.shift ? ' on' : ''}" data-key="shift">⇧</button>` : ''}${r.map(k => `<button data-key="${k}">${k}</button>`).join('')}${i === 2 ? '<button class="fn" data-key="back">⌫</button>' : ''}</div>`).join('');
+    html += `<div class="kbd-row"><button class="fn" data-key="lang">${kbd.lang === 'ko' ? 'ABC' : '한글'}</button><button class="fn wide" data-key="clear">전부 지우기</button><button class="ok wide" data-key="done">완료 ✔</button></div>`;
+    $('kbdKeys').innerHTML = html;
+  }
+  function kbdPress(k) {
+    if (k === 'shift') kbd.shift = !kbd.shift;
+    else if (k === 'lang') { kbd.lang = kbd.lang === 'ko' ? 'en' : 'ko'; kbd.shift = false; }
+    else if (k === 'back') kbd.js.pop();
+    else if (k === 'clear') kbd.js = [];
+    else if (k === 'done') { kbdClose(); return; }
+    else {
+      const next = kbd.js.concat(k);
+      if (HG.assemble(next).length > 8) return; // 최대 8글자
+      kbd.js = next; kbd.shift = false;
+      $('nameInput').dataset.touched = '1';
+    }
+    kbdRender();
+  }
+  function kbdOpen() { kbd.js = HG.split($('nameInput').value || ''); kbd.shift = false; kbdRender(); $('kbd').classList.add('on'); }
+  function kbdClose() { $('kbd').classList.remove('on'); }
+  // 누르는 순간 반응하게 pointerdown (손가락을 떼는 click보다 빠르다)
+  $('kbdKeys').addEventListener('pointerdown', e => {
+    const b = e.target.closest('button[data-key]'); if (!b) return;
+    e.preventDefault(); kbdPress(b.dataset.key);
+  });
+  if (IS_TOUCH) {
+    const inp = $('nameInput');
+    inp.readOnly = true; inp.setAttribute('inputmode', 'none'); // 시스템 키보드는 안 띄운다
+    inp.addEventListener('pointerdown', e => { e.preventDefault(); kbdOpen(); });
+  }
+
   function startGame() {
     screen(null);
     $('hud').classList.add('on');
@@ -2595,6 +2707,7 @@
   $('confirmNew').onclick = () => goSelect();
   $('contBtn').onclick = () => { S = loadSave(); if (S) startGame(); };
   $('startBtn').onclick = () => {
+    kbdClose();
     const name = ($('nameInput').value || '').trim().slice(0, 8) || CHARS.find(c => c.id === pickChar).name;
     S = newSave(pickChar, name);
     persist(); startGame();
