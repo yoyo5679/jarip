@@ -829,6 +829,7 @@ async function crawlGrouphome() {
 /* ---------- 수동 등록 지원사업 ----------
  * 크롤링 대상 사이트에 없지만 직접 넣고 싶은 사업. content는 원문 요약을 넣으면 Gemini가 친근한 말투로 다시 쓴다.
  * keepContent: true 면 Gemini를 거치지 않고 content를 그대로 쓴다 (날짜·장소처럼 틀리면 안 되는 정보가 많을 때)
+ * 같은 링크가 이미 data.js에 있으면 여기 적힌 내용으로 갱신한다 (여기서 뺀 tip 같은 항목은 지워진다)
  * 이미 data.js에 있으면 중복 검사로 건너뛰고, 마감일이 지나면 자동으로 빠진다.
  * 이것만 반영: node crawler.js --manual-only
  */
@@ -842,7 +843,6 @@ const MANUAL_POLICIES = [
     target: '19~39세 미취업 청년 (의무복무 제대군인은 복무기간에 따라 최대 3년 연장 / 양천구 거주자 등 우대)',
     content: "면접 보려는데 이력서 사진이 없다면? 📸 양천구 청년성장프로젝트에서 이력서 증명사진을 무료로 찍어줘. 남녀 정장도 빌릴 수 있고 사진 파일은 이메일로 받아. 19~39세 미취업 청년이면 신청할 수 있고 정원은 40명이야. 촬영은 10월 19일 이후 크림포토 목동점에서 하고 날짜는 개별로 안내해 줘!",
     keepContent: true,
-    tip: "10월 15일까지 구글폼으로 신청해요. 일찍 마감될 수 있으니 서두르세요! 신청하려면 카카오톡 채널 '양천청년일자리카페'를 친구 추가해야 하고 촬영 뒤 만족도 조사에도 참여해야 해요. 양천구에 살거나 일자리카페 취업특강을 들은 청년은 우대해요. 문의: 02-2062-2418",
     link: 'https://youth.seoul.go.kr/infoData/sprtInfo/view.do?sprtInfoId=74482&key=2309130006',
     date: '2026-10-01 ~ 2026-10-15',
     status: '모집중',
@@ -855,7 +855,7 @@ async function main() {
       if (process.argv.includes('--manual-only')) {
         // 크롤링 없이 수동 등록 목록만 반영
         console.log(`--- 수동 등록 사업만 반영 (${MANUAL_POLICIES.length}건) ---`);
-        return await mergeAndSave(MANUAL_POLICIES.map(p => ({ ...p })));
+        return await mergeAndSave(MANUAL_POLICIES.map(p => ({ ...p, manual: true })));
       }
       // 크롤링 사이트 통합 수집 (최신 정렬 시 높은 ID가 위로 오게 하기 위해 우선순위 역순으로 추가: 스마일센터 -> 부산 -> 경기 -> 서울 -> 자립정보ON)
       const jariponData = await crawlJaripon();
@@ -867,7 +867,7 @@ async function main() {
       const chungnamData = await crawlChungnam();
       const jeonbukData = await crawlJeonbuk();
       const grouphomeData = await crawlGrouphome();
-      const scraped = [...MANUAL_POLICIES.map(p => ({ ...p })), ...grouphomeData, ...smycData, ...jeonbukData, ...chungnamData, ...incheonData, ...busanData, ...ggData, ...seoulData, ...jariponData];
+      const scraped = [...MANUAL_POLICIES.map(p => ({ ...p, manual: true })), ...grouphomeData, ...smycData, ...jeonbukData, ...chungnamData, ...incheonData, ...busanData, ...ggData, ...seoulData, ...jariponData];
       return await mergeAndSave(scraped);
   } catch (error) {
     console.error('메인 실행 오류:', error);
@@ -1002,7 +1002,7 @@ async function mergeAndSave(scraped) {
     };
 
     // 중복 제거 및 신규 데이터 추가
-    let addedCount = 0;
+    let addedCount = 0, updatedCount = 0;
     let skippedDuplicates = 0;
     let nextId = Math.max(...existingPolicies.map(p => typeof p.id === 'number' ? p.id : 0), 600) + 1;
 
@@ -1027,9 +1027,19 @@ async function mergeAndSave(scraped) {
         if (isSimilarTitle(p, newItem)) return true;
         return false;
       });
-      if (isDuplicate) {
+      // 수동 등록 사업은 이미 있으면 내용을 갱신 (id는 그대로)
+      const sameManual = newItem.manual && existingPolicies.find(p => p.link === newItem.link);
+      if (sameManual) {
+        const { manual, keepContent, ...fields } = newItem;
+        for (const k of Object.keys(sameManual)) if (k !== 'id' && !(k in fields)) delete sameManual[k];
+        if (!keepContent) delete fields.content; // Gemini 재작성본은 다시 쓰지 않고 유지
+        Object.assign(sameManual, fields);
+        updatedCount++;
+        console.log(`  [수동 갱신] "${newItem.title.slice(0, 30)}..."`);
+      } else if (isDuplicate) {
         skippedDuplicates++;
       } else {
+        delete newItem.manual;
         newItem.id = nextId++;
         // Gemini로 content 친근하게 재작성
         if (!newItem.keepContent) console.log(`  [Gemini] "${newItem.title.slice(0, 30)}..." content 재작성 중...`);
@@ -1041,7 +1051,7 @@ async function mergeAndSave(scraped) {
       }
     }
 
-    if (addedCount === 0) {
+    if (addedCount === 0 && updatedCount === 0) {
       console.log('새로운 신규 공고가 없습니다. (모두 중복)');
       return;
     }
@@ -1127,7 +1137,7 @@ async function mergeAndSave(scraped) {
     const formattedPolicies = JSON.stringify(existingPolicies, null, 2);
     const updatedContent = dataContent.replace(policiesRegex, `window.initialPolicies = ${formattedPolicies};\n\nwindow.regionalCenters`);
     fs.writeFileSync(DATA_FILE, updatedContent, 'utf8');
-    console.log(`[data.js 업데이트 완료] 신규 지원사업 ${addedCount}건 추가, 버전 → ${newVersionStr}`);
+    console.log(`[data.js 업데이트 완료] 신규 지원사업 ${addedCount}건 추가, 수동 사업 ${updatedCount}건 갱신, 버전 → ${newVersionStr}`);
 
   } catch (error) {
     console.error('메인 실행 오류:', error);
