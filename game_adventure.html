@@ -247,6 +247,16 @@
     .rb.jump { background: rgba(80, 170, 255, .5); }
     .rb.skill { background: rgba(190, 110, 255, .5); width: clamp(40px, 11vh, 50px); }
     .rb.skill.cd { filter: grayscale(1); }
+    /* 쿨타임: 남은 만큼 어둡게 덮고(--cd = 남은 비율) 남은 초를 가운데에 */
+    .rb { position: relative; }
+    .rb.cd::before {
+      content: ''; position: absolute; inset: -2px; border-radius: 50%; pointer-events: none;
+      background: conic-gradient(transparent calc((1 - var(--cd, 0)) * 360deg), rgba(0,0,0,.6) 0);
+    }
+    .rb.cd::after {
+      content: attr(data-t); position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 1.6em; font-weight: bold; color: #fff; text-shadow: 0 0 3px #000, 0 0 3px #000; pointer-events: none;
+    }
     .rb.dash { display: none; background: rgba(90, 210, 200, .5); width: clamp(40px, 11vh, 50px); }
     .rb.dash.show { display: flex; }
     .rb.talk { display: none; background: rgba(255, 196, 0, .8); opacity: 1; animation: talkPulse 1.2s ease-in-out infinite; }
@@ -272,6 +282,15 @@
     .qs b { position: absolute; right: 3px; bottom: 1px; font-weight: normal; font-size: clamp(9px, 1.2vw, 12px); text-shadow: 0 1px 2px #000; }
     .qs small { position: absolute; left: 3px; top: 1px; font-size: 9px; color: #ffd98a; }
     .qs.empty { opacity: .45; }
+    .qs.sk { border-color: rgba(200, 160, 255, .7); }
+    .qs.cd::before {
+      content: ''; position: absolute; inset: 0; border-radius: 8px; pointer-events: none;
+      background: conic-gradient(transparent calc((1 - var(--cd, 0)) * 360deg), rgba(0,0,0,.65) 0);
+    }
+    .qs.cd::after {
+      content: attr(data-t); position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      font-size: .8em; font-weight: bold; text-shadow: 0 0 3px #000, 0 0 3px #000; pointer-events: none;
+    }
     .shop-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
     .shop-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
     .item {
@@ -354,6 +373,9 @@
         <div class="quick" id="quick">
           <button class="qs" data-pot="potS" title="작은 물약 (1)">🧪<b id="qPotS">0</b><small>1</small></button>
           <button class="qs" data-pot="potL" title="큰 물약 (2)">💖<b id="qPotL">0</b><small>2</small></button>
+          <!-- 기술 칸: 쿨타임 동안 어둡게 덮이고 남은 초가 보인다 -->
+          <button class="qs sk" id="qSkill" data-act="skill" title="스킬 (X)">✨<small>X</small></button>
+          <button class="qs sk" id="qDash" data-act="dash" title="대시 (V)" style="display:none">💨<small>V</small></button>
         </div>
         <div class="hud-btns">
           <button class="hbtn" id="stageBtn">🎮 미니게임</button>
@@ -507,7 +529,7 @@
     counselor: { img: 'npc_counselor', name: '마음쉼터 상담 선생님' },
     mentor:    { img: 'npc_mentor',    name: '자립 선배 태오' },
     shop:      { img: 'npc_shop',      name: '잡화점 하나 사장님' },
-    center:    { img: 'npc_center',    name: '지원센터 윤슬 선생님' },
+    center:    { img: 'npc_center',    name: '서아공' },
     teacher:   { img: 'npc_teacher',   name: '배움마켓 강 강사' },
     pharm:     { img: 'npc_pharm',     name: '동네 약국 약사님' },
     agency:    { img: 'npc_agency',    name: '전담기관 한결 상담원' },
@@ -523,23 +545,33 @@
     magnet: { em: '🧲', name: '코인 자석', price: 120, desc: '근처에 떨어진 코인과 아이템이 알아서 따라와요.' },
   };
 
-  // 아케이드 모드 편지 15통 — 맵 곳곳에 숨겨둔 수집품. {아}/{이가} 등은 이름 받침에 맞춰 바뀐다
+  // 숨겨진 편지 18통 — 맵마다 3통씩, 그 스테이지 주제에 맞는 내용. {아}/{이가} 등은 이름 받침에 맞춰 바뀐다
+  // ※ 저장 데이터가 순번(index)으로 기억하니, 앞 15통의 자리(map·x·y)는 바꾸지 말고 새 편지는 뒤에 붙인다
   const LETTERS = [
-    { map: 'home',   x: 720,  y: 302, text: '{name아}, 네가 처음 그룹홈에 왔던 날이 아직도 선해. 그 작던 아이가 이렇게 멋지고 든든한 어른이 됐구나.', from: '원장님' },
-    { map: 'home',   x: 1100, y: 385, text: '서두르지 않아도 돼. 네 속도로 걸어도 충분히 멀리 갈 수 있어. 파이팅!', from: '담당 선생님' },
-    { map: 'home',   x: 1400, y: 300, text: '매일 밤 기도했어. 우리 {name이가} 따뜻한 곳에서 배불리 먹고 잘 자고 있기를. 보고 싶구나.', from: '원장님' },
-    { map: 'town',   x: 1100, y: 212, text: '모르는 걸 물어보러 온 네가 이미 대단한 거야. 배움에는 나이도 늦음도 없단다.', from: '배움마켓 강사' },
-    { map: 'town',   x: 1560, y: 385, text: '{name} 씨, 매달 20일은 국가가 {name} 씨를 기억하는 날이에요. 잊지 않을게요.', from: '행정복지센터 복지팀' },
-    { map: 'town',   x: 1950, y: 300, text: '오늘 처음으로 내 이름으로 된 통장을 열었다. 손이 떨렸다. 이게 내 돈이라니... 아직 실감이 안 난다.', from: '{name}의 일기' },
-    { map: 'bank',   x: 820,  y: 300, text: '꼬마 때 동전 모으러 오던 아이가 벌써 이렇게 컸네요. 앞으로도 좋은 일만 가득하길.', from: '○○은행 창구' },
-    { map: 'bank',   x: 1800, y: 215, text: '5천만원... 이 숫자의 무게는 돈이 아니라, 나를 믿어준 사람들의 마음이었다.', from: '{name}의 메모' },
-    { map: 'bank',   x: 2100, y: 380, text: '같이 걸어서 여기까지 왔다. 뒤돌아보면 우리가 걸어온 발자국이 얼마나 많은지 보여.', from: '동료 청년' },
-    { map: 'house',  x: 680,  y: 302, text: '좋은 집이야. 여기서 따뜻한 밥 해먹고, 편히 자렴. 축하한다, {name아}.', from: '행복부동산 아저씨' },
-    { map: 'house',  x: 1200, y: 120, text: '아프면 참지 말고 꼭 오렴. 건강이 제일이야.', from: '동네 약국 약사님' },
-    { map: 'house',  x: 1520, y: 300, text: '전국 어디로 이사 가든 우리가 찾아갈게. {name} 씨는 혼자가 아니에요.', from: '자립지원전담기관' },
-    { map: 'forest', x: 1030, y: 302, text: '울어도 괜찮아. 그건 약한 게 아니야. 마음껏 울고 나면, 조금 더 가벼워질 거야.', from: '상담사 선생님' },
-    { map: 'forest', x: 1650, y: 300, text: '{name아}, 이 길엔 늘 함께 걷는 우리가 있어. 서로 정보도 나누고, 앞으로도 쭉 같이 가자.', from: '자립 커뮤니티 동기' },
+    // 보금자리 언덕: 그룹홈을 떠나는 날, 보호기간 연장, 지원센터
+    { map: 'home',   x: 720,  y: 302, text: '{name아}, 네가 처음 그룹홈에 왔던 날이 아직도 선해. 그 작던 아이가 이렇게 든든하게 컸구나. 떠나도 여긴 언제나 네 집이야.', from: '원장님' },
+    { map: 'home',   x: 1100, y: 385, text: '아직 준비가 덜 된 것 같으면 만 24세까지 여기서 더 지내도 돼. 서두르지 말고 네 속도로 가자.', from: '담당 선생님' },
+    { map: 'home',   x: 1400, y: 300, text: '그룹홈을 나가도 연락 끊길 걱정은 하지 마. 나가기 6개월 전부터 그 뒤까지, 내가 쭉 옆에서 챙길게.', from: '서아공' },
+    // 주민센터 거리: 서류·신청, 자립수당, 배움마켓
+    { map: 'town',   x: 1100, y: 212, text: '모르는 걸 물어보러 온 것부터 이미 대단한 거야. 통장 만들기도 월세 계약도, 모르면 배우면 돼.', from: '배움마켓 강 강사' },
+    { map: 'town',   x: 1560, y: 385, text: '{name} 씨, 매달 20일은 자립수당 들어오는 날이에요. 신청 서류에서 막히는 칸이 있으면 언제든 들고 와요.', from: '주민센터 민지 주무관' },
+    { map: 'town',   x: 1950, y: 300, text: '오늘 주민센터에서 처음으로 내 이름으로 서류를 냈다. 떨렸는데, 생각보다 별거 아니었다. 나도 할 수 있네.', from: '{name}의 일기' },
+    // 씨앗은행 광장: 첫 통장, 저축, 디딤씨앗통장
+    { map: 'bank',   x: 820,  y: 300, text: '꼬마 때 저금통 들고 오던 아이가 벌써 이렇게 컸네요. 적은 돈이라도 꾸준히 넣으면 그게 씨앗이 돼요.', from: '씨앗은행 김 대리' },
+    { map: 'bank',   x: 1800, y: 215, text: '오늘 처음으로 내 이름으로 된 통장을 열었다. 손이 떨렸다. 이게 내 돈이라니... 아직 실감이 안 난다.', from: '{name}의 일기' },
+    { map: 'bank',   x: 2100, y: 380, text: '나도 처음엔 한 달에 5만원밖에 못 넣었어. 그런데 디딤씨앗통장에 매달 15만원씩 쌓이는 걸 보니까 처음으로 내일이 기다려지더라.', from: '먼저 자립한 선배' },
+    // 첫 집 골목: 내 집 마련, 건강, 전담기관
+    { map: 'house',  x: 680,  y: 302, text: '좋은 집이야. 여기서 따뜻한 밥 해 먹고 푹 자렴. 계약서는 꼭 잘 챙겨 두고! 축하한다, {name아}.', from: '집 상담사 오 선생님' },
+    { map: 'house',  x: 1200, y: 120, text: '혼자 살면 아파도 참게 되더라. 그러지 말고 꼭 오렴. 건강이 제일이야.', from: '동네 약국 약사님' },
+    { map: 'house',  x: 1520, y: 300, text: '전국 어디로 이사 가든 우리가 찾아갈게요. {name} 씨는 혼자가 아니에요.', from: '자립지원전담기관 한결 상담원' },
+    // 마음 숲: 마음 돌보기, 선배·동료, 마지막 응원
+    { map: 'forest', x: 1030, y: 302, text: '울어도 괜찮아요. 그건 약한 게 아니에요. 실컷 울고 나면 조금은 가벼워질 거예요.', from: '마음쉼터 상담 선생님' },
+    { map: 'forest', x: 1650, y: 300, text: '{name아}, 이 길엔 같이 걷는 우리가 있어. 정보도 나누고 힘들 땐 기대면서, 앞으로도 쭉 같이 가자.', from: '자립준비청년 커뮤니티 동기' },
     { map: 'forest', x: 2300, y: 480, text: '{name아}, 이 편지들은 네가 이 세상에서 사랑받고 있다는 증거야. 앞으로도 쭉, 우리가 응원할게.', from: '우리 모두' },
+    // 일터 거리: 첫 알바, 첫 월급, 일하는 사람의 권리
+    { map: 'work',   x: 500,  y: 392, text: '첫 출근이라 떨리죠? 실수해도 괜찮아요. 처음엔 다 그래요. 모르는 건 그냥 물어봐요.', from: '햇살카페 도윤 사장님' },
+    { map: 'work',   x: 1060, y: 212, text: '첫 월급날. 근로계약서랑 통장에 찍힌 숫자를 몇 번이나 다시 봤다. 내 손으로 번 돈이다!', from: '{name}의 일기' },
+    { map: 'work',   x: 1430, y: 390, text: '일하다 억울한 일이 생기면 혼자 삼키지 말아요. 1350도 있고, 우리 고용센터도 있어요.', from: '고용센터 서진 상담사' },
   ];
 
   // 상점: 물약은 인벤토리로, 가구는 '내 집' 정해진 자리에 놓인다 (x, 바닥 기준 y, 높이)
@@ -570,7 +602,7 @@
     worry:  { img: 'mob_worry',  name: '걱정 구름',     h: 56,  hp: 30,  dmg: 8,  exp: 12,  speed: 45, coin: [3, 8] },
     debt:   { img: 'mob_debt',   name: '빚 코인',       h: 56,  hp: 50,  dmg: 11, exp: 18,  speed: 58, coin: [6, 14] },
     lonely: { img: 'mob_lonely', name: '외로움 그림자', h: 60,  hp: 80,  dmg: 14, exp: 26,  speed: 40, coin: [8, 18] },
-    scam:   { img: 'mob_scam',   name: '스미싱 문자',   h: 58,  hp: 70,  dmg: 13, exp: 24,  speed: 64, coin: [8, 16] },
+    scam:   { img: 'mob_scam',   name: '스미싱 문자',   h: 58,  hp: 70,  dmg: 13, exp: 24,  speed: 115, coin: [8, 16], dart: true }, // 빠르고, 가끔 휙 달려든다
     boss:   { img: 'mob_boss',   name: '불안 대왕',     h: 170, hp: 750, dmg: 20, exp: 260, speed: 55, coin: [150, 200], boss: true },
   };
 
@@ -717,7 +749,7 @@
       npc: 'center', title: '원장님 반찬통 찾기', requires: 'q1',
       goal: { type: 'fetch', item: 'lunch', n: 1 }, goalLabel: '반찬통',
       intro: [
-        '안녕, {name}! 나는 <span class="hi">서울시 아동공동생활가정 지원센터</span>에서 왔어. 그룹홈을 나서는 친구들을 계속 챙기는 게 내 일이야.',
+        '안녕, {name}! 나는 <span class="hi">서아공</span>이야! <span class="hi">서울시 아동공동생활가정 지원센터</span>를 줄여서 서아공이라고 불러. 그룹홈을 나서는 친구들을 계속 챙기는 게 내 일이야.',
         '그런데 동생들이 장난으로 원장님이 싸 둔 🍱 <span class="hi">반찬통</span>을 언덕 꼭대기 발판에 숨겨놨대. 가져와 줄래?',
       ],
       active: '반찬통은 언덕 오른쪽 제일 높은 발판 위에 있어. 발판을 차례로 밟고 올라가 봐!',
@@ -854,7 +886,7 @@
         '(띵동) {name아}, 원장님이야! 반찬 좀 싸 왔어. 집 구경 좀 해도 될까?',
         '어머, 아직 좀 휑하네. 이왕이면 다 같이 <span class="hi">집들이</span> 하자! 잡화점에서 <span class="hi">가구 3개</span>만 채워볼래?',
       ],
-      active: '가구는 주민센터 거리 잡화점에서 살 수 있어. 코인이 모자라면 씨앗은행 저축도 써 봐!',
+      active: '가구는 잡화점에서 살 수 있어. 첫 집 골목에도 있으니까 바로 나가 봐! 코인이 모자라면 씨앗은행 저축도 써 봐!',
       ready: ['와, 이제 진짜 집 같다! 우리 {name이} 다 컸네.', '집들이 전에, 같이 지난 길을 돌아볼까?'],
       quizzes: [{
         q: '가계부를 펴 볼까? 서울 자립정착금 <span class="hi">2,000만원</span> + 자립수당 5년치(<span class="hi">50만원 × 60개월</span>)를 더하면?',
@@ -912,7 +944,7 @@
       // 사다리 1: 땅 → 발판(850~1050, y212) / 사다리 2: 그 발판 → 옥상(990~1380, y120)
       plats: [[360, 392, 200], [600, 302, 180], [850, 212, 200], [990, 120, 390], [1420, 300, 220], [1680, 390, 200]],
       ladders: [[890, 212, 480], [1020, 120, 212]],
-      npcs: [['house', 220], ['pharm', 1300], ['agency', 1640]],
+      npcs: [['house', 220], ['shop', 720], ['pharm', 1300], ['agency', 1640]],
       spawns: [['worry', -1, 500, 1850, 3], ['debt', 4, 0, 0, 1], ['lonely', 5, 0, 0, 1]],
       portals: [{ x: 60, to: 'bank', at: 1 }, { x: 1940, to: 'work', at: 0, need: 'q4' }, { x: 560, to: 'myhome', at: 0, need: 'q4' }],
       items: [{ item: 'key', icon: '🔑', x: 1300, y: 120, quest: 'q4' }],
@@ -931,7 +963,7 @@
       title: '일터 거리', area: '새싹 동네', bg: 'bg_work', w: 2400,
       plats: [[380, 392, 240], [680, 300, 220], [980, 212, 220], [1300, 390, 260], [1620, 300, 240], [1940, 215, 220]],
       ladders: [[1100, 212, 480]],
-      npcs: [['cafe', 260], ['jobcenter', 1480]],
+      npcs: [['cafe', 260], ['shop', 800], ['jobcenter', 1480]],
       spawns: [['scam', -1, 520, 2250, 4], ['debt', -1, 700, 2200, 2], ['scam', 1, 0, 0, 1], ['scam', 4, 0, 0, 1], ['debt', 3, 0, 0, 1]],
       // 이미 마음 숲 퀘스트(q5)를 시작한 기존 플레이어는 일터 퀘스트 없이도 지나갈 수 있다
       portals: [{ x: 60, to: 'house', at: 1 }, { x: 2340, to: 'forest', at: 0, need: 'qw1', skipIf: 'q5' }],
@@ -944,6 +976,10 @@
       start: 200,
     },
   };
+
+  // 퀘스트 id → 그 퀘스트 NPC가 서 있는 맵
+  const QUEST_MAP = {};
+  for (const id in QUESTS) for (const m in MAPS) if (MAPS[m].npcs.some(n => n[0] === QUESTS[id].npc)) QUEST_MAP[id] = m;
 
   /* ================= IMAGES ================= */
   const IMG = {};
@@ -1029,10 +1065,19 @@
 
   document.querySelectorAll('[data-k]').forEach(b => {
     const k = b.dataset.k;
-    const on = (e) => { e.preventDefault(); if (!keys[k]) pressed[k] = true; keys[k] = true; b.classList.add('on'); };
-    const off = (e) => { e.preventDefault(); keys[k] = false; b.classList.remove('on'); };
-    b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off);
-    b.addEventListener('pointercancel', off); b.addEventListener('pointerleave', off);
+    // 버튼마다 손가락을 따로 붙잡아서(포인터 캡처) 여러 버튼 동시 누르기 + 손가락이 살짝 밀려도 안 떨어지게
+    const held = new Set();
+    const on = (e) => {
+      e.preventDefault(); held.add(e.pointerId);
+      try { b.setPointerCapture(e.pointerId); } catch (_) {}
+      if (!keys[k]) pressed[k] = true; keys[k] = true; b.classList.add('on');
+    };
+    const off = (e) => {
+      if (!held.delete(e.pointerId)) return;
+      if (!held.size) { keys[k] = false; b.classList.remove('on'); }
+    };
+    b.addEventListener('pointerdown', on);
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => b.addEventListener(ev, off));
   });
   const isTouch = matchMedia('(pointer: coarse)').matches;
 
@@ -1141,8 +1186,7 @@
     P.skillCd = Math.max(0, P.skillCd - dt); P.atk = Math.max(0, P.atk - dt);
     P.dropT = Math.max(0, P.dropT - dt); P.lastHit += dt;
     if (P.lastHit > 4 && S.hp < maxHp()) { S.hp = Math.min(maxHp(), S.hp + dt * 4); updateHud(); }
-    const cd = P.skillCd > 0;
-    if (cd !== skillCdShown) { skillCdShown = cd; $('skillBtn').classList.toggle('cd', cd); }
+    updateCdButtons();
     const canTalk = !!(nearNpc() || map.portals.some(p => Math.abs(p.x - P.x) < 40 && P.y >= GROUND - 2));
     if (canTalk !== talkShown) { talkShown = canTalk; $('talkBtn').classList.toggle('show', canTalk); }
 
@@ -1192,11 +1236,15 @@
       burst(P.x, P.y, '#bfe9ff', 10);
     }
     if (pressed.dash && S.skills.dash && P.dashCd <= 0) {
-      P.dashT = 0.2; P.dashCd = 0.9;
+      P.dashT = 0.2; P.dashCd = DASH_CD;
       burst(P.x, P.y - 30, '#e0f4ff', 8);
     }
-    if (pressed.attack && P.atkCd <= 0) attack(false);
-    if (pressed.skill && P.skillCd <= 0) attack(true);
+    // 공격: 쿨다운 중에 누른 것도 0.25초 기억했다가 풀리자마자 나간다. 꾹 누르고 있으면 연속 공격
+    if (pressed.attack) P.atkBuf = 0.25;
+    if (pressed.skill) P.skillBuf = 0.25;
+    P.atkBuf = Math.max(0, (P.atkBuf || 0) - dt); P.skillBuf = Math.max(0, (P.skillBuf || 0) - dt);
+    if ((P.skillBuf > 0 || keys.skill) && P.skillCd <= 0 && P.atkCd <= 0) { P.skillBuf = 0; attack(true); }
+    else if ((P.atkBuf > 0 || keys.attack) && P.atkCd <= 0) { P.atkBuf = 0; attack(false); }
     if (pressed.potS) usePotion('potS');
     if (pressed.potL) usePotion('potL');
 
@@ -1247,12 +1295,12 @@
     });
   }
 
-  // 공격 간격 (예전 0.42초 → 0.24초). 공격 중에도 움직일 수 있다
-  const ATK_CD = 0.24, ATK_ANIM = 0.18;
+  // 공격 간격 (예전 0.42초 → 0.2초). 공격 중에도 움직일 수 있다
+  const ATK_CD = 0.2, ATK_ANIM = 0.16, SKILL_CD = 4, DASH_CD = 0.9;
   function attack(skill) {
     const dmgBase = 12 + S.lv * 4;
     if (skill) {
-      P.skillCd = 4; P.atk = ATK_ANIM; P.atkCd = 0.28;
+      P.skillCd = SKILL_CD; P.atk = ATK_ANIM; P.atkCd = 0.28;
       fx.push({ kind: 'wave', x: P.x, y: P.y - 34, face: P.face, t: 0, life: 0.5 });
       const hits = mobs.filter(m => m.alive && m.dead <= 0 && inFront(m, 270, 90)).slice(0, 6);
       hits.forEach(m => hitMob(m, Math.round(dmgBase * 1.6 * rnd(.9, 1.15))));
@@ -1281,10 +1329,10 @@
     gainExp(m.def.exp);
     const n = m.def.boss ? 8 : 1 + (Math.random() < .35 ? 1 : 0);
     for (let i = 0; i < n; i++) drops.push({ kind: 'coin', v: Math.round(rnd(...m.def.coin) / n), x: m.x, y: m.y, vx: rnd(-80, 80), vy: -rnd(250, 380), base: m.y, t: 0 });
-    // 퀘스트
+    // 퀘스트: 그 퀘스트를 주는 NPC가 있는 맵에서만 센다 (다른 스테이지에서 미리 서류가 떨어지지 않게)
     for (const id in QUESTS) {
       const q = QUESTS[id];
-      if (!countable(id)) continue;
+      if (!countable(id) || QUEST_MAP[id] !== mapId) continue;
       if (q.goal.type === 'kill' && q.goal.mob === m.type) progress(id, 1);
       if (q.goal.type === 'collect' && q.goal.from.includes(m.type) && Math.random() < q.goal.rate)
         drops.push({ kind: 'item', item: q.goal.item, icon: q.goal.icon || '📄', quest: id, x: m.x, y: m.y, vx: rnd(-40, 40), vy: -300, base: m.y, t: 0 });
@@ -1305,10 +1353,15 @@
       if (m.def.boss) bossAI(m, dt);
       else {
         // 가까우면 플레이어 쪽으로
-        const near = Math.abs(P.x - m.x) < 220 && Math.abs(P.y - m.y) < 30;
+        const near = Math.abs(P.x - m.x) < (m.def.dart ? 320 : 220) && Math.abs(P.y - m.y) < 30;
         if (near) m.dir = P.x > m.x ? 1 : -1;
         else if ((m.turnT -= dt) <= 0) { m.dir = Math.random() < .5 ? -1 : 1; m.turnT = 1.5 + Math.random() * 3; }
-        if (m.hit <= 0) m.x += m.dir * m.def.speed * dt;
+        let sp = m.def.speed;
+        if (m.def.dart) { // 스미싱 문자: 1~2초마다 0.3초 동안 2.5배로 휙 달려든다
+          if ((m.dartT = (m.dartT ?? rnd(1, 2)) - dt) <= 0) { m.dartT = rnd(1.2, 2.2); m.darting = 0.3; }
+          if (m.darting > 0) { m.darting -= dt; sp *= 2.5; }
+        }
+        if (m.hit <= 0) m.x += m.dir * sp * dt;
         if (m.x < m.x1) { m.x = m.x1; m.dir = 1; } if (m.x > m.x2) { m.x = m.x2; m.dir = -1; }
       }
       // 충돌 데미지
@@ -1334,7 +1387,25 @@
     m.x = clamp(m.x, m.x1, m.x2);
   }
 
-  let shake = 0, skillCdShown = false, talkShown = false;
+  let shake = 0, talkShown = false;
+
+  /* ---------- 쿨타임 표시 ---------- */
+  // 폰 버튼: 남은 비율만큼 어둡게 덮고(시계 방향으로 걷힌다) 남은 초를 숫자로
+  const cdBtnShown = {};
+  function setBtnCd(id, left, max) {
+    const t = left > 0 ? (left >= 1 ? Math.ceil(left) : left.toFixed(1)) : '';
+    const r = left > 0 ? (left / max).toFixed(2) : '0';
+    const key = t + '|' + r;
+    if (cdBtnShown[id] === key) return;
+    cdBtnShown[id] = key;
+    const b = $(id);
+    b.style.setProperty('--cd', r); b.dataset.t = t; b.classList.toggle('cd', left > 0);
+  }
+  function updateCdButtons() {
+    setBtnCd('skillBtn', P.skillCd, SKILL_CD); setBtnCd('qSkill', P.skillCd, SKILL_CD);
+    setBtnCd('dashBtn', P.dashCd || 0, DASH_CD); setBtnCd('qDash', P.dashCd || 0, DASH_CD);
+  }
+
 
   // NPC를 직접 터치/클릭해도 대화 (가까이 있을 때)
   function tapNpcAt(clientX, clientY) {
@@ -1409,7 +1480,7 @@
   function usePotion(id) {
     if (mode !== 'play') return;
     const pot = POTIONS[id];
-    if (!S.inv[id]) { toast(`${pot.em} ${pot.name}이 없어요. 주민센터 거리 잡화점에서 살 수 있어요!`); return; }
+    if (!S.inv[id]) { toast(`${pot.em} ${pot.name}이 없어요. 잡화점(주민센터 거리·첫 집 골목·일터 거리)에서 살 수 있어요!`); return; }
     if (S.hp >= maxHp()) { toast('체력이 이미 가득 찼어요 💪'); return; }
     S.inv[id]--;
     const before = S.hp;
@@ -1454,7 +1525,10 @@
     nextStep();
   }
 
-  function updateSkillUi() { $('dashBtn').classList.toggle('show', !!(S && S.skills.dash)); }
+  function updateSkillUi() {
+    $('dashBtn').classList.toggle('show', !!(S && S.skills.dash));
+    $('qDash').style.display = S && S.skills.dash ? '' : 'none';
+  }
 
   /* ---------- 편지 (아케이드 모드) ---------- */
   function letterFill(s) { return fill(s); }
@@ -1741,7 +1815,7 @@
     $('coinTxt').textContent = S.coins.toLocaleString();
     $('bankTxt').textContent = S.bank.bal ? `🏦 ${S.bank.bal.toLocaleString()}` : '';
     $('qPotS').textContent = S.inv.potS; $('qPotL').textContent = S.inv.potL;
-    document.querySelectorAll('.qs').forEach(b => b.classList.toggle('empty', !S.inv[b.dataset.pot]));
+    document.querySelectorAll('.qs[data-pot]').forEach(b => b.classList.toggle('empty', !S.inv[b.dataset.pot]));
   }
   function updateTracker() {
     const el = $('tracker');
@@ -1860,7 +1934,7 @@
         ctx.fillStyle = '#fff';
         ctx.fillText('아직 텅 빈 내 첫 집이에요 🏠', 640, 327);
         ctx.fillStyle = '#ffd98a'; ctx.font = '16px Jua, sans-serif';
-        ctx.fillText('주민센터 거리 잡화점에서 가구를 사면 여기에 놓여요!', 640, 352);
+        ctx.fillText('문 밖 잡화점에서 가구를 사면 여기에 놓여요!', 640, 352);
       }
     }
     map.portals.forEach(drawPortal);
@@ -2287,7 +2361,8 @@
   $('keepBtn').onclick = () => startGame();
   $('shopClose').onclick = () => { screen(null); mode = 'play'; };
   document.querySelectorAll('.shop-tabs .btn').forEach(b => b.onclick = () => { shopTab = b.dataset.tab; renderShop(); });
-  document.querySelectorAll('.qs').forEach(b => b.addEventListener('pointerdown', e => { e.preventDefault(); usePotion(b.dataset.pot); }));
+  document.querySelectorAll('.qs[data-pot]').forEach(b => b.addEventListener('pointerdown', e => { e.preventDefault(); usePotion(b.dataset.pot); }));
+  document.querySelectorAll('.qs[data-act]').forEach(b => b.addEventListener('pointerdown', e => { e.preventDefault(); pressed[b.dataset.act] = true; }));
 
   loadImages().then(() => {
     const tb = IMG.bg_title ? `url(${A}bg_title.jpg)` : 'none';
