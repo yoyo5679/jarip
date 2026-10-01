@@ -35,6 +35,9 @@
       ]
     }
   ],
+  "redirects": [
+    { "source": "/game_adventure.html", "destination": "/play", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/play", "destination": "/game_adventure.html" },
     { "source": "/((?!sitemap\\.xml|robots\\.txt|styles\\.css|app\\.js|data\\.js|manifest\\.json|sw\\.js|icons/.*|assets/.*|admin\\.html|game\\.html|game_story\\.html|game_arcade\\.html|game_adventure\\.html).*)", "destination": "/index.html" }

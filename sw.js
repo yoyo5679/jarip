@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jariphaebom-cache-v22';
+const CACHE_NAME = 'jariphaebom-cache-v23';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -7,7 +7,7 @@ const STATIC_ASSETS = [
   '/game.html',
   '/game_story.html',
   '/game_arcade.html',
-  '/game_adventure.html',
+  '/play', // 자립 어드벤처 (예전 주소 /game_adventure.html은 /play로 넘어감)
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
