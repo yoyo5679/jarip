@@ -36,7 +36,7 @@
     }
   ],
   "redirects": [
-    { "source": "/game_adventure.html", "destination": "/play", "permanent": false }
+    { "source": "/game_adventure.html", "destination": "/play", "permanent": true }
   ],
   "rewrites": [
     { "source": "/play", "destination": "/game_adventure.html" },
