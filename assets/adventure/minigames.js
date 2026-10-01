@@ -31,7 +31,11 @@
     addEventListener('keydown', e => { if (!game) return; keys[e.key] = true; if (['ArrowLeft', 'ArrowRight', 'a', 'd'].includes(e.key)) e.preventDefault(); }, true);
     addEventListener('keyup', e => { keys[e.key] = false; }, true);
   }
-  function pt(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H }; }
+  function pt(e) {
+    // 세로 폰에서 화면을 돌려 보여줄 때는 게임 쪽 relPt()로 좌표를 바꿔 계산한다
+    if (window.relPt) { const q = window.relPt(e, cv); return { x: q.fx * W, y: q.fy * H }; }
+    const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H };
+  }
 
   function open(kind, level, o) {
     ensureDom();
@@ -67,10 +71,12 @@
     el.innerHTML = `<div class="mini-card"><h3>${win ? '클리어!' : '아쉬워요!'}</h3>
       <div class="mini-stars">${starHtml}</div><p>${msg}</p>
       <div class="mini-btns">${win ? '<button class="btn" data-a="ok">좋아!</button>'
-        : `<button class="btn" data-a="retry">다시 하기</button>${opts.canSkip ? '<button class="btn ghost" data-a="skip">건너뛰기</button>' : '<button class="btn ghost" data-a="quit">나가기</button>'}`}</div></div>`;
+        : `<button class="btn" data-a="retry">다시 하기${opts.cost ? ` (🪙${opts.cost})` : ''}</button>${opts.canSkip ? '<button class="btn ghost" data-a="skip">건너뛰기</button>' : '<button class="btn ghost" data-a="quit">나가기</button>'}`}</div></div>`;
     el.classList.add('on');
     el.querySelectorAll('[data-a]').forEach(b => b.onclick = () => {
       const a = b.dataset.a;
+      // 오락실처럼 다시 하기도 코인을 낸다. 모자라면 버튼만 바꾸고 결과창은 그대로
+      if (a === 'retry' && opts.payRetry && !opts.payRetry()) { b.textContent = '🪙 코인이 모자라요'; b.disabled = true; return; }
       el.classList.remove('on');
       if (a === 'ok') finish({ win: true, stars });
       else if (a === 'retry') { opts.attempts = (opts.attempts || 1) + 1; const k = game.kind, lv = game.level; game = k === 'pin' ? pinGame(lv) : gateGame(lv); }

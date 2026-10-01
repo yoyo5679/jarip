@@ -159,6 +159,25 @@
     .title-btns { display: flex; flex-direction: column; gap: 10px; width: min(70%, 280px); }
     .title-btns .btn { padding: 11px; font-size: clamp(15px, 2.2vw, 21px); }
     .back-link { color: #fff; margin-top: 14px; font-size: clamp(11px, 1.5vw, 14px); opacity: .85; }
+    /* 이어하기 버튼 아래 줄: 어디까지 했는지 */
+    #contBtn small { display: block; font-size: .62em; margin-top: 3px; opacity: .85; }
+    /* 저장 안내: 이 기기에만 저장된다는 걸 알려준다 */
+    .save-note {
+      margin: 12px 0 0; max-width: min(92%, 420px); padding: 7px 12px; border-radius: 12px;
+      background: rgba(40, 28, 18, .6); color: #fff; font-size: clamp(11px, 1.5vw, 14px); line-height: 1.45;
+    }
+    .save-note small { display: block; margin-top: 2px; color: #ffd98a; font-size: .88em; }
+    .confirm-panel { width: min(92%, 420px); text-align: center; }
+    /* 가로 폰처럼 낮은 화면: 제목 화면을 한 화면에 */
+    @media (max-height: 520px), (orientation: portrait) and (pointer: coarse) {
+      #scrTitle .logo { font-size: 34px; }
+      #scrTitle .sub { margin: 2px 0 8px; font-size: 12px; }
+      #scrTitle .title-btns { gap: 6px; }
+      #scrTitle .title-btns .btn { padding: 6px; font-size: 15px; }
+      #scrTitle .save-note { margin-top: 8px; padding: 5px 10px; font-size: 11px; }
+      #scrTitle .back-link { margin-top: 6px; }
+    }
+    .confirm-panel p { font-size: clamp(14px, 1.9vw, 18px); color: #5a4632; margin: 6px 0 4px; line-height: 1.5; }
 
     .panel {
       background: var(--panel); border: 3px solid var(--panel-edge); border-radius: 20px;
@@ -230,22 +249,33 @@
       position: absolute; left: 50%; top: 50%; width: 46%; height: 46%; margin: -23% 0 0 -23%;
       border-radius: 50%; background: rgba(255,255,255,.75); box-shadow: 0 2px 8px rgba(0,0,0,.35);
     }
+    /* 모바일 액션게임 배치: 오른쪽 아래 큰 공격 버튼을 중심으로 점프(왼쪽)·스킬(왼쪽 위)·대시(위)가
+       엄지 닿는 부채꼴로 둘러싸고, 대화는 NPC 근처에서만 바깥쪽에 뜬다 */
     .btns {
-      position: absolute; right: calc(env(safe-area-inset-right, 0px) + 12px); bottom: 14px;
-      /* 세로 한 줄 → 가로 폰에서는 게임 화면 오른쪽 여백 안에 쏙 들어간다 */
-      display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: auto;
+      --A: clamp(66px, 20vh, 86px);                        /* 공격 버튼 */
+      --b: clamp(46px, 13.5vh, 58px);                      /* 작은 버튼 */
+      --R: calc(var(--A) / 2 + var(--b) / 2 + 10px);       /* 공격 버튼 중심 ~ 작은 버튼 중심 */
+      position: absolute; right: calc(env(safe-area-inset-right, 0px) + 16px); bottom: 16px;
+      width: calc(var(--A) / 2 + var(--R) * 1.75 + var(--b) / 2); height: calc(var(--A) / 2 + var(--R) * 1.75 + var(--b) / 2);
+      pointer-events: none;
     }
+    .btns .rb { position: absolute; pointer-events: auto; }
+    .rb.attack { right: 0; bottom: 0; }
+    .rb.jump   { right: calc(var(--A) / 2 + var(--R) - var(--b) / 2);          bottom: calc(var(--A) / 2 - var(--b) / 2); }
+    .rb.skill  { right: calc(var(--A) / 2 + var(--R) * .71 - var(--b) / 2);    bottom: calc(var(--A) / 2 + var(--R) * .71 - var(--b) / 2); }
+    .rb.dash   { right: calc(var(--A) / 2 - var(--b) / 2);                     bottom: calc(var(--A) / 2 + var(--R) - var(--b) / 2); }
+    .rb.talk   { right: calc(var(--A) / 2 + var(--R) * 1.45 - var(--b) / 2);   bottom: calc(var(--A) / 2 + var(--R) * 1.45 - var(--b) / 2); }
     .rb {
-      width: clamp(46px, 13vh, 62px); aspect-ratio: 1; border-radius: 50%; touch-action: none;
+      width: var(--b); aspect-ratio: 1; border-radius: 50%; touch-action: none;
       background: rgba(255, 159, 28, .5); border: 2px solid rgba(255,255,255,.6); color: #fff;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      font-size: clamp(10px, 2.6vh, 13px); line-height: 1.1; opacity: .5; transition: opacity .15s;
+      font-size: clamp(10px, 2.6vh, 13px); line-height: 1.1; opacity: .75; transition: opacity .15s;
       text-shadow: 0 1px 2px rgba(0,0,0,.5);
     }
     .rb .i { font-size: 1.5em; }
-    .rb.attack { width: clamp(56px, 17vh, 70px); }
+    .rb.attack { width: var(--A); font-size: clamp(12px, 3vh, 15px); }
     .rb.jump { background: rgba(80, 170, 255, .5); }
-    .rb.skill { background: rgba(190, 110, 255, .5); width: clamp(40px, 11vh, 50px); }
+    .rb.skill { background: rgba(190, 110, 255, .5); }
     .rb.skill.cd { filter: grayscale(1); }
     /* 쿨타임: 남은 만큼 어둡게 덮고(--cd = 남은 비율) 남은 초를 가운데에 */
     .rb { position: relative; }
@@ -257,7 +287,7 @@
       content: attr(data-t); position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
       font-size: 1.6em; font-weight: bold; color: #fff; text-shadow: 0 0 3px #000, 0 0 3px #000; pointer-events: none;
     }
-    .rb.dash { display: none; background: rgba(90, 210, 200, .5); width: clamp(40px, 11vh, 50px); }
+    .rb.dash { display: none; background: rgba(90, 210, 200, .5); }
     .rb.dash.show { display: flex; }
     .rb.talk { display: none; background: rgba(255, 196, 0, .8); opacity: 1; animation: talkPulse 1.2s ease-in-out infinite; }
     .rb.talk.show { display: flex; }
@@ -268,9 +298,14 @@
       position: absolute; left: 1.2%; bottom: 2%; color: rgba(255,255,255,.85); font-size: clamp(9px, 1.2vw, 12px);
       background: rgba(0,0,0,.35); padding: 4px 8px; border-radius: 8px; pointer-events: none;
     }
-    .rotate-tip { display: none; color: #fff; text-align: center; padding: 10px; font-size: 14px; position: fixed; top: 0; left: 0; right: 0; }
+    /* 세로로 든 폰: 게임 전체를 90도 돌려서 무조건 가로 화면으로 보여준다
+       (터치 좌표는 JS의 toLocal()이 돌려서 계산한다) */
     @media (orientation: portrait) and (pointer: coarse) {
-      .rotate-tip { display: block; }
+      #app {
+        inset: auto; top: 0; left: 0; width: 100vh; height: 100vw; width: 100dvh;
+        transform-origin: top left; transform: translateX(100vw) rotate(90deg);
+      }
+      #stage { width: min(100vh, calc(100vw * 16 / 9)); width: min(100dvh, calc(100vw * 16 / 9)); max-height: 100vw; }
     }
     .hud-bank { color: #9ee6ff; margin-left: 6px; }
     .quick { position: absolute; left: 1.2%; top: calc(2% + clamp(74px, 11.5vw, 118px)); display: flex; gap: 6px; pointer-events: auto; }
@@ -283,6 +318,7 @@
     .qs small { position: absolute; left: 3px; top: 1px; font-size: 9px; color: #ffd98a; }
     .qs.empty { opacity: .45; }
     .qs.sk { border-color: rgba(200, 160, 255, .7); }
+    @media (pointer: coarse) { .qs.sk { display: none !important; } } /* 폰은 오른쪽 아래 버튼에 쿨타임이 보이니 HUD 칸은 숨김 */
     .qs.cd::before {
       content: ''; position: absolute; inset: 0; border-radius: 8px; pointer-events: none;
       background: conic-gradient(transparent calc((1 - var(--cd, 0)) * 360deg), rgba(0,0,0,.65) 0);
@@ -291,8 +327,38 @@
       content: attr(data-t); position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
       font-size: .8em; font-weight: bold; text-shadow: 0 0 3px #000, 0 0 3px #000; pointer-events: none;
     }
-    .shop-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
-    .shop-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .shop-tabs { display: flex; gap: 8px; justify-content: center; margin-bottom: 8px; }
+    .shop-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 8px; }
+    /* 잡화점은 화면 안에 다 들어오게: 제목·탭·닫기는 고정, 넘치면 목록만 안에서 스크롤 */
+    .panel.shop-panel { position: relative; display: flex; flex-direction: column; overflow: hidden; max-height: 96%; padding-top: 1.6%; padding-bottom: 1.6%; }
+    .shop-panel .shop-list { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 2px; }
+    .shop-panel .btn-row { margin-top: 8px; flex: none; }
+    .stage-panel .stage-tabs { flex: none; }
+    .stage-panel .stages.shop-list { display: grid; grid-template-columns: repeat(5, 1fr); align-content: start; }
+    .shop-panel p.lead { margin-bottom: 6px; }
+    .panel-x {
+      position: absolute; right: 10px; top: 8px; width: 36px; height: 36px; border-radius: 50%; z-index: 1;
+      border: 2px solid var(--panel-edge); background: #fff; color: #8a4b0c; font-size: 18px; cursor: pointer; font-family: inherit;
+    }
+    /* 낮은 화면(가로 폰)에선 설명을 줄이고 카드를 납작하게 */
+    @media (max-height: 520px), (orientation: portrait) and (pointer: coarse) {
+      .shop-panel h2 { font-size: 17px; }
+      .shop-panel p.lead { font-size: 10.5px; margin-bottom: 4px; }
+      .shop-panel .shop-list { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 6px; }
+      .shop-panel .item.furn p { display: none; } /* 가구 10개가 한 화면에 들어가게 설명은 숨김(길게 누르면 title로 보임) */
+      .shop-panel .shop-tabs .btn { padding: 4px 10px; font-size: 13px; }
+      .shop-panel .item { padding: 5px; gap: 2px; }
+      .shop-panel .item .pic { height: 34px; font-size: 24px; }
+      .shop-panel .item .pic img { max-height: 34px; }
+      .shop-panel .item b { font-size: 13px; }
+      .shop-panel .item p { font-size: 10.5px; line-height: 1.3; }
+      .shop-panel .item .btn { padding: 3px 10px; font-size: 12px; }
+      .shop-panel .btn-row { margin-top: 6px; }
+      .stage-panel .stages.shop-list { grid-template-columns: repeat(8, 1fr); }
+      .stage-panel .stg { padding: 4px 2px; font-size: 15px; }
+      .stage-panel .stg small { font-size: 10px; }
+      .shop-panel .btn-row .btn { padding: 5px 18px; }
+    }
     .item {
       background: #fff; border: 2px solid #ecd4ab; border-radius: 14px; padding: 8px; text-align: center;
       display: flex; flex-direction: column; align-items: center; gap: 4px;
@@ -340,7 +406,6 @@
   </style>
 </head>
 <body>
-  <div class="rotate-tip">📱 폰을 가로로 돌리면 더 넓게 즐길 수 있어요!</div>
   <div id="app">
     <!-- Touch controls: 게임 화면이 아니라 폰 화면 모서리에 붙여서, 가로 폰의 좌우 여백을 활용 -->
     <div class="touch" id="touch">
@@ -378,7 +443,7 @@
           <button class="qs sk" id="qDash" data-act="dash" title="대시 (V)" style="display:none">💨<small>V</small></button>
         </div>
         <div class="hud-btns">
-          <button class="hbtn" id="stageBtn">🎮 미니게임</button>
+          <button class="hbtn" id="stageBtn">🕹️ 오락실</button>
           <button class="hbtn" id="bookBtn">📖 정책 도감</button>
           <button class="hbtn" id="exitBtn">🏠 나가기</button>
         </div>
@@ -416,7 +481,20 @@
           <button class="btn" id="newBtn">▶ 새로 시작하기</button>
           <button class="btn ghost" id="contBtn" style="display:none">이어하기</button>
         </div>
+        <p class="save-note" id="saveNote"></p>
         <a class="back-link" href="game.html">← 게임 모드 선택으로</a>
+      </div>
+
+      <!-- 새로 시작 확인 (저장이 있을 때) -->
+      <div class="screen bg dim" id="scrConfirm">
+        <div class="panel confirm-panel">
+          <h2>처음부터 시작할까요?</h2>
+          <p id="confirmMsg"></p>
+          <div class="btn-row">
+            <button class="btn" id="confirmBack">이어하기로 돌아가기</button>
+            <button class="btn ghost" id="confirmNew">처음부터 시작</button>
+          </div>
+        </div>
       </div>
 
       <!-- Character select -->
@@ -434,21 +512,23 @@
 
       <!-- Stage select (미니게임) -->
       <div class="screen dim" id="scrStage" style="background:rgba(0,0,0,.25)">
-        <div class="panel">
-          <h2>🎮 쉬어가는 미니게임</h2>
-          <p class="lead">모험하다 쉬고 싶을 때 즐기는 놀이예요. 안 해도 모험엔 지장 없어요! 별을 모으면 희망코인을 조금 받아요. · <b id="stageStars"></b></p>
+        <div class="panel shop-panel stage-panel">
+          <button class="panel-x" id="stageX" aria-label="닫기">✕</button>
+          <h2>🕹️ 희망 오락실</h2>
+          <p class="lead">한 판에 <b>🪙 10</b> · 별을 새로 딸 때마다 코인을 돌려받아요 · 가진 코인 🪙 <b id="stageCoins">0</b> · <b id="stageStars"></b></p>
           <div class="stage-tabs">
             <button class="btn" data-st="gate">🏃 게이트 달리기</button>
             <button class="btn ghost" data-st="pin">🧷 핀 뽑기 퍼즐</button>
           </div>
-          <div class="stages" id="stageList"></div>
+          <div class="stages shop-list" id="stageList"></div>
           <div class="btn-row"><button class="btn" id="stageClose">닫기</button></div>
         </div>
       </div>
 
       <!-- Shop -->
       <div class="screen dim" id="scrShop" style="background:rgba(0,0,0,.25)">
-        <div class="panel">
+        <div class="panel shop-panel">
+          <button class="panel-x" id="shopX" aria-label="닫기">✕</button>
           <h2>🛒 하나네 잡화점</h2>
           <p class="lead">가진 코인 🪙 <b id="shopCoins">0</b> · 물약은 바로 쓰고, 가구는 '내 집'에 자동으로 놓여요.</p>
           <div class="shop-tabs">
@@ -504,6 +584,27 @@
   const A = 'assets/adventure/';
   // 기기별 안내 문구: 폰에는 ↑ 키가 없으니 '대화 버튼'/'다이얼'로 안내한다
   const IS_TOUCH = matchMedia('(pointer: coarse)').matches;
+  // 세로 폰이면 #app을 90도 돌려 보여주므로, 화면 좌표 ↔ 게임 좌표를 바꿔 계산한다
+  const ROT_MQ = matchMedia('(orientation: portrait) and (pointer: coarse)');
+  function toLocal(x, y) { return ROT_MQ.matches ? { x: y, y: document.documentElement.clientWidth - x } : { x, y }; }
+  function localRect(el) {
+    const r = el.getBoundingClientRect();
+    if (!ROT_MQ.matches) return r;
+    const a = toLocal(r.right, r.top);
+    return { left: a.x, top: a.y, width: r.height, height: r.width };
+  }
+  // 요소 안에서의 위치(0~1). 미니게임 캔버스도 이걸 쓴다
+  window.relPt = (e, el) => { const p = toLocal(e.clientX, e.clientY), r = localRect(el); return { fx: (p.x - r.left) / r.width, fy: (p.y - r.top) / r.height }; };
+  // 안드로이드 브라우저는 첫 터치 때 전체화면 + 가로 고정을 시도한다 (안 되면 위 CSS 회전으로 가로 유지)
+  if (IS_TOUCH) addEventListener('pointerdown', function lockLandscape() {
+    removeEventListener('pointerdown', lockLandscape, true);
+    try {
+      const el = document.documentElement;
+      Promise.resolve(el.requestFullscreen && el.requestFullscreen({ navigationUI: 'hide' }))
+        .then(() => screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape'))
+        .catch(() => {});
+    } catch (_) {}
+  }, true);
   const UP = IS_TOUCH ? '💬 대화 버튼' : '↑';
   const CLIMB = IS_TOUCH ? '다이얼을 위로 밀면' : '↑를 누르면';
   // 받침에 따라 와/과, 을/를 등을 고른다
@@ -529,7 +630,7 @@
     counselor: { img: 'npc_counselor', name: '마음쉼터 상담 선생님' },
     mentor:    { img: 'npc_mentor',    name: '자립 선배 태오' },
     shop:      { img: 'npc_shop',      name: '잡화점 하나 사장님' },
-    center:    { img: 'npc_center',    name: '서아공' },
+    center:    { img: 'npc_seoagong',   name: '서아공' },
     teacher:   { img: 'npc_teacher',   name: '배움마켓 강 강사' },
     pharm:     { img: 'npc_pharm',     name: '동네 약국 약사님' },
     agency:    { img: 'npc_agency',    name: '전담기관 한결 상담원' },
@@ -555,11 +656,11 @@
     // 주민센터 거리: 서류·신청, 자립수당, 배움마켓
     { map: 'town',   x: 1100, y: 212, text: '모르는 걸 물어보러 온 것부터 이미 대단한 거야. 통장 만들기도 월세 계약도, 모르면 배우면 돼.', from: '배움마켓 강 강사' },
     { map: 'town',   x: 1560, y: 385, text: '{name} 씨, 매달 20일은 자립수당 들어오는 날이에요. 신청 서류에서 막히는 칸이 있으면 언제든 들고 와요.', from: '주민센터 민지 주무관' },
-    { map: 'town',   x: 1950, y: 300, text: '오늘 주민센터에서 처음으로 내 이름으로 서류를 냈다. 떨렸는데, 생각보다 별거 아니었다. 나도 할 수 있네.', from: '{name}의 일기' },
+    { map: 'town',   x: 1950, y: 300, text: '오늘 주민센터에서 혼자 서류를 처음 냈다. 엄청 떨렸는데 막상 해 보니 별거 아니었다. 나도 할 수 있네!', from: '{name}의 일기' },
     // 씨앗은행 광장: 첫 통장, 저축, 디딤씨앗통장
     { map: 'bank',   x: 820,  y: 300, text: '꼬마 때 저금통 들고 오던 아이가 벌써 이렇게 컸네요. 적은 돈이라도 꾸준히 넣으면 그게 씨앗이 돼요.', from: '씨앗은행 김 대리' },
     { map: 'bank',   x: 1800, y: 215, text: '오늘 처음으로 내 이름으로 된 통장을 열었다. 손이 떨렸다. 이게 내 돈이라니... 아직 실감이 안 난다.', from: '{name}의 일기' },
-    { map: 'bank',   x: 2100, y: 380, text: '나도 처음엔 한 달에 5만원밖에 못 넣었어. 그런데 디딤씨앗통장에 매달 15만원씩 쌓이는 걸 보니까 처음으로 내일이 기다려지더라.', from: '먼저 자립한 선배' },
+    { map: 'bank',   x: 2100, y: 380, text: '나도 처음엔 한 달에 5만원밖에 못 넣었어. 그런데 디딤씨앗통장에 매달 15만원씩 쌓이는 걸 보니까 그때부터 내일이 기다려지더라.', from: '먼저 자립한 선배' },
     // 첫 집 골목: 내 집 마련, 건강, 전담기관
     { map: 'house',  x: 680,  y: 302, text: '좋은 집이야. 여기서 따뜻한 밥 해 먹고 푹 자렴. 계약서는 꼭 잘 챙겨 두고! 축하한다, {name아}.', from: '집 상담사 오 선생님' },
     { map: 'house',  x: 1200, y: 120, text: '혼자 살면 아파도 참게 되더라. 그러지 말고 꼭 오렴. 건강이 제일이야.', from: '동네 약국 약사님' },
@@ -614,7 +715,9 @@
     allow:   { em: '💸', title: '자립수당',         desc: '보호가 끝난 뒤 5년 동안 매달 50만원씩 들어와요(매월 20일). 서울은 대중교통비 월 6만원도 5년간 더 지원해요.' },
     settle:  { em: '💰', title: '자립정착금',       desc: '독립할 때 한 번에 받는 목돈이에요. 금액은 지역마다 달라요(서울은 2,000만원). 쓰기 전에 꼭 계획부터 세워요!' },
     didim:   { em: '🌱', title: '디딤씨앗통장',     desc: '내가 저축한 돈의 2배를 나라가 더 넣어주는 통장이에요. 적은 돈이라도 꾸준히 넣으면 든든한 씨앗돈이 돼요.' },
-    lh:      { em: '🏠', title: 'LH 전세임대주택',  desc: '전세금은 LH가 대부분 내주고, 나는 보증금 100만원만 내면 돼요. 2년마다 재계약하면서 오래 살 수 있어요.' },
+    lhapply: { em: '📮', title: '청년 전세임대 신청하기', desc: 'LH 청약플러스의 \'유스타트\'에서 신청해요. 주민등록등본·가족관계증명서·보호종료확인서는 신청일 기준 2주 안에 뗀 것만 돼요. 대상자로 뽑히기까지 최소 4주 걸리니 미리 신청해요. 문의: 유스타트 상담센터 ☎1670-2288' },
+    lhhouse: { em: '🔍', title: '지원되는 집 고르기', desc: '85㎡ 이하 아파트·빌라·주거용 오피스텔 같은 집이면 돼요. 압류·가압류가 걸린 집, 재난 위험이 있어 LH가 막아 둔 집은 안 돼요. 집주인과 얘기가 되면 LH 지역본부에 먼저 확인받고 계약해요. 서울·경기·인천은 혼자 살 집 기준 최대 1억 2,000만원까지 지원해 줘요.' },
+    lh:      { em: '🏠', title: 'LH 청년 전세임대',  desc: '전세금은 LH가 내주고 나는 보증금 100만원만 내요. 22살까지는 월 임대료(이자)도 없어요. 이사하면 바로 전입신고하고 확정일자 받기! ※ 금액·조건은 해마다 공고에서 바뀔 수 있어요. 문의: 유스타트 ☎1670-2288' },
     mind:    { em: '💜', title: '심리상담·정서지원', desc: '마음이 지칠 땐 전문 상담을 받을 수 있어요. 도움을 청하는 것도 용기예요. 혼자 버티지 않아도 괜찮아요.' },
     medical: { em: '🩺', title: '의료비 지원',       desc: '병원·약국 진료비의 약 14%만 내면 돼요(의료급여 2종 수준). 보호가 끝난 뒤 5년까지 지원돼요. 아프면 참지 말고 병원부터!' },
     agency:  { em: '📍', title: '자립지원전담기관',  desc: '전국 17개 시·도마다 있는, 자립준비청년만 전담해 돕는 기관이에요. 서울엔 서울자립지원전담기관이 있어요. 막히면 여기에 물어봐요.' },
@@ -689,23 +792,76 @@
       cards: ['didim'], exp: 120, coins: 100,
       after: '오른쪽으로 쭉 가면 첫 집 골목이 나와요. 집 구하는 것도 도와줄 거예요!',
     },
+    // 첫 집 골목: LH 청년 전세임대 실제 순서(서류 → 집 고르기 → 계약·입주)를 따라간다 (2025.9.23 LH 공고 기준)
+    q4a: {
+      npc: 'house', title: '신청 서류 챙기기', requires: 'q3',
+      goal: { type: 'fetch', item: 'doc', n: 3, time: 120 }, goalLabel: '신청 서류',
+      intro: [
+        '집 구하러 왔구나! 자립준비청년은 <span class="hi">LH 청년 전세임대</span>로 집을 구할 수 있어. 네가 살 집을 찾아오면 LH가 집주인이랑 전세 계약을 하고 너한테 다시 빌려주는 거야.',
+        '먼저 신청 서류부터 챙기자. 📄 <span class="hi">주민등록등본, 가족관계증명서, 보호종료확인서</span> 3장이 골목 곳곳에 있어.',
+        '서류는 <span class="hi">뗀 지 2주가 안 된 것</span>만 받아 줘. 그러니까 <span class="hi">120초 안에</span> 3장 다 모아 와! 시간이 지나면 처음부터 다시 떼야 해.',
+      ],
+      active: '서류 3장을 120초 안에 모아 와! 하나는 사다리 위 발판에, 하나는 골목 오른쪽 끝에 있어.',
+      ready: ['다 모았구나! 이 서류로 LH 청약플러스의 \'유스타트\'에서 신청하면 돼.'],
+      quizzes: [{
+        q: '신청할 때 내는 서류는 <span class="hi">언제 뗀 것</span>까지 받아 줄까?',
+        choices: ['아무 때나 뗀 것', '신청일로부터 2주 안에 뗀 것', '1년 안에 뗀 것'], answer: 1,
+        hint: '생각보다 짧아. 신청 직전에 새로 떼는 게 좋아!',
+        explain: '맞아! <span class="hi">신청일로부터 2주 안</span>에 뗀 서류만 돼. 그래서 아까 시간 제한이 있었던 거야.',
+      }, {
+        q: '신청하고 <span class="hi">대상자로 뽑히기</span>까지 최소 얼마나 걸릴까?',
+        choices: ['3일', '4주', '1년'], answer: 1,
+        hint: '한 달쯤이야.',
+        explain: '정답! 최소 <span class="hi">4주</span>는 걸려. 이사 날짜보다 넉넉하게 미리 신청해 두자.',
+      }],
+      cards: ['lhapply'], exp: 80, coins: 60,
+      after: '4주 뒤… 대상자로 뽑혔다는 연락이 왔어! 이제 살 집을 직접 보러 다닐 차례야. 다시 말 걸어 줘.',
+    },
+    q4b: {
+      npc: 'house', title: '살 집 고르기', requires: 'q4a',
+      goal: { type: 'pick', n: 1 }, goalLabel: '고른 집',
+      intro: [
+        '이제 집 보러 가 볼까? 골목에 <span class="hi">🏠 집 3곳</span>이 나와 있어.',
+        `표지판 앞에서 <span class="hi">${UP}</span> 눌러서 하나씩 살펴보고 <span class="hi">LH가 지원해 줄 수 있는 집</span>을 골라 와! 싸다고 다 좋은 집은 아니야.`,
+      ],
+      active: `표지판 앞에서 ${UP}! 등기부등본에 걸린 게 없는지, 안전한지, 살 수 있는 시설이 다 있는지 봐.`,
+      ready: ['좋은 집 골랐네! 계약하기 전에 꼭 알아 둘 게 있어.'],
+      quizzes: [{
+        q: '마음에 드는 집을 찾았어! 집주인이 <span class="hi">"가계약금 먼저 넣으면 잡아 줄게"</span>래. 어떻게 할까?',
+        choices: ['바로 가계약금을 보낸다', 'LH 지역본부에 이 집 계약해도 되는지 먼저 물어본다', '일단 짐부터 옮긴다'], answer: 1,
+        hint: '돈을 보내기 전에 꼭 확인받아야 하는 곳이 있어.',
+        explain: '맞아! LH 확인 없이 가계약하면 문제가 생겨도 <span class="hi">계약금을 보호받지 못해</span>. 꼭 LH 지역본부에 먼저 물어보자.',
+      }, {
+        q: '서울에서 혼자 살 집, LH가 전세금을 <span class="hi">최대 얼마까지</span> 지원해 줄까?',
+        choices: ['8,500만원', '1억 2,000만원', '2억원'], answer: 1,
+        hint: '서울·경기·인천(수도권)이 제일 많아. 1억이 넘어.',
+        explain: '정답! 수도권은 1명 기준 <span class="hi">1억 2,000만원</span>까지야. 광역시는 9,500만원, 그 밖의 지역은 8,500만원이고.',
+      }],
+      cards: ['lhhouse'], exp: 100, coins: 80,
+      after: '좋아, 이 집으로 계약 진행할게! 다시 말 걸어 줘.',
+    },
     q4: {
-      npc: 'house', title: '옥상 위의 열쇠', requires: 'q3',
+      npc: 'house', title: '옥상 위의 열쇠', requires: 'q4b',
       goal: { type: 'fetch', item: 'key', n: 1 }, goalLabel: '새 집 열쇠',
       intro: [
-        '새 집 보러 왔구나! 그런데 어쩌지… 바람이 불어서 <span class="hi">열쇠가 저 위 옥상까지</span> 날아가 버렸어.',
+        '계약 끝! 이제 진짜 네 집이야. 그런데 어쩌지… 바람이 불어서 <span class="hi">열쇠가 저 위 옥상까지</span> 날아가 버렸어.',
         '발판을 밟고 사다리도 타고 올라가서 🔑 열쇠 좀 찾아다 줄래? 사다리 앞에서 <span class="hi">{climb}</span> 올라갈 수 있어.',
       ],
       active: '열쇠는 제일 높은 옥상에 있어! 사다리 앞에서 {climb} 올라갈 수 있어.',
-      ready: ['찾았구나! 이제 계약 얘기를 해볼까?'],
+      ready: ['찾았구나! 이사 들어가기 전에 마지막으로 두 가지만 확인하자.'],
       quizzes: [{
-        q: '<span class="hi">LH 전세임대주택</span>은 전세금 대부분을 LH가 내줘. 자립준비청년이 내는 <span class="hi">임대보증금</span>은 얼마일까?',
+        q: '이사 들어가면 <span class="hi">바로 해야 하는 일</span>은?',
+        choices: ['전입신고하고 확정일자 받기', '집들이부터 하기', '주소는 예전 그대로 두기'], answer: 0,
+        hint: '주민센터에 "저 여기 살아요" 하고 알리는 거야.',
+        explain: '맞아! <span class="hi">전입신고</span>하고 <span class="hi">확정일자</span>를 받아야 해. 전입을 안 하면 계약이 해지될 수도 있어.',
+      }, {
+        q: '보너스 문제! <span class="hi">LH 청년 전세임대</span>는 전세금을 LH가 내줘. 내가 내는 <span class="hi">임대보증금</span>은 얼마일까?',
         choices: ['100만원', '500만원', '1,000만원'], answer: 0,
         hint: '생각보다 훨씬 적어. 세 자리 숫자(만원)야.',
-        explain: '맞아! 보증금 <span class="hi">100만원</span>이면 내 집을 구할 수 있어.',
+        explain: '맞아! 보증금 <span class="hi">100만원</span>이면 돼. 22살까지는 월 임대료(이자)도 없어.',
       }],
       cards: ['lh'], exp: 150, coins: 120,
-      after: '오른쪽 끝은 마음 숲이야. 새 생활이 익숙해지면 마음도 꼭 챙겨야 해.',
+      after: '금액이나 조건은 해마다 공고에서 바뀔 수 있어. 신청 전에 꼭 <span class="hi">유스타트 상담센터(☎1670-2288)</span>에 물어봐! 오른쪽 끝은 일터 거리야.',
     },
     q5: {
       npc: 'counselor', title: '외로움 달래기', requires: 'q4',
@@ -749,7 +905,7 @@
       npc: 'center', title: '원장님 반찬통 찾기', requires: 'q1',
       goal: { type: 'fetch', item: 'lunch', n: 1 }, goalLabel: '반찬통',
       intro: [
-        '안녕, {name}! 나는 <span class="hi">서아공</span>이야! <span class="hi">서울시 아동공동생활가정 지원센터</span>를 줄여서 서아공이라고 불러. 그룹홈을 나서는 친구들을 계속 챙기는 게 내 일이야.',
+        '안녕, {name}! 나는 <span class="hi">서아공</span>이야. <span class="hi">서울시 아동공동생활가정 지원센터</span>, 줄여서 서아공! 그룹홈을 나서는 친구들을 계속 챙기는 게 내 일이야.',
         '그런데 동생들이 장난으로 원장님이 싸 둔 🍱 <span class="hi">반찬통</span>을 언덕 꼭대기 발판에 숨겨놨대. 가져와 줄래?',
       ],
       active: '반찬통은 언덕 오른쪽 제일 높은 발판 위에 있어. 발판을 차례로 밟고 올라가 봐!',
@@ -886,7 +1042,7 @@
         '(띵동) {name아}, 원장님이야! 반찬 좀 싸 왔어. 집 구경 좀 해도 될까?',
         '어머, 아직 좀 휑하네. 이왕이면 다 같이 <span class="hi">집들이</span> 하자! 잡화점에서 <span class="hi">가구 3개</span>만 채워볼래?',
       ],
-      active: '가구는 잡화점에서 살 수 있어. 첫 집 골목에도 있으니까 바로 나가 봐! 코인이 모자라면 씨앗은행 저축도 써 봐!',
+      active: '가구는 잡화점에서 팔아. 문 밖 첫 집 골목에도 있어! 코인이 모자라면 씨앗은행에 모아 둔 돈을 꺼내 써도 돼.',
       ready: ['와, 이제 진짜 집 같다! 우리 {name이} 다 컸네.', '집들이 전에, 같이 지난 길을 돌아볼까?'],
       quizzes: [{
         q: '가계부를 펴 볼까? 서울 자립정착금 <span class="hi">2,000만원</span> + 자립수당 5년치(<span class="hi">50만원 × 60개월</span>)를 더하면?',
@@ -947,7 +1103,21 @@
       npcs: [['house', 220], ['shop', 720], ['pharm', 1300], ['agency', 1640]],
       spawns: [['worry', -1, 500, 1850, 3], ['debt', 4, 0, 0, 1], ['lonely', 5, 0, 0, 1]],
       portals: [{ x: 60, to: 'bank', at: 1 }, { x: 1940, to: 'work', at: 0, need: 'q4' }, { x: 560, to: 'myhome', at: 0, need: 'q4' }],
-      items: [{ item: 'key', icon: '🔑', x: 1300, y: 120, quest: 'q4' }],
+      items: [
+        { item: 'key', icon: '🔑', x: 1300, y: 120, quest: 'q4' },
+        // 신청 서류 3장 (120초 제한, key로 하나씩 기억)
+        { item: 'doc', key: 'resident', name: '주민등록등본', icon: '📄', x: 440, y: 392, quest: 'q4a' },
+        { item: 'doc', key: 'family', name: '가족관계증명서', icon: '📃', x: 930, y: 212, quest: 'q4a' },
+        { item: 'doc', key: 'care', name: '보호종료확인서', icon: '📑', x: 1760, y: 390, quest: 'q4a' },
+      ],
+      // 살 집 고르기(q4b) 때만 보이는 매물 표지판. ok인 집을 고르면 성공
+      signs: [
+        { id: 'A', x: 990, title: '급매 원룸', lines: ['보증금 엄청 싸요!', '등기부등본: 압류 있음'], ok: false,
+          why: '등기부등본에 <span class="hi">압류</span>가 걸린 집은 LH가 지원해 주지 않아. 잘못하면 전세금을 못 돌려받을 수도 있거든.' },
+        { id: 'B', x: 1160, title: '주거용 오피스텔', lines: ['전용 24㎡', '바닥난방·주방·화장실 O'], ok: true },
+        { id: 'C', x: 1460, title: '반지하 원룸', lines: ['월세가 싸요', '창문이 땅이랑 붙어 있어요'], ok: false,
+          why: '반지하는 비가 많이 오면 물에 잠길 위험이 있어. LH는 이렇게 <span class="hi">재난 위험이 있는 집</span>은 지원을 막아 두고 있어.' },
+      ],
       start: 140,
     },
     forest: {
@@ -1015,6 +1185,8 @@
     s.bank = Object.assign({ bal: 0, day: '', today: 0 }, s.bank);
     s.cleared = !!s.cleared;
     Object.keys(QUESTS).forEach(k => { if (!s.quests[k]) s.quests[k] = { state: 'none', n: 0 }; });
+    // 첫 집 퀘스트가 서류·집 고르기·열쇠 3단계로 나뉨: 이미 열쇠 퀘스트를 시작했으면 앞 단계는 끝난 걸로
+    if (s.quests.q4.state !== 'none') ['q4a', 'q4b'].forEach(k => { if (s.quests[k].state === 'none') s.quests[k] = { state: 'done', n: 0 }; });
     s.skills = Object.assign({ djump: false, dash: false, magnet: false }, s.skills);
     s.letters = s.letters || [];
     s.mini = Object.assign({ gate: {}, pin: {} }, s.mini); // 미니게임 단계별 별 개수
@@ -1094,8 +1266,8 @@
     zone.addEventListener('pointerdown', e => {
       if (id !== null) return;
       e.preventDefault(); id = e.pointerId; zone.setPointerCapture(id);
-      const zr = zone.getBoundingClientRect(), r = stick.offsetWidth / 2;
-      cx = e.clientX; cy = e.clientY; t0 = performance.now(); moved = 0;
+      const zr = localRect(zone), r = stick.offsetWidth / 2, p = toLocal(e.clientX, e.clientY);
+      cx = p.x; cy = p.y; t0 = performance.now(); moved = 0;
       stick.style.left = (cx - zr.left - r) + 'px'; stick.style.top = (cy - zr.top - r) + 'px'; stick.style.bottom = 'auto';
       stick.classList.add('active');
     });
@@ -1103,7 +1275,8 @@
       if (e.pointerId !== id) return;
       e.preventDefault();
       const r = stick.offsetWidth / 2;
-      let dx = e.clientX - cx, dy = e.clientY - cy;
+      const p = toLocal(e.clientX, e.clientY);
+      let dx = p.x - cx, dy = p.y - cy;
       const d = Math.hypot(dx, dy);
       moved = Math.max(moved, d);
       if (d > r) { dx = dx / d * r; dy = dy / d * r; }
@@ -1169,6 +1342,7 @@
     t += dt;
     if (mode !== 'play') { for (const k in pressed) pressed[k] = false; return; }
     updatePlayer(dt);
+    tickQuestTimers(dt);
     updateMobs(dt);
     updateDrops(dt);
     fx = fx.filter(f => (f.t += dt) < f.life);
@@ -1187,7 +1361,7 @@
     P.dropT = Math.max(0, P.dropT - dt); P.lastHit += dt;
     if (P.lastHit > 4 && S.hp < maxHp()) { S.hp = Math.min(maxHp(), S.hp + dt * 4); updateHud(); }
     updateCdButtons();
-    const canTalk = !!(nearNpc() || map.portals.some(p => Math.abs(p.x - P.x) < 40 && P.y >= GROUND - 2));
+    const canTalk = !!(nearNpc() || nearSign() || map.portals.some(p => Math.abs(p.x - P.x) < 40 && P.y >= GROUND - 2));
     if (canTalk !== talkShown) { talkShown = canTalk; $('talkBtn').classList.toggle('show', canTalk); }
 
     // 상호작용 (↑)
@@ -1196,6 +1370,8 @@
       if (portal) { usePortal(portal); return; }
       const npc = nearNpc();
       if (npc) { talk(npc); return; }
+      const sg = nearSign();
+      if (sg) { inspectSign(sg); return; }
     }
 
     // 사다리
@@ -1268,7 +1444,10 @@
     items.forEach(it => {
       if (!itemVisible(it)) return;
       if (Math.abs(it.x - P.x) < 34 && Math.abs(it.y - P.y) < 40) {
-        it.got = true; progress(it.quest, 1);
+        it.got = true;
+        if (it.key) { const st = S.quests[it.quest]; (st.got = st.got || []).push(it.key); }
+        if (it.name) toast(`${it.icon} ${it.name} 챙겼다!`, 1800);
+        progress(it.quest, 1);
         burst(it.x, it.y - 30, '#ffd23f', 18);
       }
     });
@@ -1410,8 +1589,8 @@
   // NPC를 직접 터치/클릭해도 대화 (가까이 있을 때)
   function tapNpcAt(clientX, clientY) {
     if (mode !== 'play' || !map) return false;
-    const r = cv.getBoundingClientRect();
-    const wx = (clientX - r.left) / r.width * VW + cam, wy = (clientY - r.top) / r.height * VH;
+    const q = relPt({ clientX, clientY }, cv);
+    const wx = q.fx * VW + cam, wy = q.fy * VH;
     const n = npcList().find(n => Math.abs(n.x - wx) < 45 && wy > GROUND - 100 && wy < GROUND + 15);
     if (!n) return false;
     if (Math.abs(n.x - P.x) < 80 && P.y > GROUND - 30) talk(n);
@@ -1463,7 +1642,30 @@
   // 퀘스트를 수락하기 전(받을 수 있는 상태)에 한 일도 인정해준다
   function available(id) { const q = QUESTS[id]; return qs(id) === 'none' && (!q.requires || qs(q.requires) === 'done'); }
   function countable(id) { return qs(id) === 'active' || available(id); }
-  function itemVisible(it) { return !it.got && countable(it.quest) && S.quests[it.quest].n < QUESTS[it.quest].goal.n; }
+  function itemVisible(it) {
+    const q = QUESTS[it.quest], st = S.quests[it.quest];
+    if (it.got || st.n >= q.goal.n || (it.key && (st.got || []).includes(it.key))) return false;
+    return q.goal.time ? st.state === 'active' : countable(it.quest); // 시간 제한은 퀘스트를 받은 뒤부터
+  }
+  // 시간 제한 퀘스트: 그 맵에서 놀고 있을 때만 시간이 흐른다. 다 쓰면 모은 걸 잃고 처음부터
+  function tickQuestTimers(dt) {
+    for (const id in QUESTS) {
+      const q = QUESTS[id], st = S.quests[id];
+      if (!q.goal.time || st.state !== 'active' || QUEST_MAP[id] !== mapId) continue;
+      const before = Math.ceil(st.left ?? q.goal.time);
+      st.left = (st.left ?? q.goal.time) - dt;
+      const now = Math.ceil(st.left);
+      if (st.left <= 0) {
+        st.left = q.goal.time; st.n = 0; st.got = [];
+        items.forEach(it => { if (it.quest === id) it.got = false; });
+        toast(`⏰ 시간 끝! 서류 유효기간(2주)이 지났어요. ${q.goalLabel}를 처음부터 다시 모아요!`, 4200);
+        persist(); updateTracker();
+      } else if (now !== before) {
+        if (now === 30 || now === 10) toast(`⏰ ${now}초 남았어요!`, 1800);
+        updateTracker();
+      }
+    }
+  }
   function progress(id, n) {
     const q = QUESTS[id], st = S.quests[id];
     st.n = Math.min(q.goal.n, st.n + n);
@@ -1568,7 +1770,7 @@
     } else {
       L.innerHTML = Object.entries(FURN).map(([id, f]) => {
         const own = S.furn.includes(id);
-        return `<div class="item${own ? ' owned' : ''}"><div class="pic"><img src="${A + id}.png" alt=""></div><b>${f.name}</b><p>${f.desc}</p>
+        return `<div class="item furn${own ? ' owned' : ''}" title="${f.desc}"><div class="pic"><img src="${A + id}.png" alt=""></div><b>${f.name}</b><p>${f.desc}</p>
           ${own ? '<button class="btn" disabled>✔ 우리 집에 있어요</button>'
                 : `<button class="btn" data-buy="${id}" ${S.coins < f.price ? 'disabled' : ''}>🪙 ${f.price}</button>`}</div>`;
       }).join('');
@@ -1607,6 +1809,12 @@
 
   /* ---------- 미니게임 스테이지 ---------- */
   const STAGE_MAX = { gate: 15, pin: 15 };
+  const MINI_COST = 10; // 오락실처럼 한 판에 희망코인 10개
+  function payMini() {
+    if (S.coins < MINI_COST) return false;
+    S.coins -= MINI_COST; updateHud(); persist();
+    return true;
+  }
   function nextStage(kind) {
     for (let i = 1; i <= STAGE_MAX[kind]; i++) if (!S.mini[kind][i]) return i;
     return 0;
@@ -1624,7 +1832,7 @@
     for (const k in keys) keys[k] = false;
     $('touch').classList.remove('on'); // 미니게임 중엔 다이얼·버튼 숨김
     window.MiniGames.open(kind, lv, Object.assign({
-      charImg: IMG[S.char],
+      charImg: IMG[S.char], cost: MINI_COST, payRetry: payMini,
       onDone(res) {
         mode = prevMode === 'mini' ? 'play' : prevMode;
         $('touch').classList.toggle('on', isTouch);
@@ -1652,7 +1860,9 @@
       html += `<button class="stg${st ? ' clear' : ''}" data-lv="${i}" ${i > open ? 'disabled' : ''}>${i > open ? '🔒' : i}<small>${st ? '⭐'.repeat(st) : i > open ? '' : 'NEW'}</small></button>`;
     }
     list.innerHTML = html;
+    $('stageCoins').textContent = S.coins.toLocaleString();
     list.querySelectorAll('[data-lv]').forEach(b => b.onclick = () => {
+      if (!payMini()) { toast(`🪙 희망코인이 모자라요! 한 판에 ${MINI_COST}개가 필요해요. 몬스터를 물리치거나 퀘스트를 깨면 모을 수 있어요.`, 3600); return; }
       screen(null);
       playMini(stageTab, +b.dataset.lv, {}, () => openStages(), () => openStages());
     });
@@ -1663,7 +1873,25 @@
   // 세 번째 값이 있으면 그 퀘스트를 깬 뒤에만 나타나는 NPC
   function npcList() { return map.npcs.filter(n => !n[2] || qs(n[2]) === 'done').map(([id, x]) => ({ id, x, def: NPCS[id] })); }
   function nearNpc() { return npcList().find(n => Math.abs(n.x - P.x) < 80 && P.y > GROUND - 30); }
-  function questOf(npcId) { return Object.keys(QUESTS).find(k => QUESTS[k].npc === npcId); }
+  // 매물 표지판 (살 집 고르기 퀘스트 중에만)
+  function signsOn() { return map && map.signs && qs('q4b') === 'active' ? map.signs : []; }
+  function nearSign() { return signsOn().find(sg => Math.abs(sg.x - P.x) < 42 && P.y > GROUND - 30); }
+  function inspectSign(sg) {
+    const guide = { id: 'house', def: NPCS.house };
+    const info = `<b>🏠 ${sg.id}. ${sg.title}</b><br>${sg.lines.join(' · ')}<br>이 집으로 할까?`;
+    openDialog(guide, [{ menu: info, opts: [
+      { label: '이 집으로 할래요', fn: () => {
+        if (sg.ok) { closeDialog(); progress('q4b', 1); }
+        else openDialog(guide, [{ say: '음… 이 집은 안 돼. ' + sg.why + ' 다른 집도 살펴보자!' }]);
+      } },
+      { label: '다른 집도 볼래요', cls: 'ghost', fn: closeDialog },
+    ] }]);
+  }
+  // 한 NPC가 퀘스트를 여러 개 줄 때는 아직 안 끝난 첫 퀘스트
+  function questOf(npcId) {
+    const ids = Object.keys(QUESTS).filter(k => QUESTS[k].npc === npcId);
+    return ids.find(k => qs(k) !== 'done') || ids[ids.length - 1];
+  }
   function npcMark(npcId) {
     if (npcId === 'shop') return '$';
     if (npcId === 'banker' && qs('q3') === 'done') return bankLeft() > 0 ? '$' : '';
@@ -1746,6 +1974,7 @@
         const st = S.quests[s.id], q = QUESTS[s.id], npc = dlg.npc;
         st.state = 'active';
         if (q.goal.type === 'furn') st.n = Math.min(q.goal.n, S.furn.length); // 이미 산 가구도 인정
+        if (q.goal.time) { st.left = q.goal.time; st.got = []; st.n = 0; }
         closeDialog();
         if (st.n >= q.goal.n) {
           // 미리 해둔 몫으로 이미 목표 달성 → 바로 보고 대화로
@@ -1828,7 +2057,7 @@
       const q = QUESTS[k], st = S.quests[k];
       html += st.state === 'ready'
         ? `<div class="ready">✔ ${q.title} 완료!<br>→ ${NPCS[q.npc].name}한테 가서 ${UP} 눌러 보고하기</div>`
-        : `<div>• ${q.title} (${q.goalLabel} ${st.n}/${q.goal.n})</div>`;
+        : `<div>• ${q.title} (${q.goalLabel} ${st.n}/${q.goal.n})${q.goal.time ? ` <b style="color:${(st.left ?? q.goal.time) <= 30 ? '#ff8a8a' : '#ffd98a'}">⏰ ${Math.ceil(st.left ?? q.goal.time)}초</b>` : ''}</div>`;
     });
     // 이 맵에서 받을 수 있는 퀘스트
     here.slice(0, 3).forEach(k => {
@@ -1874,7 +2103,7 @@
   }
 
   function screen(id) {
-    ['scrLoading', 'scrTitle', 'scrSelect', 'scrBook', 'scrShop', 'scrStage', 'scrEnding'].forEach(s => $(s).classList.toggle('on', s === id));
+    ['scrLoading', 'scrTitle', 'scrConfirm', 'scrSelect', 'scrBook', 'scrShop', 'scrStage', 'scrEnding'].forEach(s => $(s).classList.toggle('on', s === id));
   }
 
   function showEnding() {
@@ -1939,6 +2168,7 @@
     }
     map.portals.forEach(drawPortal);
     items.forEach(drawItem);
+    signsOn().forEach(drawSign);
     drawLetters();
     npcList().forEach(drawNpc);
     mobs.forEach(drawMob);
@@ -1953,10 +2183,11 @@
     if (mode === 'play') {
       const n = nearNpc(), p = map.portals.find(p => Math.abs(p.x - P.x) < 40);
       const key = IS_TOUCH ? '💬' : '↑';
-      const tip = n ? `${key} ${josa(n.def.name, '과', '와')} 대화하기` : p ? `${key} 포탈 타기` : '';
+      const sg = !n && !p && nearSign();
+      const tip = n ? `${key} ${josa(n.def.name, '과', '와')} 대화하기` : p ? `${key} 포탈 타기` : sg ? `${key} ${sg.id}번 집 살펴보기` : '';
       if (tip) {
         ctx.font = '18px Jua, sans-serif'; ctx.textAlign = 'center';
-        const tw = ctx.measureText(tip).width + 24, tx = P.x - cam, ty = P.y - 118;
+        const tw = ctx.measureText(tip).width + 24, tx = P.x - cam, ty = sg ? GROUND - 146 : P.y - 118; // 표지판 앞이면 표지판 위로
         roundRect(tx - tw / 2, ty - 18, tw, 28, 14, 'rgba(255,159,28,.92)');
         ctx.fillStyle = '#fff'; ctx.fillText(tip, tx, ty + 2);
       }
@@ -2084,6 +2315,18 @@
     const tw = ctx.measureText(label).width + 16;
     roundRect(p.x - tw / 2, y - 80, tw, 22, 11, 'rgba(30,20,10,.65)');
     ctx.fillStyle = '#fff'; ctx.fillText(label, p.x, y - 64);
+    ctx.restore();
+  }
+  function drawSign(sg) {
+    const y = GROUND, bw = 132, bh = 74, by = y - 128;
+    ctx.save();
+    ctx.fillStyle = '#7a5230'; ctx.fillRect(sg.x - 4, by + bh - 4, 8, y - by - bh + 4); // 기둥
+    roundRect(sg.x - bw / 2, by, bw, bh, 10, '#f6e3c0');
+    ctx.strokeStyle = '#8a5a2b'; ctx.lineWidth = 3; ctx.strokeRect(sg.x - bw / 2 + 2, by + 2, bw - 4, bh - 4);
+    ctx.textAlign = 'center'; ctx.fillStyle = '#6b3d10';
+    ctx.font = '16px Jua, sans-serif'; ctx.fillText(`🏠 ${sg.id}. ${sg.title}`, sg.x, by + 22);
+    ctx.font = '12px Jua, sans-serif'; ctx.fillStyle = '#7a5a3a';
+    sg.lines.forEach((l, i) => ctx.fillText(l, sg.x, by + 42 + i * 16));
     ctx.restore();
   }
   function drawItem(it) {
@@ -2328,10 +2571,28 @@
     if (first) setTimeout(() => toast(IS_TOUCH ? '머리 위에 ! 가 뜬 원장님한테 가서 💬 대화 버튼을 눌러봐! (원장님을 터치해도 돼)' : '머리 위에 ! 가 뜬 원장님한테 가서 ↑ 를 눌러봐!', 4200), 2800);
   }
 
+  /* ---------- 제목 화면: 이 기기에만 저장된다는 안내 + 이어하기에 진행 상황 ---------- */
+  const DEVICE = IS_TOUCH ? '이 폰' : '이 컴퓨터';
+  const escHtml = (t) => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  function refreshTitle() {
+    const sv = loadSave();
+    $('saveNote').innerHTML = `💾 모험 기록은 <b>지금 ${DEVICE}(브라우저)에만</b> 저장돼요. ${IS_TOUCH ? '다른 폰이나 PC' : '다른 컴퓨터나 폰'}에서는 처음부터 시작해요.`
+      + '<small>인터넷 기록을 지우면 모험 기록도 같이 지워져요.</small>';
+    $('contBtn').style.display = sv ? '' : 'none';
+    if (sv) {
+      const where = MAPS[sv.map] ? MAPS[sv.map].title : '보금자리 언덕';
+      $('contBtn').innerHTML = `이어하기<small>Lv.${sv.lv} ${escHtml(sv.name)} · ${where}에서 멈췄어요</small>`;
+    }
+  }
+  function goSelect() { buildSelect(); $('nameInput').value = CHARS.find(c => c.id === pickChar).name; screen('scrSelect'); }
   $('newBtn').onclick = () => {
-    if (loadSave() && !confirm('저장된 모험이 있어요. 처음부터 새로 시작할까요?')) return;
-    buildSelect(); $('nameInput').value = CHARS.find(c => c.id === pickChar).name; screen('scrSelect');
+    const sv = loadSave();
+    if (!sv) return goSelect();
+    $('confirmMsg').innerHTML = `${DEVICE}에 저장된 <b>${escHtml(sv.name)}의 모험</b>(Lv.${sv.lv})이 지워져요.<br>한 번 지우면 되돌릴 수 없어요.`;
+    screen('scrConfirm');
   };
+  $('confirmBack').onclick = () => screen('scrTitle');
+  $('confirmNew').onclick = () => goSelect();
   $('contBtn').onclick = () => { S = loadSave(); if (S) startGame(); };
   $('startBtn').onclick = () => {
     const name = ($('nameInput').value || '').trim().slice(0, 8) || CHARS.find(c => c.id === pickChar).name;
@@ -2351,23 +2612,23 @@
   };
   $('bookClose').onclick = () => { screen(null); mode = 'play'; };
   $('stageBtn').onclick = () => { if (mode === 'play') openStages(); };
-  $('stageClose').onclick = () => { screen(null); mode = 'play'; };
+  $('stageClose').onclick = $('stageX').onclick = () => { screen(null); mode = 'play'; };
   document.querySelectorAll('[data-st]').forEach(b => b.onclick = () => openStages(b.dataset.st));
   $('exitBtn').onclick = () => { persist(); location.href = 'game.html'; };
   $('againBtn').onclick = () => {
     if (!confirm('처음부터 다시 하면 코인·통장·가구 기록이 모두 지워져요. 정말 새로 시작할까요?')) return;
-    clearSave(); map = null; S = null; $('contBtn').style.display = 'none'; screen('scrTitle'); mode = 'title';
+    clearSave(); map = null; S = null; refreshTitle(); screen('scrTitle'); mode = 'title';
   };
   $('keepBtn').onclick = () => startGame();
-  $('shopClose').onclick = () => { screen(null); mode = 'play'; };
+  $('shopClose').onclick = $('shopX').onclick = () => { screen(null); mode = 'play'; };
   document.querySelectorAll('.shop-tabs .btn').forEach(b => b.onclick = () => { shopTab = b.dataset.tab; renderShop(); });
   document.querySelectorAll('.qs[data-pot]').forEach(b => b.addEventListener('pointerdown', e => { e.preventDefault(); usePotion(b.dataset.pot); }));
   document.querySelectorAll('.qs[data-act]').forEach(b => b.addEventListener('pointerdown', e => { e.preventDefault(); pressed[b.dataset.act] = true; }));
 
   loadImages().then(() => {
     const tb = IMG.bg_title ? `url(${A}bg_title.jpg)` : 'none';
-    ['scrTitle', 'scrSelect', 'scrEnding'].forEach(id => $(id).style.backgroundImage = tb);
-    if (loadSave()) $('contBtn').style.display = '';
+    ['scrTitle', 'scrConfirm', 'scrSelect', 'scrEnding'].forEach(id => $(id).style.backgroundImage = tb);
+    refreshTitle();
     screen('scrTitle'); mode = 'title';
   });
   requestAnimationFrame(loop);

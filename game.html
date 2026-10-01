@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>자립 방탈출 - 게임 모드 선택 | 자립해봄</title>
-  <meta name="description" content="자립준비청년 지원 정책을 쉽고 재미있게 배우는 자립 방탈출 게임! 글로 즐기는 '스토리 모드'와 2D 픽셀 탐험 '아케이드 모드' 중 선택해 탈출해보세요.">
+  <meta name="description" content="자립준비청년 지원 정책을 쉽고 재미있게 배우는 게임! 횡스크롤 '자립 어드벤처', 글로 즐기는 '스토리 방탈출', 2D 픽셀 '아케이드 방탈출' 중 골라 봐요.">
   <meta name="keywords" content="자립방탈출, 자립해봄, 자립준비청년 게임, 방탈출 게임, 스토리 방탈출, 2D 방탈출, 아케이드 방탈출">
   <meta name="robots" content="index, follow, max-image-preview:large">
   <link rel="canonical" href="https://jarip.vercel.app/game.html">
@@ -14,7 +14,7 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://jarip.vercel.app/game.html">
   <meta property="og:title" content="자립 방탈출 - 게임 모드 선택 | 자립해봄">
-  <meta property="og:description" content="자립준비청년 정책을 배우는 자립 방탈출! 스토리 모드 & 아케이드 모드 중 도전할 모드를 선택해보세요.">
+  <meta property="og:description" content="자립준비청년 정책을 배우는 게임! 어드벤처·스토리·아케이드 중 끌리는 모드로 골라 봐요.">
   <meta property="og:image" content="https://jarip.vercel.app/icons/icon-192.png">
 
   <!-- Fonts & Icons -->
@@ -279,6 +279,17 @@
       letter-spacing: -0.02em;
     }
 
+    /* 새로 나온·인기 모드 표시 */
+    .title-tags { display: inline-flex; gap: 5px; vertical-align: middle; margin-left: 4px; }
+    .tag-new, .tag-hot {
+      font-size: 0.68rem; font-weight: 900; letter-spacing: 0.04em; line-height: 1;
+      padding: 4px 8px; border-radius: 999px; color: #fff; white-space: nowrap;
+    }
+    .tag-new { background: linear-gradient(135deg, #22c55e, #16a34a); }
+    .tag-hot { background: linear-gradient(135deg, #f97316, #ef4444); animation: hotPulse 1.6s ease-in-out infinite; }
+    @keyframes hotPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+    @media (prefers-reduced-motion: reduce) { .tag-hot { animation: none; } }
+
     .mode-card.arcade .card-title {
       font-family: var(--font-arcade);
       color: #ffce56;
@@ -484,16 +495,52 @@
     <!-- Hero Header -->
     <section class="hero">
       <div class="badge-tag">
-        <i class="fa-solid fa-gamepad"></i> 원하는 게임 플레이 방식을 선택하세요
+        <i class="fa-solid fa-gamepad"></i> 하고 싶은 게임을 골라 봐요
       </div>
-      <h1>자립준비청년 지원 정책<br><span class="grad-txt">방탈출 게임 센터</span></h1>
-      <p>15개의 방에 숨겨진 진짜 정책 열쇠를 찾아 탈출해보세요. 차분한 스토리 탐험과 신나는 2D 픽셀 방탐험 중 취향에 맞춰 선택할 수 있습니다.</p>
+      <h1>자립준비청년 지원 정책<br><span class="grad-txt">게임 센터</span></h1>
+      <p>마을을 뛰어다니는 모험, 이야기를 따라가는 방탈출, 직접 방을 뒤지는 2D 방탈출. 끌리는 걸로 골라 봐요! 뭘 하든 진짜 자립 지원 정책을 하나씩 알게 돼요.</p>
     </section>
 
     <!-- Mode Selection Cards Grid -->
     <main class="cards-grid">
       
-      <!-- 1. Story Mode Card -->
+      <!-- 1. Side-scrolling Adventure Mode Card -->
+      <article class="mode-card adventure">
+        <div class="card-badge">⚔️ 횡스크롤 모험 모드</div>
+        <div class="card-icon">⚔️</div>
+        <h2 class="card-title">자립 어드벤처 <span class="title-tags"><span class="tag-new">NEW</span><span class="tag-hot">🔥 HOT</span></span></h2>
+        <p class="card-desc">
+          캐릭터를 골라 마을 곳곳을 점프하며 돌아다녀요. 걱정 구름, 빚 코인 같은 몬스터를 물리치고 NPC 퀘스트를 깨면 정책 카드를 모을 수 있어요.
+        </p>
+
+        <div class="tags-row">
+          <span class="tag-item">#횡스크롤</span>
+          <span class="tag-item">#캐릭터선택</span>
+          <span class="tag-item">#퀘스트</span>
+          <span class="tag-item">#정책도감</span>
+        </div>
+
+        <div class="meta-spec">
+          <div class="spec-item">
+            <span class="spec-lbl">플레이 타임</span>
+            <span class="spec-val">약 15~20분</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-lbl">난이도</span>
+            <span class="spec-val">⭐⭐ (쉬움)</span>
+          </div>
+          <div class="spec-item">
+            <span class="spec-lbl">조작 방식</span>
+            <span class="spec-val">키보드 / 터치 버튼</span>
+          </div>
+        </div>
+
+        <a href="game_adventure.html" class="btn-play">
+          <i class="fa-solid fa-khanda"></i> 모험 떠나기
+        </a>
+      </article>
+
+      <!-- 2. Story Mode Card -->
       <article class="mode-card story">
         <div class="card-badge">📖 글 중심 스토리 모드</div>
         <div class="card-icon">📖</div>
@@ -529,7 +576,7 @@
         </a>
       </article>
 
-      <!-- 2. Arcade 2D Mode Card -->
+      <!-- 3. Arcade 2D Mode Card -->
       <article class="mode-card arcade">
         <div class="card-badge">🕹️ 2D 픽셀 탐험 모드</div>
         <div class="card-icon">🕹️</div>
@@ -562,42 +609,6 @@
 
         <a href="game_arcade.html" class="btn-play">
           <i class="fa-solid fa-gamepad"></i> 아케이드 2D 시작하기
-        </a>
-      </article>
-
-      <!-- 3. Side-scrolling Adventure Mode Card -->
-      <article class="mode-card adventure">
-        <div class="card-badge">⚔️ 횡스크롤 모험 모드</div>
-        <div class="card-icon">⚔️</div>
-        <h2 class="card-title">자립 어드벤처</h2>
-        <p class="card-desc">
-          캐릭터를 골라 마을 곳곳을 점프하며 돌아다녀요. 걱정 구름, 빚 코인 같은 몬스터를 물리치고 NPC 퀘스트를 깨면 정책 카드를 모을 수 있어요.
-        </p>
-
-        <div class="tags-row">
-          <span class="tag-item">#횡스크롤</span>
-          <span class="tag-item">#캐릭터선택</span>
-          <span class="tag-item">#퀘스트</span>
-          <span class="tag-item">#정책도감</span>
-        </div>
-
-        <div class="meta-spec">
-          <div class="spec-item">
-            <span class="spec-lbl">플레이 타임</span>
-            <span class="spec-val">약 15~20분</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-lbl">난이도</span>
-            <span class="spec-val">⭐⭐ (쉬움)</span>
-          </div>
-          <div class="spec-item">
-            <span class="spec-lbl">조작 방식</span>
-            <span class="spec-val">키보드 / 터치 버튼</span>
-          </div>
-        </div>
-
-        <a href="game_adventure.html" class="btn-play">
-          <i class="fa-solid fa-khanda"></i> 모험 떠나기
         </a>
       </article>
 
