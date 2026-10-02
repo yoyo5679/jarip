@@ -446,8 +446,8 @@
         <div class="stick" id="stick"><div class="knob" id="knob"></div></div>
       </div>
       <div class="btns">
-        <!-- NPC·포탈 근처에서만 나타나는 대화 버튼 (↑ 키와 같은 역할) -->
-        <div class="rb talk" data-k="up" id="talkBtn"><span class="i">💬</span>대화</div>
+        <!-- NPC·포탈 근처에서만 나타나는 대화 버튼 (PC의 ↑ 키와 같은 역할) -->
+        <div class="rb talk" data-k="talk" id="talkBtn"><span class="i">💬</span>대화</div>
         <div class="rb dash" data-k="dash" id="dashBtn"><span class="i">💨</span>대시</div>
         <div class="rb skill" data-k="skill" id="skillBtn"><span class="i">✨</span>스킬</div>
         <div class="rb jump" data-k="jump"><span class="i">⤴</span>점프</div>
@@ -1430,8 +1430,8 @@
     const canTalk = !!(nearNpc() || nearSign() || map.portals.some(p => Math.abs(p.x - P.x) < 40 && P.y >= GROUND - 2));
     if (canTalk !== talkShown) { talkShown = canTalk; $('talkBtn').classList.toggle('show', canTalk); }
 
-    // 상호작용 (↑)
-    if (pressed.up && !P.climb) {
+    // 상호작용: 💬 대화 버튼, PC는 ↑ 키 (폰 다이얼을 위로 미는 건 사다리 오르기만 — 지나가다 대화가 걸리지 않게)
+    if ((pressed.talk || (pressed.up && !IS_TOUCH)) && !P.climb) {
       const portal = map.portals.find(p => Math.abs(p.x - P.x) < 40 && P.y >= GROUND - 2);
       if (portal) { usePortal(portal); return; }
       const npc = nearNpc();
