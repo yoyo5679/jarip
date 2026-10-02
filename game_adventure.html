@@ -2769,7 +2769,7 @@
   })();
   // 앱 안 브라우저 → 외부 브라우저로 여는 주소
   //  안드로이드: package를 안 정하면 폰의 기본 브라우저(크롬·삼성 인터넷 등)로 열린다
-  //  아이폰: 인스타가 사파리 주소(x-safari-https)를 막아서, ⋯ 메뉴 안내 + 주소 복사로 대신한다
+  //  아이폰: 인스타가 사파리 주소(x-safari-https)를 막고 메뉴에도 외부 열기가 없어서, 주소 복사로 대신한다
   const IS_ANDROID = /Android/i.test(navigator.userAgent);
   const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
   function externalUrl() {
@@ -2789,7 +2789,7 @@
     const open = externalUrl();
     $('inappNote').innerHTML = `📱 지금 <b>${INAPP} 앱 안</b>에서 열었어요. 여기서 한 모험 기록은 ${INAPP} 안에만 남아요.`
       + (open ? `<br><a href="${open}">🌐 다른 브라우저로 열기</a>`
-        : `<br>오른쪽 위 <b>⋯</b> → <b>외부 브라우저로 열기</b>를 누르거나, 주소를 복사해서 사파리에 붙여 넣어요.`
+        : `<br>기록을 오래 남기려면 주소를 복사해서 <b>사파리</b> 주소창에 붙여 넣어요.`
           + `<br><a href="#" id="copyUrlBtn">📋 주소 복사하기</a>`);
     $('inappNote').style.display = '';
     const copy = $('copyUrlBtn');
