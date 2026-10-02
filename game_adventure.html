@@ -2767,16 +2767,31 @@
     if (/FBAN|FBAV|FB_IAB/i.test(ua)) return '페이스북';
     return '';
   })();
+  // 앱 안 브라우저 → 외부 브라우저로 여는 주소
+  //  안드로이드: package를 안 정하면 폰의 기본 브라우저(크롬·삼성 인터넷 등)로 열린다
+  //  아이폰(iOS 17+): x-safari-https:// 로 사파리를 연다 (인스타가 막으면 안 열릴 수 있음)
+  const IS_ANDROID = /Android/i.test(navigator.userAgent);
+  const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  function externalUrl() {
+    const bare = location.href.replace(/^https?:\/\//, '');
+    if (INAPP === '카카오톡') return `kakaotalk://web/openExternal?url=${encodeURIComponent(location.href)}`;
+    if (IS_ANDROID) return `intent://${bare}#Intent;scheme=https;S.browser_fallback_url=${encodeURIComponent(location.href)};end`;
+    if (IS_IOS) return `x-safari-https://${bare}`;
+    return '';
+  }
+  // 안드로이드·카카오톡은 처음 열 때 한 번 자동으로 외부 브라우저를 연다 (막히면 아래 버튼으로)
+  (function autoOpenExternal() {
+    if (!INAPP || !(IS_ANDROID || INAPP === '카카오톡')) return;
+    try { if (sessionStorage.getItem('jarip_ext_tried')) return; sessionStorage.setItem('jarip_ext_tried', '1'); } catch (e) { return; }
+    location.href = externalUrl();
+  })();
   function inappNote() {
     if (!INAPP) return;
-    const android = /Android/i.test(navigator.userAgent);
-    const url = location.href.replace(/^https?:\/\//, '');
-    // 안드로이드는 버튼으로 크롬을 바로 열 수 있다. 카카오톡은 자체 '외부 브라우저로 열기' 주소가 있다
-    const open = INAPP === '카카오톡' ? `kakaotalk://web/openExternal?url=${encodeURIComponent(location.href)}`
-      : android ? `intent://${url}#Intent;scheme=https;package=com.android.chrome;end` : '';
+    const open = externalUrl();
+    const label = IS_IOS && INAPP !== '카카오톡' ? '사파리' : '다른 브라우저';
     $('inappNote').innerHTML = `📱 지금 <b>${INAPP} 앱 안</b>에서 열었어요. 여기서 한 모험 기록은 ${INAPP} 안에만 남아요.`
-      + (open ? `<br><a href="${open}">🌐 ${INAPP === '카카오톡' ? '다른 브라우저' : '크롬'}으로 열기</a>`
-        : `<small>기록을 오래 남기려면 오른쪽 위 <b>⋯</b> → <b>외부 브라우저(Safari)로 열기</b>를 눌러요.</small>`);
+      + (open ? `<br><a href="${open}">🌐 ${label}로 열기</a>` : '')
+      + (IS_IOS && INAPP !== '카카오톡' ? `<small>안 열리면 오른쪽 위 <b>⋯</b> → <b>외부 브라우저로 열기</b>를 눌러요.</small>` : '');
     $('inappNote').style.display = '';
   }
   function refreshTitle() {
