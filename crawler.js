@@ -850,6 +850,9 @@ const MANUAL_POLICIES = [
   },
 ];
 
+// 자동 수집을 허용하지 않는 사이트 (robots.txt 기준) — 이 주소의 글은 data.js에서 뺀다
+const BLOCKED_HOSTS = ['injarip.or.kr'];
+
 async function main() {
   try {
       if (process.argv.includes('--manual-only')) {
@@ -863,11 +866,11 @@ async function main() {
       const ggData = await crawlGyeonggi();
       const busanData = await crawlBusan();
       const smycData = await crawlSmyc();
-      const incheonData = await crawlIncheon();
+      // 인천 전담기관(injarip.or.kr)은 robots.txt로 검색엔진 외 자동 수집을 막고 있어 수집하지 않는다
       const chungnamData = await crawlChungnam();
       const jeonbukData = await crawlJeonbuk();
       const grouphomeData = await crawlGrouphome();
-      const scraped = [...MANUAL_POLICIES.map(p => ({ ...p, manual: true })), ...grouphomeData, ...smycData, ...jeonbukData, ...chungnamData, ...incheonData, ...busanData, ...ggData, ...seoulData, ...jariponData];
+      const scraped = [...MANUAL_POLICIES.map(p => ({ ...p, manual: true })), ...grouphomeData, ...smycData, ...jeonbukData, ...chungnamData, ...busanData, ...ggData, ...seoulData, ...jariponData];
       return await mergeAndSave(scraped);
   } catch (error) {
     console.error('메인 실행 오류:', error);
@@ -908,9 +911,9 @@ async function mergeAndSave(scraped) {
     // 마감된 사업 필터링 함수
     const isExpired = (dateText) => {
       if (!dateText || dateText.includes('상시')) return false;
-      const matches = dateText.match(/\\d{4}[-.]\\d{2}[-.]\\d{2}/g);
+      const matches = dateText.match(/\d{4}[-.]\d{2}[-.]\d{2}/g);
       if (!matches) return false;
-      const lastDateStr = matches[matches.length - 1].replace(/\\./g, '-');
+      const lastDateStr = matches[matches.length - 1].replace(/\./g, '-');
       
       const now = new Date();
       const kst = new Date(now.getTime() + (9 * 60 * 60 * 1000));
@@ -919,9 +922,10 @@ async function mergeAndSave(scraped) {
       return lastDateStr < todayStr;
     };
 
-    // 기존 데이터에서 마감되거나 키워드 포함된 사업 제거
+    // 기존 데이터에서 마감되거나 키워드 포함된 사업, 수집을 허용하지 않는 사이트의 글 제거
     const originalCount = existingPolicies.length;
     existingPolicies = existingPolicies.filter(p => {
+      if (BLOCKED_HOSTS.some(h => (p.link || '').includes(h))) return false;
       const title = p.title || '';
       const isClosedKeyword = ['모집완료', '마감', '종료'].some(word => title.includes(word));
       if (isClosedKeyword || isExpired(p.date)) return false;

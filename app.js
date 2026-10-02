@@ -1,7 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // 관리자 세션 확인 (admin.html에서 로그인 시 sessionStorage에 저장됨)
-  const isAdmin = sessionStorage.getItem('jarip_admin') === '1';
-
   // 1. 상태 관리 변수
   let policies = [];
   let localPolicies = []; // 로컬 수집 정책 리스트
@@ -76,53 +73,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // 토스트 컨테이너
   const toastContainer = document.getElementById("toastContainer");
 
-  // 관리자 UI 설정 (로그인 상태일 때만 상단 바 및 편집 버튼 활성화)
-  function setupAdminUI() {
-    if (!isAdmin) return;
-
-    // 관리자 상단 바 동적 생성
-    const bar = document.createElement('div');
-    bar.id = 'adminBar';
-    bar.style.cssText = [
-      'position:fixed', 'top:0', 'left:0', 'right:0', 'z-index:9999',
-      'background:#4f46e5', 'color:#fff',
-      'padding:0.45rem 1.25rem',
-      'display:flex', 'align-items:center', 'justify-content:space-between',
-      'font-size:0.82rem', 'font-weight:600',
-      'box-shadow:0 2px 8px rgba(0,0,0,0.2)'
-    ].join(';');
-    bar.innerHTML = `
-      <span>🔑 관리자 모드 활성화</span>
-      <div style="display:flex;gap:0.6rem;align-items:center;">
-        <button id="openModalBtn"
-          style="background:#fff;color:#4f46e5;border:none;padding:0.3rem 0.9rem;
-                 border-radius:6px;font-weight:700;cursor:pointer;font-size:0.8rem;">
-          + 새 지원사업 등록
-        </button>
-        <button id="adminLogoutBtn"
-          style="background:rgba(255,255,255,0.15);color:#fff;
-                 border:1px solid rgba(255,255,255,0.45);padding:0.3rem 0.9rem;
-                 border-radius:6px;cursor:pointer;font-size:0.8rem;">
-          로그아웃
-        </button>
-      </div>
-    `;
-    document.body.prepend(bar);
-
-    // 상단 바 높이만큼 본문 여백 추가
-    document.body.style.paddingTop = '36px';
-
-    // 새 지원사업 등록 버튼
-    document.getElementById('openModalBtn').addEventListener('click', () => openModal(null));
-
-    // 로그아웃 버튼
-    document.getElementById('adminLogoutBtn').addEventListener('click', () => {
-      sessionStorage.removeItem('jarip_admin');
-      showToast('👋 관리자 로그아웃 되었습니다.');
-      setTimeout(() => location.reload(), 800);
-    });
-  }
-
   function rebuildCombinedPolicies() {
     policies = [...localPolicies];
     populateRegionFilters();
@@ -134,7 +84,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // 3-1. 초기화 함수
   function init() {
     loadBookmarks();
-    setupAdminUI();
     loadPolicies();
     loadTheme();
     populateRegionFilters();
@@ -621,32 +570,28 @@ document.addEventListener("DOMContentLoaded", () => {
           <a href="${safeUrl(p.link)}" target="_blank" rel="noopener noreferrer" class="btn-card link">
             <span>원문 바로가기</span> 🔗
           </a>
-          ${!isAdmin ? `<button class="btn-card web-share" data-id="${escapeHTML(String(p.id))}"><span>공유하기</span> 📤</button>` : ''}
-          ${isAdmin ? `<button class="btn-card share" data-id="${escapeHTML(String(p.id))}"><span>공유 정보 복사</span> 💬</button>` : ''}
-          ${isAdmin ? `<button class="btn-card edit" data-id="${escapeHTML(String(p.id))}" title="정책 수정/삭제">⚙️</button>` : ''}
+          <button class="btn-card web-share" data-id="${escapeHTML(String(p.id))}"><span>공유하기</span> 📤</button>
         </div>
       `;
 
-      // 일반 방문자: 카드 클릭 시 상세 모달
-      if (!isAdmin) {
-        card.style.cursor = 'pointer';
-        card.setAttribute('role', 'button');
-        card.setAttribute('tabindex', '0');
-        card.setAttribute('aria-label', `${p.title} 상세 정보 보기`);
-        const openIfNotControl = (e) => {
-          if (!e.target.closest('a') && !e.target.closest('.copy-link') &&
-              !e.target.closest('.web-share') && !e.target.closest('.btn-bookmark')) {
-            openDetailModal(p.id);
-          }
-        };
-        card.addEventListener('click', openIfNotControl);
-        card.addEventListener('keydown', (e) => {
-          if ((e.key === 'Enter' || e.key === ' ') && e.target === card) {
-            e.preventDefault();
-            openDetailModal(p.id);
-          }
-        });
-      }
+      // 카드 클릭 시 상세 모달
+      card.style.cursor = 'pointer';
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-label', `${p.title} 상세 정보 보기`);
+      const openIfNotControl = (e) => {
+        if (!e.target.closest('a') && !e.target.closest('.copy-link') &&
+            !e.target.closest('.web-share') && !e.target.closest('.btn-bookmark')) {
+          openDetailModal(p.id);
+        }
+      };
+      card.addEventListener('click', openIfNotControl);
+      card.addEventListener('keydown', (e) => {
+        if ((e.key === 'Enter' || e.key === ' ') && e.target === card) {
+          e.preventDefault();
+          openDetailModal(p.id);
+        }
+      });
 
       cardsGrid.appendChild(card);
     });
@@ -693,24 +638,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const rawId = e.currentTarget.getAttribute("data-id");
         const id = /^\d+$/.test(rawId) ? parseInt(rawId) : rawId;
         webSharePolicy(id);
-      });
-    });
-
-    document.querySelectorAll(".btn-card.share").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const rawId = e.currentTarget.getAttribute("data-id");
-        const id = /^\d+$/.test(rawId) ? parseInt(rawId) : rawId;
-        sharePolicy(id);
-      });
-    });
-
-    document.querySelectorAll(".btn-card.edit").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const rawId = e.currentTarget.getAttribute("data-id");
-        const id = /^\d+$/.test(rawId) ? parseInt(rawId) : rawId;
-        openModal(id);
       });
     });
   }
@@ -1105,33 +1032,8 @@ ${p.link}
       }
     });
 
-    // 🔑 관리자 페이지 진입용 숨겨진 로직 (로고 7번 연속 터치 시 admin.html 이동, 1번 터치 시 새로고침)
-    let logoClicks = 0;
-    let clickTimeout;
-    let reloadTimeout;
-    const handleLogoClick = () => {
-      logoClicks++;
-      
-      // 기존에 예약된 새로고침이 있다면 취소 (연속 터치 시 바로 새로고침 되는 것 방지)
-      clearTimeout(reloadTimeout);
-      
-      if (logoClicks >= 7) {
-        logoClicks = 0;
-        window.location.href = "admin.html";
-        return;
-      }
-      
-      clearTimeout(clickTimeout);
-      clickTimeout = setTimeout(() => {
-        logoClicks = 0;
-      }, 3000); // 3초간 추가 입력이 없으면 카운트 초기화
-
-      // 300ms 후 새로고침 실행 (7번 연속 클릭을 시도 중인 경우 차단됨)
-      reloadTimeout = setTimeout(() => {
-        logoClicks = 0;
-        window.location.reload();
-      }, 300);
-    };
+    // 로고를 누르면 새로고침
+    const handleLogoClick = () => window.location.reload();
 
     const desktopLogo = document.querySelector(".logo-section");
     const mobileLogo = document.querySelector(".mobile-logo");
