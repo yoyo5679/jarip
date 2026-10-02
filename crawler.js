@@ -748,6 +748,111 @@ async function crawlJeonbuk() {
   }
 }
 
+// 8-1. 경상남도 자립지원전담기관 '참여안내' 크롤링 (굿네이버스 게시판: /gnchangwon1/board/cd101101101/info/{id})
+// 목록엔 작성일만 있어서 상세 글에서 접수·신청 기간을 읽는다.
+// 기간이 없으면 본문 속 날짜(행사일 등) 중 가장 늦은 날을 마감으로 본다.
+// 내용이 이미지(포스터)뿐인 글은 기간·내용을 확인할 수 없어 넣지 않는다 (예전 포스터를 다시 올린 글, Gemini가 내용을 짐작해 쓰는 문제).
+async function crawlGyeongnam() {
+  console.log('--- 경상남도자립지원전담기관 크롤링 시작 ---');
+  const BASE = 'https://changwon1.gnk.or.kr';
+  const LIST = `${BASE}/gnchangwon1/board/cd101101101/default`;
+  const MAX_AGE_DAYS = 60;
+  const day = (s) => new Date(`${s}T00:00:00+09:00`);
+  const ymd = (d) => new Date(d.getTime() + 9 * 3600 * 1000).toISOString().split('T')[0];
+  const today = ymd(new Date());
+  const pad = (n) => String(n).padStart(2, '0');
+
+  // "2026년 09월 21일(월) 13:00 ~ 2026년 10월 16일" / "2026.9.21 ~ 10.16" / "9월 21일 ~ 10월 16일" → ['2026-09-21', '2026-10-16']
+  const findPeriod = (text, year) => {
+    const at = text.search(/(접수|신청|모집)\s*(기간|기한|일정)/);
+    if (at < 0) return null;
+    const part = text.slice(at, at + 120);
+    const dates = [];
+    const re = /(?:(20\d{2})\s*[년.\-/]\s*)?(\d{1,2})\s*[월.\-/]\s*(\d{1,2})\s*일?/g;
+    let m;
+    while ((m = re.exec(part)) && dates.length < 2) {
+      const y = m[1] ? Number(m[1]) : (dates.length ? Number(dates[0].slice(0, 4)) : year);
+      const mo = Number(m[2]), d = Number(m[3]);
+      if (mo < 1 || mo > 12 || d < 1 || d > 31) continue;
+      dates.push(`${y}-${pad(mo)}-${pad(d)}`);
+    }
+    return dates.length ? dates : null;
+  };
+  // 본문에 나오는 날짜 중 가장 늦은 날 ("9/21(월)", "10월 16일", "2026.10.16" 등)
+  const lastDateIn = (text, year) => {
+    let last = null, m;
+    const re = /(?:(20\d{2})\s*[년.\-]\s*)?(\d{1,2})\s*(?:월\s*(\d{1,2})\s*일|[./]\s*(\d{1,2})(?=\s*\())/g;
+    while ((m = re.exec(text))) {
+      const mo = Number(m[2]), d = Number(m[3] || m[4]);
+      if (mo < 1 || mo > 12 || d < 1 || d > 31) continue;
+      const s = `${m[1] || year}-${pad(mo)}-${pad(d)}`;
+      if (!last || s > last) last = s;
+    }
+    return last;
+  };
+
+  const newPolicies = [];
+  const seen = new Set();
+  try {
+    for (let page = 1; page <= 2; page++) {
+      const response = await axiosInstance.get(page > 1 ? `${LIST}?pageNo=${page}` : LIST);
+      if (response.status !== 200) {
+        console.error(`경남 사이트 응답 에러: ${response.status}`);
+        continue;
+      }
+      const $ = cheerio.load(response.data);
+      const rows = [];
+      $('.board_list_mo a[href*="/info/"]').each((i, el) => {
+        const a = $(el);
+        const href = a.attr('href') || '';
+        const id = (href.match(/\/info\/(\d+)/) || [])[1];
+        const title = a.find('.bo_title').text().replace(/\s+/g, ' ').trim();
+        const posted = (a.find('.bo_date').text().match(/\d{4}-\d{2}-\d{2}/) || [])[0];
+        if (!id || seen.has(id) || !title || !posted) return;
+        seen.add(id);
+        if (BLACKLIST.some(word => title.includes(word))) return;
+        if ((day(today) - day(posted)) / 86400000 > MAX_AGE_DAYS) return;
+        rows.push({ id, title, posted, link: `${BASE}${href}` });
+      });
+
+      for (const row of rows) {
+        let body = '';
+        try {
+          const detail = await axiosInstance.get(row.link);
+          if (detail.status === 200) body = cheerio.load(detail.data)('.board_view').text().replace(/\s+/g, ' ')
+            .replace(/^.*?조회수\s*\|\s*\d+/, '').replace(/목록보기.*$/, ''); // 등록일·이전글/다음글 제목은 빼고 본문만
+        } catch (e) { /* 상세를 못 읽어도 목록 정보로 등록 */ }
+        // 제목엔 없고 본문 첫머리에만 "마감되었습니다"를 적는 경우가 있다
+        if (/마감\s*되었습니다|모집\s*마감|접수\s*마감|조기\s*마감/.test(body.slice(0, 400))) continue;
+
+        const year = Number(row.posted.slice(0, 4));
+        const period = findPeriod(body, year);
+        const mentioned = period ? null : lastDateIn(body, year);
+        if (!period && !mentioned) continue;           // 날짜가 글자로 없는 글 (이미지뿐)
+        if (mentioned && mentioned < today) continue; // 행사일이 이미 지난 글
+        newPolicies.push({
+          title: `[경상남도자립지원전담기관] ${row.title}`,
+          category: detectCategory(row.title),
+          type: '공공·지자체',
+          provider: '경상남도자립지원전담기관',
+          region: '경남',
+          target: '경남 거주 보호아동 및 자립준비청년',
+          content: `경상남도 자립지원전담기관에서 준비한 [${row.title}] 소식이에요! 🌸 자세한 자격 조건이나 신청 방법은 '원문 바로가기'에서 꼭 확인해 봐요! 😉`,
+          link: row.link,
+          date: period ? (period.length > 1 ? `${period[0]} ~ ${period[1]}` : `~ ${period[0]}`) : `~ ${mentioned}`,
+          status: '모집중',
+          source: '경상남도자립지원전담기관'
+        });
+      }
+    }
+    console.log(`경남 자립 공고 ${newPolicies.length}건 수집 완료`);
+    return newPolicies;
+  } catch (error) {
+    console.error('경남 사이트 크롤링 오류:', error.message);
+    return [];
+  }
+}
+
 // 9. 전국아동청소년그룹홈협의회 '열린공지' 크롤링 (page_153.php?sn={번호})
 async function crawlGrouphome() {
   console.log('--- 전국아동청소년그룹홈협의회(열린공지) 크롤링 시작 ---');
@@ -869,8 +974,9 @@ async function main() {
       // 인천 전담기관(injarip.or.kr)은 robots.txt로 검색엔진 외 자동 수집을 막고 있어 수집하지 않는다
       const chungnamData = await crawlChungnam();
       const jeonbukData = await crawlJeonbuk();
+      const gyeongnamData = await crawlGyeongnam();
       const grouphomeData = await crawlGrouphome();
-      const scraped = [...MANUAL_POLICIES.map(p => ({ ...p, manual: true })), ...grouphomeData, ...smycData, ...jeonbukData, ...chungnamData, ...busanData, ...ggData, ...seoulData, ...jariponData];
+      const scraped = [...MANUAL_POLICIES.map(p => ({ ...p, manual: true })), ...grouphomeData, ...smycData, ...gyeongnamData, ...jeonbukData, ...chungnamData, ...busanData, ...ggData, ...seoulData, ...jariponData];
       return await mergeAndSave(scraped);
   } catch (error) {
     console.error('메인 실행 오류:', error);
