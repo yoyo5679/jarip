@@ -2769,14 +2769,13 @@
   })();
   // 앱 안 브라우저 → 외부 브라우저로 여는 주소
   //  안드로이드: package를 안 정하면 폰의 기본 브라우저(크롬·삼성 인터넷 등)로 열린다
-  //  아이폰(iOS 17+): x-safari-https:// 로 사파리를 연다 (인스타가 막으면 안 열릴 수 있음)
+  //  아이폰: 인스타가 사파리 주소(x-safari-https)를 막아서, ⋯ 메뉴 안내 + 주소 복사로 대신한다
   const IS_ANDROID = /Android/i.test(navigator.userAgent);
   const IS_IOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
   function externalUrl() {
     const bare = location.href.replace(/^https?:\/\//, '');
     if (INAPP === '카카오톡') return `kakaotalk://web/openExternal?url=${encodeURIComponent(location.href)}`;
     if (IS_ANDROID) return `intent://${bare}#Intent;scheme=https;S.browser_fallback_url=${encodeURIComponent(location.href)};end`;
-    if (IS_IOS) return `x-safari-https://${bare}`;
     return '';
   }
   // 안드로이드·카카오톡은 처음 열 때 한 번 자동으로 외부 브라우저를 연다 (막히면 아래 버튼으로)
@@ -2788,11 +2787,19 @@
   function inappNote() {
     if (!INAPP) return;
     const open = externalUrl();
-    const label = IS_IOS && INAPP !== '카카오톡' ? '사파리' : '다른 브라우저';
     $('inappNote').innerHTML = `📱 지금 <b>${INAPP} 앱 안</b>에서 열었어요. 여기서 한 모험 기록은 ${INAPP} 안에만 남아요.`
-      + (open ? `<br><a href="${open}">🌐 ${label}로 열기</a>` : '')
-      + (IS_IOS && INAPP !== '카카오톡' ? `<small>안 열리면 오른쪽 위 <b>⋯</b> → <b>외부 브라우저로 열기</b>를 눌러요.</small>` : '');
+      + (open ? `<br><a href="${open}">🌐 다른 브라우저로 열기</a>`
+        : `<br>오른쪽 위 <b>⋯</b> → <b>외부 브라우저로 열기</b>를 누르거나, 주소를 복사해서 사파리에 붙여 넣어요.`
+          + `<br><a href="#" id="copyUrlBtn">📋 주소 복사하기</a>`);
     $('inappNote').style.display = '';
+    const copy = $('copyUrlBtn');
+    if (copy) copy.onclick = (e) => {
+      e.preventDefault();
+      const url = location.origin + '/play';
+      const done = () => { copy.textContent = '✅ 복사했어요! 사파리 주소창에 붙여 넣어요'; };
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done, () => prompt('이 주소를 복사해요', url));
+      else prompt('이 주소를 복사해요', url);
+    };
   }
   function refreshTitle() {
     inappNote();
