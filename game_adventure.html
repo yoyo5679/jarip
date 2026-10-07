@@ -17,6 +17,25 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+  <script>
+    // 안드로이드는 100vh/100dvh가 실제 보이는 화면보다 크게 잡힐 때가 있어서(상태바·내비바·주소창)
+    // 진짜 보이는 크기를 재서 --vw/--vh로 넘긴다. 회전 레이아웃이 이 값으로 화면에 딱 맞춰진다
+    (function () {
+      var root = document.documentElement;
+      function fit() {
+        var vv = window.visualViewport;
+        var w = Math.round(vv ? vv.width * vv.scale : innerWidth) || innerWidth;
+        var h = Math.round(vv ? vv.height * vv.scale : innerHeight) || innerHeight;
+        root.style.setProperty('--vw', Math.min(w, innerWidth) + 'px');
+        root.style.setProperty('--vh', Math.min(h, innerHeight) + 'px');
+      }
+      fit();
+      addEventListener('resize', fit);
+      addEventListener('orientationchange', function () { fit(); setTimeout(fit, 250); setTimeout(fit, 700); });
+      if (window.visualViewport) visualViewport.addEventListener('resize', fit);
+      document.addEventListener('fullscreenchange', function () { setTimeout(fit, 100); });
+    })();
+  </script>
   <style>
     :root {
       --ink: #3b2a1a;
@@ -38,6 +57,7 @@
     #stage {
       position: relative; aspect-ratio: 16 / 9;
       width: min(100vw, calc(100dvh * 16 / 9)); max-height: 100dvh;
+      width: min(var(--vw, 100vw), calc(var(--vh, 100dvh) * 16 / 9)); max-height: var(--vh, 100dvh);
       background: #000; overflow: hidden; box-shadow: 0 0 40px rgba(0,0,0,.6);
     }
     canvas { display: block; width: 100%; height: 100%; image-rendering: auto; }
@@ -337,8 +357,12 @@
       #app {
         inset: auto; top: 0; left: 0; width: 100vh; height: 100vw; width: 100dvh;
         transform-origin: top left; transform: translateX(100vw) rotate(90deg);
+        /* JS가 잰 실제 화면 크기 우선 (100dvh가 내비바만큼 더 길게 잡혀 오른쪽 끝이 잘리던 문제) */
+        width: var(--vh, 100dvh); height: var(--vw, 100vw);
+        transform: translateX(var(--vw, 100vw)) rotate(90deg);
       }
-      #stage { width: min(100vh, calc(100vw * 16 / 9)); width: min(100dvh, calc(100vw * 16 / 9)); max-height: 100vw; }
+      #stage { width: min(100vh, calc(100vw * 16 / 9)); width: min(100dvh, calc(100vw * 16 / 9)); max-height: 100vw;
+        width: min(var(--vh, 100dvh), calc(var(--vw, 100vw) * 16 / 9)); max-height: var(--vw, 100vw); }
     }
     .hud-bank { color: #9ee6ff; margin-left: 6px; }
     .quick { position: absolute; left: 1.2%; top: calc(2% + clamp(74px, 11.5vw, 118px)); display: flex; gap: 6px; pointer-events: auto; }
