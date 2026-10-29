@@ -1,7 +1,7 @@
 // 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관 + 부산자립지원전담기관)
-// 마지막 크롤링 일시: 2026-10-28
-window.initialDataVersion = "v2026.10.28_v139";
-window.lastUpdated = "2026-10-28"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
+// 마지막 크롤링 일시: 2026-10-29
+window.initialDataVersion = "v2026.10.29_v140";
+window.lastUpdated = "2026-10-29"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
 window.initialPolicies = [
   {
     "id": 106,
@@ -589,21 +589,6 @@ window.initialPolicies = [
     "id": 1206
   },
   {
-    "title": "[LH주거복지정보] 자립지원 종사자 주거교육 신청 안내",
-    "category": "housing",
-    "type": "공공·지자체",
-    "provider": "LH주거복지정보㈜",
-    "region": "전국",
-    "target": "자립준비청년 대상",
-    "content": "🏠✨ 독립 준비하는 당신을 위해 LH에서 주거 교육을 준비했어요! 내 집 마련부터 관리 꿀팁까지, 주거 전문가가 친절하게 알려준대요. 🤩 10월 19일부터 28일까지 전국에서 신청 가능하니, 놓치지 말고 꼭 참여해보세요! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
-    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
-    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2188&menuPos=1",
-    "date": "2026-10-19 ~ 2026-10-28",
-    "status": "모집중",
-    "source": "자립정보ON",
-    "id": 1207
-  },
-  {
     "title": "[자립정보ON] 2026년 보호연장아동 자립지원프로그램 기관주도형 [수",
     "category": "life",
     "type": "공공·지자체",
@@ -662,6 +647,36 @@ window.initialPolicies = [
     "status": "모집예정",
     "source": "자립정보ON",
     "id": 1214
+  },
+  {
+    "title": "[자립정보ON] 키움증권 자립준비청년지원사업 '오늘의집' 사업 안내",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "초록우산 어린이재단 사회공헌협력본부",
+    "region": "서울 외 (15)",
+    "target": "자립준비청년 대상",
+    "content": "얘들아, 집 꾸미기에 로망 있던 사람 손! 🙋‍♀️ 키움증권이랑 초록우산이 너희의 보금자리를 더 예쁘게 만들어줄 '오늘의집' 사업을 시작한대. 서울 외 지역 자립준비청년이라면 10월 28일부터 11월 1일까지 신청할 수 있으니 놓치지 마! ✨ 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2205&menuPos=1",
+    "date": "2026-10-28 ~ 2026-11-01",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 1215
+  },
+  {
+    "title": "[자립정보ON] 희망디딤돌 인천센터 자립체험실 참가자 모집",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "희망디딤돌 인천센터",
+    "region": "전국",
+    "target": "자립준비청년 대상",
+    "content": "🏠✨ 인천으로 랜선 집들이 갈 사람? 희망디딤돌 인천센터에서 자립체험실 참가자를 모집하고 있어요! 전국 자립준비청년 친구들이라면 누구나 신청 가능하고, 10월 27일부터 11월 9일까지 딱 2주간만 신청할 수 있대요. 🗓️ 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2204&menuPos=1",
+    "date": "2026-10-27 ~ 2026-11-09",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 1216
   },
   {
     "id": 505,
@@ -1127,21 +1142,6 @@ window.initialPolicies = [
     "date": "2026-03-03 ~ 상시 모집",
     "status": "모집중",
     "source": "경기도자립지원전담기관"
-  },
-  {
-    "title": "[모집 중] 2026년 보호연장아동 자립지원프로그램 기관주도형 [수원 힐링 프로그램]  참여자 모집",
-    "category": "life",
-    "type": "공공·지자체",
-    "provider": "경기도자립지원전담기관",
-    "region": "경기",
-    "target": "경기도 거주 보호아동 및 자립준비청년",
-    "content": "수원 사는 친구들 주목! 📢 2026년 경기도자립지원전담기관에서 보호연장아동 자립지원 프로그램 참여자를 모집하고 있어요. 힐링 프로그램으로 몸과 마음 편안하게 충전하고, 자립 준비도 함께 해봐요! 💆‍♀️ 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
-    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
-    "link": "https://www.ggjarip.or.kr/community_01.html?actobj=notice&acttype=VIEWINFO&bbs_code=notice&bbs_key=79738971887766_6ae15c69b1e2b",
-    "date": "2026-10-28 ~ 모집 시까지",
-    "status": "모집중",
-    "source": "경기도자립지원전담기관",
-    "id": 1208
   },
   {
     "id": 702,
