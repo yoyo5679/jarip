@@ -1,7 +1,7 @@
 // 자립준비청년 지원 정책 데이터베이스 (자립정보ON 크롤링 데이터 + 상시 제도 데이터 + 서울자립지원전담기관 + 부산자립지원전담기관)
-// 마지막 크롤링 일시: 2026-11-06
-window.initialDataVersion = "v2026.11.06_v145";
-window.lastUpdated = "2026-11-06"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
+// 마지막 크롤링 일시: 2026-11-09
+window.initialDataVersion = "v2026.11.09_v146";
+window.lastUpdated = "2026-11-09"; // 마지막 크롤링 반영 일자 (crawler.js가 자동 갱신)
 window.initialPolicies = [
   {
     "id": 106,
@@ -317,21 +317,6 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "자립정보ON",
     "id": 1148
-  },
-  {
-    "title": "[자립정보ON] 박재연 소장님과 함께하는 대화 수업",
-    "category": "life",
-    "type": "공공·지자체",
-    "provider": "(주)소이프스튜디오",
-    "region": "서울 외 (2)",
-    "target": "자립준비청년 대상",
-    "content": "친구들, 혹시 대화 스킬 업그레이드하고 싶은 사람? 🗣️ 박재연 소장님과 함께하는 특별한 대화 수업이 열린대! 💖 (주)소이프스튜디오에서 자립준비청년을 위해 준비한 이번 수업은 10월 19일부터 11월 8일까지 신청 가능하니 놓치지 마! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
-    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
-    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2184&menuPos=1",
-    "date": "2026-10-19 ~ 2026-11-08",
-    "status": "모집중",
-    "source": "자립정보ON",
-    "id": 1178
   },
   {
     "title": "[자립정보ON] 신용카드사회공헌재단과 함께하는 'SN(Safe Net)",
@@ -754,6 +739,21 @@ window.initialPolicies = [
     "id": 1246
   },
   {
+    "title": "[자립정보ON] (경상북도자립지원전담기관)다독다독 프로그램",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "경상북도자립지원전담기관",
+    "region": "경북",
+    "target": "자립준비청년 대상",
+    "content": "경상북도 친구들 주목! 🙋‍♀️ 경상북도자립지원전담기관에서 완전 꿀잼 프로그램, 다독다독을 준비했대! 혼자 고민하지 말고 다 같이 모여서 수다도 떨고 힐링도 해보자구요! 💖 2026년 11월 6일부터 13일까지니까 놓치지 말고 지금 바로 신청 고고! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 상세 페이지를 꼭 확인해 주세요.",
+    "link": "https://jaripon.ncrc.or.kr/home/kor/support/projectMng/edit.do?idx=2222&menuPos=1",
+    "date": "2026-11-06 ~ 2026-11-13",
+    "status": "모집중",
+    "source": "자립정보ON",
+    "id": 1251
+  },
+  {
     "id": 505,
     "title": "[서울자립지원전담기관] 자립준비청년 법률상담(매월 진행)",
     "category": "life",
@@ -1037,21 +1037,6 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "서울광역청년센터",
     "id": 1152
-  },
-  {
-    "title": "[강서구가족센터] 자립준비청년 대상 「우리의 온(ON)도(터프팅)」 참여자 모집",
-    "category": "life",
-    "type": "공공·지자체",
-    "provider": "서울자립지원전담기관",
-    "region": "서울",
-    "target": "서울시 거주 보호아동 및 자립준비청년",
-    "content": "얘들아, 강서구가족센터에서 완전 힙한 프로그램이 떴어! ✨ 터프팅 클래스 들으면서 나만의 멋진 러그도 만들고, 친구들이랑 도란도란 이야기도 나눌 수 있는 기회래. 🧶 서울 사는 친구들, 특히 보호아동이나 자립준비청년이라면 11월 8일까지 신청할 수 있으니까 놓치지 마! 🗓️ 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
-    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
-    "link": "https://www.sjarip.or.kr/home/kor/support/cmmn/view.do?menuPos=10&idx2=656",
-    "date": "2026-10-20 ~ 2026-11-08",
-    "status": "모집중",
-    "source": "서울자립지원전담기관",
-    "id": 1170
   },
   {
     "title": "[서울시자살예방센터] 2026년 청년 자살예방 서포터즈 마음리스너단 또래 청년 정서지원 활동 홍보",
@@ -1354,21 +1339,6 @@ window.initialPolicies = [
     "id": 1131
   },
   {
-    "title": "[부산자립지원전담기관] 사회적지지체계형성사업 유자청 자조모임 “Fall짝, ...",
-    "category": "life",
-    "type": "공공·지자체",
-    "provider": "부산광역시보호아동자립지원센터",
-    "region": "부산",
-    "target": "부산 거주 보호연장아동 및 자립준비청년",
-    "content": "부산에 사는 친구들 주목! 📢 혼자라고 느끼지 마! 우리 부산자립지원전담기관에서 친구들도 만나고 힐링도 할 수 있는 유자청 자조모임 \"Fall짝\" 참가자를 모집한대! 🍂 10월 30일부터 11월 8일까지니까 놓치지 말고 신청해봐! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
-    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
-    "link": "https://www.busanjarip.or.kr/edu/sub5_2.php?zipEncode=9G2yYfwztb3B0zspKXwzPzwELTMj9uwBH5wELTMjX0tzNfgC39MBMKdm20tB150BM5wAMetpSfMvWLME",
-    "date": "2026-10-30 ~ 2026-11-08",
-    "status": "모집중",
-    "source": "부산광역시자립지원전담기관",
-    "id": 1219
-  },
-  {
     "title": "[부산자립지원전담기관] 건강예방지원사업 건강검진지원사업 참여자 모집",
     "category": "life",
     "type": "공공·지자체",
@@ -1382,21 +1352,6 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "부산광역시자립지원전담기관",
     "id": 1237
-  },
-  {
-    "title": "[부산자립지원전담기관] 건강예방지원사업 식사지원사업 참여자 모집",
-    "category": "life",
-    "type": "공공·지자체",
-    "provider": "부산광역시보호아동자립지원센터",
-    "region": "부산",
-    "target": "부산 거주 보호연장아동 및 자립준비청년",
-    "content": "부산에 사는 자립준비청년 친구들 주목! 📢 밥 잘 챙겨 먹고 있는지 걱정된다면, 부산자립지원전담기관에서 건강예방지원사업으로 밥값 걱정을 덜어줄게! 🍚 11월 5일부터 8일까지 딱 4일 동안 신청 가능하니 놓치지 말고 지금 바로 지원해봐! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
-    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
-    "link": "https://www.busanjarip.or.kr/edu/sub5_2.php?zipEncode=9G2yYfwztb3B0zspKXwzPzwELTMj9uwBH5wELTMjX0tzNfgC39MBMCtm20tB150BM5wAMetpSfMvWLME",
-    "date": "2026-11-05 ~ 2026-11-08",
-    "status": "모집중",
-    "source": "부산광역시자립지원전담기관",
-    "id": 1238
   },
   {
     "title": "[부산자립지원전담기관] 건강예방지원사업 운동지원사업 참여자 모집",
@@ -1414,36 +1369,6 @@ window.initialPolicies = [
     "id": 1239
   },
   {
-    "title": "[부산자립지원전담기관] 주거환경개선사업 홈케어지원사업 참여자 모집",
-    "category": "housing",
-    "type": "공공·지자체",
-    "provider": "부산광역시보호아동자립지원센터",
-    "region": "부산",
-    "target": "부산 거주 보호연장아동 및 자립준비청년",
-    "content": "부산에 사는 자립준비청년 친구들 주목! 📣 꿉꿉하고 지저분한 방은 이제 그만! 부산자립지원전담기관에서 우리 집을 호텔처럼 바꿔줄 홈케어 지원사업 참여자를 모집한대요. 🏡✨ 11월 5일부터 8일까지 딱 4일간이니 놓치지 말고 신청하세요! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
-    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
-    "link": "https://www.busanjarip.or.kr/edu/sub5_2.php?zipEncode=9G2yYfwztb3B0zspKXwzPzwELTMj9uwBH5wELTMjX0tzNfgC39MBMutm20tB150BM5wAMetpSfMvWLME",
-    "date": "2026-11-05 ~ 2026-11-08",
-    "status": "모집중",
-    "source": "부산광역시자립지원전담기관",
-    "id": 1240
-  },
-  {
-    "title": "[부산자립지원전담기관] 주거환경개선사업 맞춤형주거지원사업 참여자 모집",
-    "category": "housing",
-    "type": "공공·지자체",
-    "provider": "부산광역시보호아동자립지원센터",
-    "region": "부산",
-    "target": "부산 거주 보호연장아동 및 자립준비청년",
-    "content": "부산에 살고 있는 자립준비청년 친구들 주목! 📢 집 꾸미기에 고민 많았다면, 부산자립지원전담기관에서 주거환경개선사업 참여자를 모집한대요! 🏡 11월 5일부터 8일까지 딱 4일 동안 신청 가능하니, 놓치지 말고 예쁜 집에서 새 출발 해봐요! ✨ 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
-    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
-    "link": "https://www.busanjarip.or.kr/edu/sub5_2.php?zipEncode=9G2yYfwztb3B0zspKXwzPzwELTMj9uwBH5wELTMjX0tzNfgC39MBMmtm20tB150BM5wAMetpSfMvWLME",
-    "date": "2026-11-05 ~ 2026-11-08",
-    "status": "모집중",
-    "source": "부산광역시자립지원전담기관",
-    "id": 1241
-  },
-  {
     "title": "[부산자립지원전담기관] 건강예방지원사업 재활지원사업 참여자 모집",
     "category": "life",
     "type": "공공·지자체",
@@ -1457,6 +1382,51 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "부산광역시자립지원전담기관",
     "id": 1242
+  },
+  {
+    "title": "[부산자립지원전담기관] 주거환경개선사업 홈케어지원사업 참여자 모집",
+    "category": "housing",
+    "type": "공공·지자체",
+    "provider": "부산광역시보호아동자립지원센터",
+    "region": "부산",
+    "target": "부산 거주 보호연장아동 및 자립준비청년",
+    "content": "이사하고 청소 걱정 끝! 🧹✨ 부산에 사는 자립준비청년이라면 주목! 부산시보호아동자립지원센터에서 11월 5일부터 10일까지 '홈케어지원사업' 참여자를 모집해요. 주거환경 개선에 도움받고 싶은 친구들은 지금 바로 신청하세요! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
+    "link": "https://www.busanjarip.or.kr/edu/sub5_2.php?zipEncode=9G2yYfwztb3B0zspKXwzPzwELTMj9uwBH5wELTMjX0tzNfgC39MBMutm20tB150BM5wAMetpSfMvWLME",
+    "date": "2026-11-05 ~ 2026-11-10",
+    "status": "모집중",
+    "source": "부산광역시자립지원전담기관",
+    "id": 1248
+  },
+  {
+    "title": "[부산자립지원전담기관] 주거환경개선사업 맞춤형주거지원사업 참여자 모집",
+    "category": "housing",
+    "type": "공공·지자체",
+    "provider": "부산광역시보호아동자립지원센터",
+    "region": "부산",
+    "target": "부산 거주 보호연장아동 및 자립준비청년",
+    "content": "부산에 사는 자립준비청년들 주목! 📣 혹시 지금 사는 집이 좀 불편하거나, 원하는 대로 꾸미고 싶은데 망설이고 있었다면? 부산자립지원전담기관에서 주거환경개선사업 참여자를 모집하고 있대! 🏘️ 11월 5일부터 11일까지니까, 이 기회 놓치지 말고 얼른 신청해서 우리 집을 더 아늑하고 예쁘게 만들어봐! ✨ 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
+    "link": "https://www.busanjarip.or.kr/edu/sub5_2.php?zipEncode=9G2yYfwztb3B0zspKXwzPzwELTMj9uwBH5wELTMjX0tzNfgC39MBMmtm20tB150BM5wAMetpSfMvWLME",
+    "date": "2026-11-05 ~ 2026-11-11",
+    "status": "모집중",
+    "source": "부산광역시자립지원전담기관",
+    "id": 1249
+  },
+  {
+    "title": "[부산자립지원전담기관] 사회적지지체계형성사업 유자청 자조모임 “Fall짝, ...",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "부산광역시보호아동자립지원센터",
+    "region": "부산",
+    "target": "부산 거주 보호연장아동 및 자립준비청년",
+    "content": "부산에 사는 자립준비청년들 주목! 🙋‍♀️ 부산자립지원전담기관에서 '유자청 자조모임' 참가자를 모집한대! 고민도 나누고, 맘 맞는 친구들도 만들면서 Fall짝 성장할 기회라구! 🤸‍♀️ 10월 30일부터 11월 10일까지니까 놓치지 말고 신청해봐! 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
+    "link": "https://www.busanjarip.or.kr/edu/sub5_2.php?zipEncode=9G2yYfwztb3B0zspKXwzPzwELTMj9uwBH5wELTMjX0tzNfgC39MBMKdm20tB150BM5wAMetpSfMvWLME",
+    "date": "2026-10-30 ~ 2026-11-10",
+    "status": "모집중",
+    "source": "부산광역시자립지원전담기관",
+    "id": 1250
   },
   {
     "title": "[전라북도자립지원전담기관] 정보 자료 전북특별자치도 자립시기별 자립지원체계 흐름도 안내",
@@ -1967,6 +1937,21 @@ window.initialPolicies = [
     "status": "모집중",
     "source": "전라북도자립지원전담기관",
     "id": 1236
+  },
+  {
+    "title": "[전라북도자립지원전담기관] 공지사항 자립역량강화프로그램 '자립 사총사(Four-Care) 안심패키지' 개인정보처리의 위·수탁",
+    "category": "life",
+    "type": "공공·지자체",
+    "provider": "전라북도자립지원전담기관",
+    "region": "전북",
+    "target": "전북 거주 보호아동 및 자립준비청년",
+    "content": "전북에 사는 자립준비청년들 주목! 🙋‍♀️ 전라북도자립지원전담기관에서 '자립 사총사 안심패키지'로 자립 역량을 팍팍 키워줄 거래요. 혼자 고민 말고 상시 모집 중인 이 프로그램으로 든든한 지원 받아봐요! 💖 자세한 내용은 원문 링크를 꼭 확인해봐요! 😊",
+    "tip": "제출 서류 및 자격 요건이 변동될 수 있으므로, 신청 전에 기관 상세 안내 페이지를 꼭 확인해 주세요.",
+    "link": "https://jbjarip.goodneighbors.kr/gnjbjarip/board/cd103101100/info/60913",
+    "date": "상시 모집",
+    "status": "모집중",
+    "source": "전라북도자립지원전담기관",
+    "id": 1247
   },
   {
     "id": 511,
